@@ -258,11 +258,12 @@ function generateFinal3DGeoms(constraintedModelDesigns, genstreets) {
   var genstreets = (genstreets === 'false') ? false : true;
   var finalGJFeats = [];
   var plFeats = [];
+  var centerPt = turf.center(constraintedModelDesigns);
+  var lat = centerPt.geometry.coordinates[1];
+  var lng = centerPt.geometry.coordinates[0];
 
   var curFeats = constraintedModelDesigns.features;
-
   for (var h = 0, flen = curFeats.length; h < flen; h++) {
-
     // for every feature , create a point grid.
     var curFeat = curFeats[h];
     if (curFeat.geometry.type === "LineString") {
@@ -274,7 +275,7 @@ function generateFinal3DGeoms(constraintedModelDesigns, genstreets) {
       f = f.features[0];
       finalGJFeats.push.apply(finalGJFeats, [f]);
 
-    } else if ("height" in curFeat.properties) {
+    } else if ("height" in curFeat.properties && curFeat.properties.height > 0) {
 
       var featProps = curFeat.properties;
       var color = featProps.color;
@@ -302,9 +303,9 @@ function generateFinal3DGeoms(constraintedModelDesigns, genstreets) {
         var bds = turf.extent(buffered);
         // var bPoly = turf.bboxPolygon(bds);
         var subGrid = turf.pointGrid(bds, indWidth, unit);
-        for (var h = 0, glen = subGrid.features.length; h < glen; h++) {
+        for (var h1 = 0, glen = subGrid.features.length; h1 < glen; h1++) {
           var smallWidth = indWidth - 0.025;
-          var curSubGrid = subGrid.features[h];
+          var curSubGrid = subGrid.features[h1];
           var bfrd = turf.buffer(curSubGrid, smallWidth, unit);
           var bfrdext = turf.extent(bfrd);
           var bfrdextPlgn = turf.bboxPolygon(bfrdext);
@@ -347,19 +348,8 @@ function generateFinal3DGeoms(constraintedModelDesigns, genstreets) {
             finalFeatures.push(curF1);
           }
         }
-        // if (intersect2) {
-        //   intersect2.properties = {
-        //     "height": 2,
-        //     "color": "#808080"
-        //   };
-        //   finalFeatures = finalFeatures.concat(intersect2);
-        // } else {
-        //   finalFeatures = finalFeatures.concat(streetFeatureCollection.features);
 
-        // }
         finalFeatures.push.apply(finalFeatures, streetFeatureCollection.features);
-        // finalFeatures = finalFeatures.concat(streetFeatureCollection.features);
-        // console.log(JSON.stringify(streetFeatureCollection.features))
         finalGJFeats = finalFeatures;
       }
 
@@ -367,8 +357,8 @@ function generateFinal3DGeoms(constraintedModelDesigns, genstreets) {
     } else {
 
       var prop = {
-        'color': f.properties.color,
-        'areatype': f.properties.areatype,
+        'color': curFeat.properties.color,
+        'areatype': curFeat.properties.areatype,
         'height': 2
       }
       curFeat.properties = prop;
@@ -384,6 +374,7 @@ function generateFinal3DGeoms(constraintedModelDesigns, genstreets) {
 
   self.postMessage({
     'polygons': JSON.stringify(fpolygons),
+    'center':JSON.stringify([lat,lng])
   });
 }
 
