@@ -70,18 +70,22 @@
       /*font-weight: bold;*/
       text-align: center;
     }
-
+    a
+    {
+      color: #3a9bdc;
+    }
     .glcontrol button:hover {
       opacity: 1;
       cursor: pointer;
     }
 
-	textarea#styled {
+	textarea#gjTA {
 		width: 350px;
 		font-family: 'Open Sans', sans-serif;
 		height: 200px;
 		border: 3px solid #cccccc;
 		padding: 5px;
+    display:block;
 
 	}    
 	.button {
@@ -102,26 +106,55 @@
 	    color: black; 
 	    border: 2px solid #008CBA;
 	}
-
+ ol {
+   list-style: none;
+   padding: 0;
+ }
+ li {
+   counter-increment: item;
+   margin-bottom: 5px;
+ }
+ li:before {
+   margin-right: 10px;
+   content: counter(item);
+   background: #7f8c8d;
+   border-radius: 100%;
+   color: white;
+   width: 1.4em;
+   text-align: center;
+   display: inline-block;
+ }
 	
 
   </style>
   <link rel="stylesheet" href="OSMBuildings/OSMBuildings.css">
+  <link rel="stylesheet" href="js/humane/flatty.css">
   <link href='https://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css'>
   <script type="text/javascript" src="OSMBuildings/OSMBuildings.js"></script>
-  <script type="text/javascript" src="js/spinjs/spin.min.js"></script>
+  <script type="text/javascript" src="js/geojsonlint/geojsonlint.js"></script>
+  <script type="text/javascript" src="js/humane/humane.min.js"></script>
 </head>
 
 <body>
   <div id="container">
 
     <div id="left">
-     <p>Instructions: Use the Geodesign Hub API to get GeoJSON of your synthesis</p>
-      <textarea id="gjTA" name="styled-textarea" id="styled" onfocus="this.value='';">Paste GeoJSON from Geodesign Hub here...</textarea><br>
-      <input id="genStreetsCB" class="checkbox-custom" name="checkbox-1" type="checkbox" checked> Generate Streets
+    <h1>Geodesign Hub 3D Viewer</h1>
+   <h3>Usage Instructions:</h3>
+    <ol>
+      <li>Use the Geodeisgn Hub API <a href="http://www.geodesignsupport.com/kb/get-methods/" target="_blank">GET Synthesis JSON</a> call to get a design JSON. </li>
+      <li>Paste the GeoJSON below</li>
+      <li>Choose if you want streets to be rendered</li>
+      <li>Click "Generate Scene" button</li>
+
+    </ol>
+
+      <textarea id="gjTA" name="styled-textarea" onfocus="this.value='';">Paste Synthesis GeoJSON from Geodesign Hub here...</textarea><br>
+      <input id="genStreetsCB" class="checkbox-custom" name="checkbox-1" type="checkbox"> Generate Streets
       <br>
-      <p><button class="button" onclick="submitGJ()">Refresh Scene</button>
-      <span id="spinnerCont"></span></p>
+      <p><button class="button" onclick="submitGJ()">Generate Scene</button></p>
+
+      <p>This project uses <a href="http://osmbuildings.org/" target="_blank">OSM Buildings</a> library for visualization and design data from <a href="http://www.geodesignhub.com/">Geodesign Hub</a>. Please see the <a href="https://github.com/hrishiballal/GDH3DViewer">GitHub repository</a> for more information.
       
 
       <!--end left-->
@@ -170,7 +203,7 @@
     }).addTo(map);
 
     osmb.addMapTiles(
-      'http://{s}.tiles.mapbox.com/v3/osmbuildings.kbpalbpk/{z}/{x}/{y}.png', {
+      'http://a.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '© Data <a href="http://openstreetmap.org/copyright/">OpenStreetMap</a> · © Map <a href="http://mapbox.com">MapBox</a>'
       }
     );
@@ -204,19 +237,21 @@
     }
     function setbg(color)
       {
-      document.getElementById("styled").style.background=color
+        document.getElementById("styled").style.background=color;
       }
     function submitGJ(){
-    // 	var target = document.getElementById('spinnerCont');
-  		// glb.spinner = new Spinner().spin();
-  		// target.appendChild(glb.spinner.el);
-
-      var gj = JSON.parse(document.getElementById("gjTA").value);
-      var genstreets = document.getElementById("genStreetsCB").checked;
-      start3dWorker(gj, genstreets)
+      var gj = document.getElementById("gjTA").value;
+      var gjerrors = geojsonhint.hint(gj);
+      if (gjerrors.length > 0) {
+        humane.log("The GeoJSON you have entered is invalid.. ", { addnCls: 'humane-flatty-error' });
+      } else {
+          gj = JSON.parse(gj);
+          var genstreets = document.getElementById("genStreetsCB").checked;
+          start3dWorker(gj, genstreets);
+        }
     }
     function start3dWorker(allFeaturesList, genstreets) {
-
+        humane.log("Processing..", { addnCls: 'humane-flatty-info' });
         var threeDWorker = new Worker('workers/3dlib.js');
         threeDWorker.onerror = function(e) {
           console.log('Error: Line ' + e.lineno + ' in ' + e.filename + ': ' + e.message);
@@ -224,18 +259,24 @@
         threeDWorker.postMessage({
           'allFeaturesList': JSON.stringify(allFeaturesList),
           'genstreets': JSON.stringify(genstreets)
-
         });
         threeDWorker.addEventListener('message', function(e) {
           //  console.log(e.data);
           var gjsonData = e.data.polygons;
-          // console.log(gjsonData);
+          var latlng = e.data.center;
+          setMapCenter(latlng);
           updateGLData(gjsonData);
         }, false);
       }
+  function setMapCenter(latlng)
+  {
+    ll = JSON.parse(latlng);
+    map.setPosition({latitude:ll[0],longitude:ll[1]});
 
+  }
 	function updateGLData(gjsonData) {
-    // glb.spinner.stop();
+    
+    humane.log("Rendering Scene..", { addnCls: 'humane-flatty-success' });
 	  if (glb.gjLayer) {
 	    var k = glb.gjLayer;
 	    k.destroy();
