@@ -275,7 +275,7 @@ function generateFinal3DGeoms(constraintedModelDesigns, genstreets) {
       f = f.features[0];
       finalGJFeats.push.apply(finalGJFeats, [f]);
 
-    } else if ("height" in curFeat.properties && curFeat.properties.height > 0) {
+    } else if ("height" in curFeat.properties && curFeat.properties.height === 'ag') {
 
       var featProps = curFeat.properties;
       var color = featProps.color;
