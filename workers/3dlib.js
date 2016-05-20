@@ -285,7 +285,7 @@ function generateFinal3DGeoms(constraintedModelDesigns, genstreets) {
       // featProps.roofMaterial = 'roof_tiles';
       // featProps.roofHeight = 10;
       var featExtent = turf.extent(curFeat);
-      var cellWidth = 0.06;
+      var cellWidth = 0.05;
       // var cellWidth = 0.2
       var unit = 'kilometers';
       var diagJSON = {
@@ -357,7 +357,8 @@ function generateFinal3DGeoms(constraintedModelDesigns, genstreets) {
     } else {
 
       var prop = {
-        'color': curFeat.properties.color,
+        // 'color': curFeat.properties.color,
+        'color': '#808080',
         'areatype': curFeat.properties.areatype,
         'height': 2
       }
