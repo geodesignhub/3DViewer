@@ -201,9 +201,14 @@
       maxZoom: 22,
       attribution: '© 3D <a href="http://osmbuildings.org/copyright/">OSM Buildings</a>'
     }).addTo(map);
-
+    
+    // osmb.addMapTiles(
+    //   'http://a.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    //     attribution: '© Data <a href="http://openstreetmap.org/copyright/">OpenStreetMap</a> · © Map <a href="http://mapbox.com">MapBox</a>'
+    //   }
+    // );
     osmb.addMapTiles(
-      'http://a.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      'https://{s}.tiles.mapbox.com/v3/cygnus2936.curedn3y/{z}/{x}/{y}.png', {
         attribution: '© Data <a href="http://openstreetmap.org/copyright/">OpenStreetMap</a> · © Map <a href="http://mapbox.com">MapBox</a>'
       }
     );
