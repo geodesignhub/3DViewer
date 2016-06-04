@@ -77,6 +77,7 @@ function genStreetsGrid(pointsWithin, extent) {
         var street = turf.buffer(linestring, 0.0075, 'kilometers');
         street.features[0].properties = {
             "color": "#202020",
+            "roofColor": "#202020",
             "height": 2
         };
         streets.push.apply(streets, street.features);
@@ -93,6 +94,7 @@ function genStreetsGrid(pointsWithin, extent) {
             var street = turf.buffer(linestring, 0.005, 'kilometers');
             street.features[0].properties = {
                 "color": "#202020",
+                "roofColor": "#202020",
                 "height": 2
             };
             streets.push.apply(streets, street.features);
@@ -230,13 +232,11 @@ function genStreetsHeatMapped(pointsWithin, extent) {
 
     // console.log(JSON.stringify(filteredLineFC));
     // console.log(JSON.stringify(mainPts));
-
     // var curved = turf.bezier(filteredLineFC.features[0]);
     // var streets = turf.buffer(curved, 0.010, 'kilometers');
     return filteredLineFC;
 
 }
-
 
 function getRandomHeight(reqtype) {
     var smbHeights = [2, 3, 5, 6, 7, 10];
@@ -249,10 +249,7 @@ function getRandomHeight(reqtype) {
         reqtype > 'POL' ? 0 :
         reqtype > 'PAV' ? 0 :
         0;
-
 }
-
-
 
 function generateFinal3DGeoms(constraintedModelDesigns, genstreets) {
     var genstreets = (genstreets === 'false') ? false : true;
@@ -273,10 +270,11 @@ function generateFinal3DGeoms(constraintedModelDesigns, genstreets) {
             f = turf.buffer(curFeat, 0.005, 'kilometers');
             var linefeats = f.features;
             var linefeatlen = linefeats.length;
-            for (var x1 = 0; x < linefeatlen; x1++) {
+            for (var x1 = 0; x1 < linefeatlen; x1++) {
                 curlineFeat = linefeats[x1];
                 curlineFeat.properties = {
                     "color": "#202020",
+                    "roofColor": "#202020",
                     "height": 2
                 };
 
@@ -307,22 +305,19 @@ function generateFinal3DGeoms(constraintedModelDesigns, genstreets) {
             // filter the grid so that only points within the feature are left.
             var ptsWithin = turf.within(grid, diagJSON);
             // 15 meter subtract
-            var bufferWidth = cellWidth - 0.015; //35 meter buffer
+            var bufferWidth = cellWidth - 0.002; //48 meter buffer
             for (var k = 0, ptslen = ptsWithin.features.length; k < ptslen; k++) {
                 var curPt = ptsWithin.features[k];
                 var buffered = turf.buffer(curPt, bufferWidth, unit); // buffer 35 meters
-
-                var indWidth = bufferWidth - 0.001; // subtract 1 meter = 34 meters
-                var bds = turf.extent(buffered);
-
-
-                var subGrid = turf.pointGrid(bds, indWidth, unit);
+                var indWidth = bufferWidth - 0.01; // subtract 1 meter = 34 meters
+                var bds = turf.extent(buffered); // get the extent of the buffered features
+                var subGrid = turf.pointGrid(bds, indWidth, unit); // generate a grid within 34 meters
                 for (var h1 = 0, glen = subGrid.features.length; h1 < glen; h1++) {
-                    var smallWidth = indWidth - 0.025;
+                    var smallWidth = indWidth - 0.017; //9 meters width
                     var curSubGrid = subGrid.features[h1];
-                    var bfrd = turf.buffer(curSubGrid, smallWidth, unit);
+                    var bfrd = turf.buffer(curSubGrid, smallWidth, unit); // 9 m buffer
                     var bfrdext = turf.extent(bfrd);
-                    var bfrdextPlgn = turf.bboxPolygon(bfrdext);
+                    var bfrdextPlgn = turf.bboxPolygon(bfrdext); // generate the polygon
                     var height = getRandomHeight(reqTag);
                     // console.log(JSON.stringify(featProps))
                     var p = {
@@ -336,10 +331,7 @@ function generateFinal3DGeoms(constraintedModelDesigns, genstreets) {
                         finalGJFeats.push.apply(finalGJFeats, [bfrdextPlgn]);
                     } // finalGJFeats = finalGJFeats.concat(bfrdextPlgn);
                 }
-
             }
-            // console.log(JSON.stringify(finalGJFeats));
-
             if (genstreets) {
                 var finalFeatures = [];
                 var streetFeatureCollection = genStreetsGrid(ptsWithin, featExtent);
@@ -366,18 +358,15 @@ function generateFinal3DGeoms(constraintedModelDesigns, genstreets) {
                 finalGJFeats = finalFeatures;
             }
 
-
         } else {
-
             var prop = {
-                // 'color': curFeat.properties.color,
-                'color': '#808080',
+                'color': curFeat.properties.color,
+                'roofColor': curFeat.properties.color,
                 'areatype': curFeat.properties.areatype,
                 'height': 2
             }
             curFeat.properties = prop;
             finalGJFeats.push.apply(finalGJFeats, [curFeat]);
-
         }
     }
 
@@ -400,5 +389,4 @@ function generate3DGeoms(allFeaturesList, genstreets) {;
 
 self.onmessage = function(e) {
     generate3DGeoms(e.data.allFeaturesList, e.data.genstreets);
-
 }
