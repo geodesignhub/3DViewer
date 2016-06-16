@@ -1,6 +1,5 @@
 importScripts('../js/turfjs/turf.min.js');
 
-
 function genStreetsGrid(pointsWithin, extent) {
     // This module generates streets. given a grid of points. 
     var rows = [];
@@ -23,8 +22,6 @@ function genStreetsGrid(pointsWithin, extent) {
         columns[curLat].push(curPt);
     }
 
-    // console.log(JSON.stringify(rows));
-    // console.log(JSON.stringify(columns));
     var allCols = [];
     var allRows = [];
     for (key in columns) {
@@ -105,7 +102,6 @@ function genStreetsGrid(pointsWithin, extent) {
         "features": streets
     };
     return s;
-
 }
 
 function genStreetsHeatMapped(pointsWithin, extent) {
@@ -119,7 +115,6 @@ function genStreetsHeatMapped(pointsWithin, extent) {
     });
     // console.log(JSON.stringify(extent));
     var startPoint = turf.point([extent[0], extent[1]]);
-
     // assign a random z property.
     for (var i = 0; i < heatmap.features.length; i++) {
         heatmap.features[i].properties.z = ~~(Math.random() * 9);
@@ -130,7 +125,6 @@ function genStreetsHeatMapped(pointsWithin, extent) {
         properties.fill = '#' + properties.a +
             properties.b + properties.c;
     }
-
     var tinPtsFC = {
         "type": "FeatureCollection",
         "features": []
@@ -140,7 +134,6 @@ function genStreetsHeatMapped(pointsWithin, extent) {
         var tincoords = tin.features[k].geometry.coordinates[0];
         for (var m = 0; m < tincoords.length; m++) {
             var tco = tincoords[m];
-
             var ptFeat = {
                 "type": "Feature",
                 "properties": prop,
@@ -167,7 +160,6 @@ function genStreetsHeatMapped(pointsWithin, extent) {
     });
     tinPtsFC.features = result;
     // console.log(JSON.stringify(tinPtsFC));
-
     var arr = Object.keys(ptcounts).map(function(key) {
         return ptcounts[key];
     });
@@ -184,7 +176,6 @@ function genStreetsHeatMapped(pointsWithin, extent) {
             ptsofInt.push(key);
         }
     }
-
     // extract all points from tin
     var tinLinesFC = {
         "type": "FeatureCollection",
@@ -309,7 +300,7 @@ function generateFinal3DGeoms(constraintedModelDesigns, genstreets) {
             for (var k = 0, ptslen = ptsWithin.features.length; k < ptslen; k++) {
                 var curPt = ptsWithin.features[k];
                 var buffered = turf.buffer(curPt, bufferWidth, unit); // buffer 35 meters
-                var indWidth = bufferWidth - 0.01; // subtract 1 meter = 34 meters
+                var indWidth = bufferWidth - 0.02; // subtract 1 meter = 34 meters
                 var bds = turf.extent(buffered); // get the extent of the buffered features
                 var subGrid = turf.pointGrid(bds, indWidth, unit); // generate a grid within 34 meters
                 for (var h1 = 0, glen = subGrid.features.length; h1 < glen; h1++) {
@@ -319,17 +310,14 @@ function generateFinal3DGeoms(constraintedModelDesigns, genstreets) {
                     var bfrdext = turf.extent(bfrd);
                     var bfrdextPlgn = turf.bboxPolygon(bfrdext); // generate the polygon
                     var height = getRandomHeight(reqTag);
-                    // console.log(JSON.stringify(featProps))
+                    // console.log(JSON.stringify(featProps));
                     var p = {
                         'height': height,
                         'color': color,
                         'roofColor': color
                     };
                     bfrdextPlgn.properties = p;
-                    // console.log(JSON.stringify(bfrdextPlgn));
-                    if (height > 0) {
-                        finalGJFeats.push.apply(finalGJFeats, [bfrdextPlgn]);
-                    } // finalGJFeats = finalGJFeats.concat(bfrdextPlgn);
+                    finalGJFeats.push.apply(finalGJFeats, [bfrdextPlgn]);
                 }
             }
             if (genstreets) {
@@ -374,7 +362,6 @@ function generateFinal3DGeoms(constraintedModelDesigns, genstreets) {
         "type": "FeatureCollection",
         "features": finalGJFeats
     };
-
     self.postMessage({
         'polygons': JSON.stringify(fpolygons),
         'center': JSON.stringify([lat, lng])
