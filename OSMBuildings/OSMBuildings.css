@@ -1,5 +1,9 @@
 
-.osmb-container {
+.osmb {
+}
+
+.osmb-viewport {
+    position:absolute;
 }
 
 .osmb-attribution {
