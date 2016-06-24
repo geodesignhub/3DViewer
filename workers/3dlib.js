@@ -299,11 +299,11 @@ function generateFinal3DGeoms(constraintedModelDesigns, genstreets) {
             for (var k = 0, ptslen = ptsWithin.features.length; k < ptslen; k++) {
                 var curPt = ptsWithin.features[k];
                 var buffered = turf.buffer(curPt, bufferWidth, unit); // buffer 48 meters
-                var indWidth = bufferWidth - 0.02; // subtract 20 meter = 25 meters
+                var indWidth = bufferWidth - 0.015; // subtract 35 meter = 15 meters
                 var bds = turf.extent(buffered); // get the extent of the buffered features
                 var subGrid = turf.pointGrid(bds, indWidth, unit); // generate a grid within 34 meters
                 for (var h1 = 0, glen = subGrid.features.length; h1 < glen; h1++) {
-                    var smallWidth = indWidth - 0.015; //(25-15 = 8 meters width
+                    var smallWidth = indWidth - 0.015; //(15-10 = 5 meters width
                     var curSubGrid = subGrid.features[h1];
                     var bfrd = turf.buffer(curSubGrid, smallWidth, unit); // 9 m buffer
                     var bfrdext = turf.extent(bfrd);
