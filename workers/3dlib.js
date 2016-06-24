@@ -295,15 +295,15 @@ function generateFinal3DGeoms(constraintedModelDesigns, genstreets) {
             // filter the grid so that only points within the feature are left.
             var ptsWithin = turf.within(grid, diagJSON);
             // 15 meter subtract
-            var bufferWidth = cellWidth - 0.002; //48 meter buffer
+            var bufferWidth = cellWidth - 0.005; //45 meter buffer
             for (var k = 0, ptslen = ptsWithin.features.length; k < ptslen; k++) {
                 var curPt = ptsWithin.features[k];
-                var buffered = turf.buffer(curPt, bufferWidth, unit); // buffer 35 meters
-                var indWidth = bufferWidth - 0.02; // subtract 1 meter = 34 meters
+                var buffered = turf.buffer(curPt, bufferWidth, unit); // buffer 48 meters
+                var indWidth = bufferWidth - 0.02; // subtract 20 meter = 25 meters
                 var bds = turf.extent(buffered); // get the extent of the buffered features
                 var subGrid = turf.pointGrid(bds, indWidth, unit); // generate a grid within 34 meters
                 for (var h1 = 0, glen = subGrid.features.length; h1 < glen; h1++) {
-                    var smallWidth = indWidth - 0.017; //9 meters width
+                    var smallWidth = indWidth - 0.015; //(25-15 = 8 meters width
                     var curSubGrid = subGrid.features[h1];
                     var bfrd = turf.buffer(curSubGrid, smallWidth, unit); // 9 m buffer
                     var bfrdext = turf.extent(bfrd);
