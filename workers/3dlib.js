@@ -80,7 +80,6 @@ function genStreetsGrid(pointsWithin, extent) {
         streets.push.apply(streets, street.features);
     }
     if (distance >= 0.7) { // there is a road that is greater than 1KM, so we need vertical streets.
-
         for (var k2 = 0, numRoads = roadPointsVert.length; k2 < numRoads; k2++) {
             var curRoad = roadPointsVert[k2];
             var tmpPts = [];
