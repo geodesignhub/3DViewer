@@ -270,7 +270,7 @@
             humane.log("Processing..", {
                 addnCls: 'humane-flatty-info'
             });
-            var threeDWorker = new Worker('workers/3dlib.js');
+            var threeDWorker = new Worker('/assets/workers/3dlib.js');
             threeDWorker.onerror = function(e) {
                 console.log('Error: Line ' + e.lineno + ' in ' + e.filename + ': ' + e.message);
             };
