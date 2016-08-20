@@ -271,7 +271,7 @@ function generateFinal3DGeoms(constraintedModelDesigns, genstreets) {
                 finalGJFeats.push.apply(finalGJFeats, [curlineFeat]);
             }
 
-        } else if ("height" in curFeat.properties && curFeat.properties.height === 'ag') {
+        } else {
 
             var featProps = curFeat.properties;
             var color = featProps.color;
@@ -345,16 +345,17 @@ function generateFinal3DGeoms(constraintedModelDesigns, genstreets) {
                 finalGJFeats = finalFeatures;
             }
 
-        } else {
-            var prop = {
-                'color': curFeat.properties.color,
-                'roofColor': curFeat.properties.color,
-                'areatype': curFeat.properties.areatype,
-                'height': 2
-            }
-            curFeat.properties = prop;
-            finalGJFeats.push.apply(finalGJFeats, [curFeat]);
         }
+        // else {
+        //     var prop = {
+        //         'color': curFeat.properties.color,
+        //         'roofColor': curFeat.properties.color,
+        //         'areatype': curFeat.properties.areatype,
+        //         'height': 2
+        //     }
+        //     curFeat.properties = prop;
+        //     finalGJFeats.push.apply(finalGJFeats, [curFeat]);
+        // }
     }
 
     var fpolygons = {
