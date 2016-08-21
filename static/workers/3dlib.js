@@ -87,7 +87,7 @@ function genStreetsGrid(pointsWithin, extent) {
                 tmpPts.push(curRoad.points[p2].geometry.coordinates);
             }
             var linestring = turf.linestring(tmpPts);
-            var street = turf.buffer(linestring, 0.005, 'kilometers');
+            var street = turf.buffer(linestring, 0.0075, 'kilometers');
             street.features[0].properties = {
                 "color": "#202020",
                 "roofColor": "#202020",
@@ -271,7 +271,7 @@ function generateFinal3DGeoms(constraintedModelDesigns, genstreets) {
                 finalGJFeats.push.apply(finalGJFeats, [curlineFeat]);
             }
 
-        } else {
+        } else if (curFeat.properties.areatype === 'project') {
 
             var featProps = curFeat.properties;
             var color = featProps.color;
@@ -282,8 +282,8 @@ function generateFinal3DGeoms(constraintedModelDesigns, genstreets) {
             // featProps.roofHeight = 10;
             // get the extent of the feature
             var featExtent = turf.extent(curFeat);
-            // 50 meter cell width
-            var cellWidth = 0.05;
+            //100 meter cell width
+            var cellWidth = 0.05; // 100 meter
             var unit = 'kilometers';
             // make this feature a feature collection since point grid only takes in a feature collection
             var diagJSON = {
@@ -295,7 +295,7 @@ function generateFinal3DGeoms(constraintedModelDesigns, genstreets) {
             // filter the grid so that only points within the feature are left.
             var ptsWithin = turf.within(grid, diagJSON);
             // 15 meter subtract
-            var bufferWidth = cellWidth - 0.01; //45 meter buffer
+            var bufferWidth = cellWidth - 0.005; //40 meter buffer
             for (var k = 0, ptslen = ptsWithin.features.length; k < ptslen; k++) {
                 var curPt = ptsWithin.features[k];
                 var buffered = turf.buffer(curPt, bufferWidth, unit); // buffer 48 meters
@@ -303,20 +303,24 @@ function generateFinal3DGeoms(constraintedModelDesigns, genstreets) {
                 var bds = turf.extent(buffered); // get the extent of the buffered features
                 var subGrid = turf.pointGrid(bds, indWidth, unit); // generate a grid within 34 meters
                 for (var h1 = 0, glen = subGrid.features.length; h1 < glen; h1++) {
-                    var smallWidth = indWidth - 0.018; //(15-10 = 5 meters width
+                    var smallWidth = indWidth - 0.015; //(15-10 = 5 meters width
                     var curSubGrid = subGrid.features[h1];
                     var bfrd = turf.buffer(curSubGrid, smallWidth, unit); // 9 m buffer
                     var bfrdext = turf.extent(bfrd);
-                    var bfrdextPlgn = turf.bboxPolygon(bfrdext); // generate the polygon
-                    var height = getRandomHeight(reqTag);
+                    var bfrdextPlgn = turf.bboxPolygon(bfrdext); // generate the polygons
+                    var heightlist = [5, 7, 10, 12, 15];
+                    var height = heightlist[Math.floor(Math.random() * heightlist.length)];
                     // console.log(JSON.stringify(featProps));
-                    var p = {
-                        'height': height,
-                        'color': color,
-                        'roofColor': color
-                    };
-                    bfrdextPlgn.properties = p;
-                    finalGJFeats.push.apply(finalGJFeats, [bfrdextPlgn]);
+                    var chosenValue = Math.random() < 0.5 ? true : false;
+                    if (chosenValue) {
+                        var p = {
+                            'height': height,
+                            'color': color,
+                            'roofColor': color
+                        };
+                        bfrdextPlgn.properties = p;
+                        finalGJFeats.push.apply(finalGJFeats, [bfrdextPlgn]);
+                    }
                 }
             }
             if (genstreets) {
