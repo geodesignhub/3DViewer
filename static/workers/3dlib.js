@@ -72,7 +72,6 @@ function genStreetsGrid(pointsWithin, extent) {
             // allLines.push(linestring);
             var d = turf.lineDistance(linestring, 'kilometers');
             distance = (distance > Math.round(d)) ? distance : Math.round(d);
-            console.log(JSON.stringify(linestring));
             var street = turf.buffer(linestring, 0.0075, 'kilometers');
             if (street['type'] === "Feature") {
                 street = { "type": "FeatureCollection", "features": [street] }
@@ -316,6 +315,7 @@ function generateFinal3DGeoms(constraintedModelDesigns, genstreets) {
                 var curPt = ptsWithin.features[k];
 
                 var buffered = turf.buffer(curPt, bufferWidth, unit); // buffer 48 meters
+<<<<<<< HEAD
                 var bds = turf.bbox(buffered); // get the extent of the buffered features
                 var bfrdextPlgn = turf.bboxPolygon(bds);
                 var heightlist = [5, 7, 10, 12, 15];
@@ -337,6 +337,30 @@ function generateFinal3DGeoms(constraintedModelDesigns, genstreets) {
                     bpoly.properties = p;
                     finalGJFeats.push.apply(finalGJFeats, [bpoly]);
 
+=======
+                var indWidth = bufferWidth - 0.01; // subtract 35 meter = 15 meters
+                var bds = turf.extent(buffered); // get the extent of the buffered features
+                var subGrid = turf.pointGrid(bds, indWidth, unit); // generate a grid within 34 meters
+                for (var h1 = 0, glen = subGrid.features.length; h1 < glen; h1++) {
+                    var smallWidth = indWidth - 0.025; //(15-10 = 5 meters width
+                    var curSubGrid = subGrid.features[h1];
+                    var bfrd = turf.buffer(curSubGrid, smallWidth, unit); // 9 m buffer
+                    var bfrdext = turf.extent(bfrd);
+                    var bfrdextPlgn = turf.bboxPolygon(bfrdext); // generate the polygons
+                    var heightlist = [5, 7, 10, 12, 15];
+                    var height = heightlist[Math.floor(Math.random() * heightlist.length)];
+                    // console.log(JSON.stringify(featProps));
+                    var chosenValue = Math.random() < 0.5 ? true : false;
+                    if (chosenValue) {
+                        var p = {
+                            'height': height,
+                            'color': color,
+                            'roofColor': color
+                        };
+                        bfrdextPlgn.properties = p;
+                        finalGJFeats.push.apply(finalGJFeats, [bfrdextPlgn]);
+                    }
+>>>>>>> origin/master
                 }
             }
             if (genstreets) {
