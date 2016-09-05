@@ -2,7 +2,7 @@
 <html>
 
 <head>
-    <title>OSM Buildings</title>
+    <title>Geodesign Hub OSM Buildings Viewer</title>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <style>
@@ -296,6 +296,15 @@
             });
 
         }
+        function guid() {
+            function s4() {
+                return Math.floor((1 + Math.random()) * 0x10000)
+                .toString(16)
+                .substring(1);
+            }
+            return s4() + s4() + '-' + s4() + '-' + s4() + '-' +
+                s4() + '-' + s4() + s4() + s4();
+            }
 
         function updateGLData(gjsonData) {
 
@@ -307,6 +316,15 @@
                 k.destroy();
                 glb.gjLayer = "";
             }
+            // var d = JSON.parse(gjsonData);
+            // for (var k1 = 0; k1<d.features.length;k1++){
+            //     var uuid = guid();
+            //     var curfeat = d['features'][k1];
+            //     if (curfeat.geometry.type==="Point"){
+            //     osmb.addOBJ('assets/objs/ldhhouse.obj', { latitude: curfeat.geometry.coordinates[1], longitude: curfeat.geometry.coordinates[0]}, { id: uuid, color: 'red',scale:0.001});
+            //     }
+            // }
+            
             var x = osmb.addGeoJSON(JSON.parse(gjsonData));
             glb.gjLayer = x;
         }
