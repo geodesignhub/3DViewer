@@ -241,6 +241,19 @@ function genStreetsHeatMapped(pointsWithin, extent) {
 
 }
 
+function getGridSize(reqtype) {
+    var smbHeights = [2, 3, 5, 6, 7, 10];
+    var labHeights = [0, 5, 7, 10, 12, 15];
+    var restHeights = [0, 2, 5];
+
+    return reqtype === 'SMB' ? smbHeights[Math.floor(Math.random() * smbHeights.length)] :
+        reqtype === 'LAB' ? labHeights[Math.floor(Math.random() * labHeights.length)] :
+        reqtype === 'POR' ? restHeights[Math.floor(Math.random() * restHeights.length)] :
+        reqtype > 'POL' ? 0 :
+        reqtype > 'PAV' ? 0 :
+        0;
+}
+
 function getRandomHeight(reqtype) {
     var smbHeights = [2, 3, 5, 6, 7, 10];
     var labHeights = [0, 5, 7, 10, 12, 15];
@@ -293,10 +306,6 @@ function generateFinal3DGeoms(constraintedModelDesigns, genstreets) {
             var color = featProps.color;
             var roofColor = color;
             var reqTag = featProps.reqtag;
-            // featProps.roofShape = 'pyramid';
-            // featProps.roofMaterial = 'roof_tiles';
-            // featProps.roofHeight = 10;
-            // get the extent of the feature
             var featExtent = turf.bbox(curFeat);
             //100 meter cell width
             var cellWidth = 0.04; // 40 meter
@@ -316,9 +325,7 @@ function generateFinal3DGeoms(constraintedModelDesigns, genstreets) {
             var bufferWidth = cellWidth - 0.01; //30 meter buffer
             for (var k = 0, ptslen = ptsWithin.features.length; k < ptslen; k++) {
                 var curPt = ptsWithin.features[k];
-
                 var buffered = turf.buffer(curPt, bufferWidth, unit); // buffer 48 meters
-
                 var bds = turf.bbox(buffered); // get the extent of the buffered features
                 var bfrdextPlgn = turf.bboxPolygon(bds);
                 var heightlist = [5, 7, 10, 12, 15];
