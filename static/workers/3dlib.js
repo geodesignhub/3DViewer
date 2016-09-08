@@ -80,30 +80,33 @@ function genStreetsGrid(pointsWithin, extent) {
             street.features[0].properties = {
                 "color": "#202020",
                 "roofColor": "#202020",
-                "height": 2
+                "height": 0.1
             };
             streets.push.apply(streets, street.features);
         }
     }
     if (distance >= 0.7) { // there is a road that is greater than 1KM, so we need vertical streets.
+
         for (var k2 = 0, numRoads = roadPointsVert.length; k2 < numRoads; k2++) {
             var curRoad = roadPointsVert[k2];
             var tmpPts = [];
             for (var p2 = 0, ptsLen = curRoad.points.length; p2 < ptsLen; p2++) {
                 tmpPts.push(curRoad.points[p2].geometry.coordinates);
             }
-            var linestring = turf.lineString(tmpPts);
 
-            var street = turf.buffer(linestring, 0.0075, 'kilometers');
-            if (street['type'] === "Feature") {
-                street = { "type": "FeatureCollection", "features": [street] }
+            if (tmpPts.length > 1) { // valid line
+                var linestring = turf.lineString(tmpPts);
+                var street = turf.buffer(linestring, 0.0075, 'kilometers');
+                if (street['type'] === "Feature") {
+                    street = { "type": "FeatureCollection", "features": [street] }
+                }
+                street.features[0].properties = {
+                    "color": "#202020",
+                    "roofColor": "#202020",
+                    "height": 0.1
+                };
+                streets.push.apply(streets, street.features);
             }
-            street.features[0].properties = {
-                "color": "#202020",
-                "roofColor": "#202020",
-                "height": 2
-            };
-            streets.push.apply(streets, street.features);
         }
     }
     var s = {
@@ -308,7 +311,7 @@ function generateFinal3DGeoms(constraintedModelDesigns, genstreets) {
             // filter the grid so that only points within the feature are left.
             var ptsWithin = turf.within(grid, diagJSON);
 
-            console.log(JSON.stringify(ptsWithin));
+            // console.log(JSON.stringify(ptsWithin));
             // 15 meter subtract
             var bufferWidth = cellWidth - 0.01; //30 meter buffer
             for (var k = 0, ptslen = ptsWithin.features.length; k < ptslen; k++) {
