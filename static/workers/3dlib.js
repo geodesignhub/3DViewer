@@ -241,31 +241,78 @@ function genStreetsHeatMapped(pointsWithin, extent) {
 
 }
 
-function getGridSize(reqtype) {
-    var smbHeights = [2, 3, 5, 6, 7, 10];
-    var labHeights = [0, 5, 7, 10, 12, 15];
-    var restHeights = [0, 2, 5];
+function getGridCellWidth(featProps) {
+    // get the reqtag and req name 
 
-    return reqtype === 'SMB' ? smbHeights[Math.floor(Math.random() * smbHeights.length)] :
-        reqtype === 'LAB' ? labHeights[Math.floor(Math.random() * labHeights.length)] :
-        reqtype === 'POR' ? restHeights[Math.floor(Math.random() * restHeights.length)] :
-        reqtype > 'POL' ? 0 :
-        reqtype > 'PAV' ? 0 :
-        0;
+    var reqname = featProps.sysname;
+    var reqtype = featProps.systag;
+    console.log(reqtype);
+    var checkSys = ['HDH', 'LDH'];
+
+    if (checkSys.indexOf(reqname) >= 0) {
+        return reqname === 'HDH' ? 0.03 :
+            reqname === 'LDH' ? 0.04 :
+            0.04;
+    } else {
+        var taglist = ['Roads, transport', 'A law or regulation', 'Agriculture, Forestry', 'Small buildings, low density housing', 'Large buildings, Industry, commerce'];
+        if (taglist.indexOf(reqtype) >= 0) {
+            return reqtype === 'Large buildings, Industry, commerce' ? 0.02 :
+                reqname === 'Small buildings, low density housing' ? 0.04 :
+                0.04
+        } else {
+            // not in HDH or LDH or correct systype
+            return 0.04;
+        }
+    }
+
 }
 
 function getRandomHeight(reqtype) {
+    var taglist = ['Roads, transport', 'A law or regulation', 'Agriculture, Forestry', 'Small buildings, low density housing', 'Large buildings, Industry, commerce'];
     var smbHeights = [2, 3, 5, 6, 7, 10];
-    var labHeights = [0, 5, 7, 10, 12, 15];
+    var labHeights = [15, 20, 32, 45];
     var restHeights = [0, 2, 5];
 
-    return reqtype === 'SMB' ? smbHeights[Math.floor(Math.random() * smbHeights.length)] :
-        reqtype === 'LAB' ? labHeights[Math.floor(Math.random() * labHeights.length)] :
-        reqtype === 'POR' ? restHeights[Math.floor(Math.random() * restHeights.length)] :
-        reqtype > 'POL' ? 0 :
-        reqtype > 'PAV' ? 0 :
-        0;
+    return reqtype === 'Small buildings, low density housing' ? smbHeights[Math.floor(Math.random() * smbHeights.length)] :
+        reqtype === 'Large buildings, Industry, commerce' ? labHeights[Math.floor(Math.random() * labHeights.length)] :
+        restHeights[Math.floor(Math.random() * restHeights.length)];
+
 }
+
+function generateBuildingFootprints(ptsWithin, featProps, cellWidth, unit) {
+    var allGeneratedFeats = [];
+    var color = featProps.color;
+    var roofColor = color;
+    var systag = featProps.systag;
+    var bufferWidth = cellWidth - 0.01; //30 meter buffer
+    for (var k = 0, ptslen = ptsWithin.features.length; k < ptslen; k++) {
+        var curPt = ptsWithin.features[k];
+        var buffered = turf.buffer(curPt, bufferWidth, unit); // buffer 48 meters
+        var bds = turf.bbox(buffered); // get the extent of the buffered features
+        var bfrdextPlgn = turf.bboxPolygon(bds);
+        var bldgfootprint = 0.015;
+        var centrepoint = turf.centroid(bfrdextPlgn);
+        var bldg = turf.buffer(centrepoint, bldgfootprint, unit);
+        var bdgply = turf.bbox(bldg); // get the extent of the buffered features
+        var bpoly = turf.bboxPolygon(bdgply);
+        var height = getRandomHeight(systag);
+        var chosenValue = Math.random() < 0.5 ? true : false;
+        var chosenValue = true;
+        if (chosenValue) {
+            var p = {
+                'height': height,
+                'color': color,
+                'roofColor': color
+            };
+            bpoly.properties = p;
+            allGeneratedFeats.push(bpoly);
+
+        }
+    }
+    return allGeneratedFeats;
+}
+
+
 
 function generateFinal3DGeoms(constraintedModelDesigns, genstreets) {
     var genstreets = (genstreets === 'false') ? false : true;
@@ -303,53 +350,21 @@ function generateFinal3DGeoms(constraintedModelDesigns, genstreets) {
         } else if (curFeat.properties.areatype === 'project') {
 
             var featProps = curFeat.properties;
-            var color = featProps.color;
-            var roofColor = color;
-            var reqTag = featProps.reqtag;
             var featExtent = turf.bbox(curFeat);
             //100 meter cell width
-            var cellWidth = 0.04; // 40 meter
+            var cellWidth = getGridCellWidth(featProps);
             var unit = 'kilometers';
-            // make this feature a feature collection since point grid only takes in a feature collection
             var diagJSON = {
                 "type": "FeatureCollection",
                 "features": [curFeat]
             };
             // make the grid of 50 meter points
             var grid = turf.pointGrid(featExtent, cellWidth, unit);
-            // filter the grid so that only points within the feature are left.
+
             var ptsWithin = turf.within(grid, diagJSON);
+            var footprint = generateBuildingFootprints(ptsWithin, featProps, cellWidth, unit);
 
-            // console.log(JSON.stringify(ptsWithin));
-            // 15 meter subtract
-            var bufferWidth = cellWidth - 0.01; //30 meter buffer
-            for (var k = 0, ptslen = ptsWithin.features.length; k < ptslen; k++) {
-                var curPt = ptsWithin.features[k];
-                var buffered = turf.buffer(curPt, bufferWidth, unit); // buffer 48 meters
-                var bds = turf.bbox(buffered); // get the extent of the buffered features
-                var bfrdextPlgn = turf.bboxPolygon(bds);
-                var heightlist = [5, 7, 10, 12, 15];
-                var bldgfootprint = 0.015;
-                var centrepoint = turf.centroid(bfrdextPlgn);
-                // finalGJFeats.push.apply(finalGJFeats, [centrepoint]);
-                var bldg = turf.buffer(centrepoint, bldgfootprint, unit);
-                var bdgply = turf.bbox(bldg); // get the extent of the buffered features
-                var bpoly = turf.bboxPolygon(bdgply);
-                var height = heightlist[Math.floor(Math.random() * heightlist.length)];
-                var chosenValue = Math.random() < 0.5 ? true : false;
-                var chosenValue = true;
-                if (chosenValue) {
-                    var p = {
-                        'height': height,
-                        'color': color,
-                        'roofColor': color
-                    };
-                    bpoly.properties = p;
-                    finalGJFeats.push.apply(finalGJFeats, [bpoly]);
-
-
-                }
-            }
+            finalGJFeats.push.apply(finalGJFeats, footprint);
             if (genstreets) {
                 var finalFeatures = [];
                 var streetFeatureCollection = genStreetsGrid(ptsWithin, featExtent);
