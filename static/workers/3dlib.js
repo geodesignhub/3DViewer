@@ -256,7 +256,7 @@ function getGridCellWidth(featProps) {
     } else {
         var taglist = ['Roads, transport', 'A law or regulation', 'Agriculture, Forestry', 'Small buildings, low density housing', 'Large buildings, Industry, commerce'];
         if (taglist.indexOf(reqtype) >= 0) {
-            return reqtype === 'Large buildings, Industry, commerce' ? 0.02 :
+            return reqtype === 'Large buildings, Industry, commerce' ? 0.03 :
                 reqname === 'Small buildings, low density housing' ? 0.04 :
                 0.04
         } else {
@@ -279,35 +279,68 @@ function getRandomHeight(reqtype) {
 
 }
 
+function makeid() {
+    var text = "";
+    var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+
+    for (var i = 0; i < 5; i++)
+        text += possible.charAt(Math.floor(Math.random() * possible.length));
+
+    return text;
+}
+
 function generateBuildingFootprints(ptsWithin, featProps, cellWidth, unit) {
     var allGeneratedFeats = [];
     var color = featProps.color;
     var roofColor = color;
     var systag = featProps.systag;
     var bufferWidth = cellWidth - 0.01; //30 meter buffer
-    for (var k = 0, ptslen = ptsWithin.features.length; k < ptslen; k++) {
-        var curPt = ptsWithin.features[k];
-        var buffered = turf.buffer(curPt, bufferWidth, unit); // buffer 48 meters
-        var bds = turf.bbox(buffered); // get the extent of the buffered features
-        var bfrdextPlgn = turf.bboxPolygon(bds);
-        var bldgfootprint = 0.015;
-        var centrepoint = turf.centroid(bfrdextPlgn);
-        var bldg = turf.buffer(centrepoint, bldgfootprint, unit);
-        var bdgply = turf.bbox(bldg); // get the extent of the buffered features
-        var bpoly = turf.bboxPolygon(bdgply);
-        var height = getRandomHeight(systag);
-        var chosenValue = Math.random() < 0.5 ? true : false;
-        var chosenValue = true;
-        if (chosenValue) {
-            var p = {
-                'height': height,
-                'color': color,
-                'roofColor': color
-            };
-            bpoly.properties = p;
-            allGeneratedFeats.push(bpoly);
-
+    // if it is HDH type feature
+    if (systag === 'Large buildings, Industry, commerce') {
+        var nearestSearch = [0, 1, 2, 3];
+        var takenIDs = [];
+        var nearest = nearestSearch[Math.floor(Math.random() * nearestSearch.length)];
+        // create a unique ID for each feature.
+        for (var k = 0, ptslen = ptsWithin.features.length; k < ptslen; k++) {
+            var id = makeid();
+            ptsWithin.features[k].properties.id = id;
         }
+        for (var k1 = 0, ptslen = ptsWithin.features.length; k1 < ptslen; k1++) {
+            var curPt = ptsWithin[k1];
+            // check if nearest is there
+            if (nearest) {
+
+            } else {
+
+            }
+        }
+
+    } else { // build LDH type feature
+        for (var k = 0, ptslen = ptsWithin.features.length; k < ptslen; k++) {
+            var curPt = ptsWithin.features[k];
+            var buffered = turf.buffer(curPt, bufferWidth, unit); // buffer 48 meters
+            var bds = turf.bbox(buffered); // get the extent of the buffered features
+            var bfrdextPlgn = turf.bboxPolygon(bds);
+            var bldgfootprint = 0.015;
+            var centrepoint = turf.centroid(bfrdextPlgn);
+            var bldg = turf.buffer(centrepoint, bldgfootprint, unit);
+            var bdgply = turf.bbox(bldg); // get the extent of the buffered features
+            var bpoly = turf.bboxPolygon(bdgply);
+            var height = getRandomHeight(systag);
+            var chosenValue = Math.random() < 0.5 ? true : false;
+            var chosenValue = true;
+            if (chosenValue) {
+                var p = {
+                    'height': height,
+                    'color': color,
+                    'roofColor': color
+                };
+                bpoly.properties = p;
+                allGeneratedFeats.push(bpoly);
+
+            }
+        }
+
     }
     return allGeneratedFeats;
 }
@@ -362,6 +395,7 @@ function generateFinal3DGeoms(constraintedModelDesigns, genstreets) {
             var grid = turf.pointGrid(featExtent, cellWidth, unit);
 
             var ptsWithin = turf.within(grid, diagJSON);
+
             var footprint = generateBuildingFootprints(ptsWithin, featProps, cellWidth, unit);
 
             finalGJFeats.push.apply(finalGJFeats, footprint);
