@@ -546,16 +546,17 @@ function generateFinal3DGeoms(constraintedModelDesigns, genstreets) {
                 finalGJFeats = finalFeatures;
             }
 
-        } else {
-            var prop = {
-                'color': curFeat.properties.color,
-                'roofColor': curFeat.properties.color,
-
-                'height': 0.01
-            }
-            curFeat.properties = prop;
-            finalGJFeats.push.apply(finalGJFeats, [curFeat]);
         }
+        // else { // for policies
+        //     var prop = {
+        //         'color': curFeat.properties.color,
+        //         'roofColor': curFeat.properties.color,
+
+        //         'height': 0.01
+        //     }
+        //     curFeat.properties = prop;
+        //     finalGJFeats.push.apply(finalGJFeats, [curFeat]);
+        // }
     }
 
     var fpolygons = {
