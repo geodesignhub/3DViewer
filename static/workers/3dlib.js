@@ -288,15 +288,20 @@ function getGridCellWidth(featProps) {
 
 function getRandomHeight(reqtype, reqname) {
     var taglist = ['Roads, transport', 'A law or regulation', 'Agriculture, Forestry', 'Small buildings, low density housing', 'Large buildings, Industry, commerce'];
-    var checkSys = ['HDH', 'LDH'];
+    var checkSys = ['HDH', 'LDH', 'COM'];
+    var hdhHeights = [24, 35, 40, 32, 45];
+    var comHeights = [14, 25, 30, 22, 28];
+    var indHeights = [5, 10, 12, 7];
+    var ldhHeights = [5, 10, 12, 7];
     var smbHeights = [2, 3, 5, 6, 7, 10];
     var labHeights = [15, 20, 25, 22, 12];
-    var hdhHeights = [24, 35, 40, 32, 45];
-    var ldhHeights = [5, 10, 12, 7];
     var restHeights = [0, 2, 5];
+    // console.log(reqname);
     if (checkSys.indexOf(reqname) >= 0) {
         return reqname === 'HDH' ? hdhHeights[Math.floor(Math.random() * hdhHeights.length)] :
             reqname === 'LDH' ? ldhHeights[Math.floor(Math.random() * ldhHeights.length)] :
+            reqname === 'COM' ? comHeights[Math.floor(Math.random() * comHeights.length)] :
+            reqname === 'IND' ? indHeights[Math.floor(Math.random() * indHeights.length)] :
             restHeights[Math.floor(Math.random() * restHeights.length)];
     } else {
         return reqtype === 'Small buildings, low density housing' ? smbHeights[Math.floor(Math.random() * smbHeights.length)] :
@@ -321,6 +326,7 @@ function generateBuildingFootprints(ptsWithin, featProps, cellWidth, unit) {
     var roofColor = color;
     var systag = featProps.systag;
     var sysname = featProps.sysname;
+   
     var bufferWidth = cellWidth - 0.01; //30 meter buffer
 
     var alreadyAdded = { "type": "FeatureCollection", "features": [] };
@@ -470,6 +476,7 @@ function generateBuildingFootprints(ptsWithin, featProps, cellWidth, unit) {
 
 function generateFinal3DGeoms(constraintedModelDesigns, genstreets) {
     var genstreets = (genstreets === 'false') ? false : true;
+    var whiteListedSysName = ['HDH', 'LDH', 'IND', 'COM', 'COMIND', 'HSG'];
     var finalGJFeats = [];
     var plFeats = [];
     // get the center of the design so that the map once returned can be recentered.
@@ -482,6 +489,7 @@ function generateFinal3DGeoms(constraintedModelDesigns, genstreets) {
     for (var h = 0; h < flen; h++) {
         // for every feature , create a point grid.
         var curFeat = curFeats[h];
+        var curFeatSys = curFeat.properties.sysname;
         // if it is a line then simply buffer it and paint it black with a small height
         if (curFeat.geometry.type === "LineString") {
             f = turf.buffer(curFeat, 0.005, 'kilometers');
@@ -493,70 +501,71 @@ function generateFinal3DGeoms(constraintedModelDesigns, genstreets) {
             for (var x1 = 0; x1 < linefeatlen; x1++) {
                 curlineFeat = linefeats[x1];
                 curlineFeat.properties = {
-                    "color": "#202020",
-                    "roofColor": "#202020",
+                    "color": curFeat.properties.color,
+                    "roofColor": curFeat.properties.color,
                     "height": 2
                 };
 
                 finalGJFeats.push.apply(finalGJFeats, [curlineFeat]);
             }
 
-        } else if (curFeat.properties.areatype === 'project') {
+        }
+        if (whiteListedSysName.indexOf(curFeatSys) >= 0) {
+            if (curFeat.properties.areatype === 'project') {
+                var featProps = curFeat.properties;
 
-            var featProps = curFeat.properties;
-            var featExtent = turf.bbox(curFeat);
-            //100 meter cell width
-            var cellWidth = getGridCellWidth(featProps);
-            var unit = 'kilometers';
-            var diagJSON = {
-                "type": "FeatureCollection",
-                "features": [curFeat]
-            };
-            // make the grid of 50 meter points
-            var grid = turf.pointGrid(featExtent, cellWidth, unit);
+                var featExtent = turf.bbox(curFeat);
+                //100 meter cell width
+                var cellWidth = getGridCellWidth(featProps);
+                var unit = 'kilometers';
+                var diagJSON = {
+                    "type": "FeatureCollection",
+                    "features": [curFeat]
+                };
+                // make the grid of 50 meter points
+                var grid = turf.pointGrid(featExtent, cellWidth, unit);
 
-            var ptsWithin = turf.within(grid, diagJSON);
+                var ptsWithin = turf.within(grid, diagJSON);
 
-            var footprint = generateBuildingFootprints(ptsWithin, featProps, cellWidth, unit);
+                var footprint = generateBuildingFootprints(ptsWithin, featProps, cellWidth, unit);
 
-            finalGJFeats.push.apply(finalGJFeats, footprint);
-            if (genstreets) {
-                var finalFeatures = [];
-                var streetFeatureCollection = genStreetsGrid(ptsWithin, featExtent);
-                // console.log(JSON.stringify(streetFeatureCollection));
-                for (var l = 0; l < finalGJFeats.length; l++) {
-                    var curF1 = finalGJFeats[l];
-                    var intersects = false;
-                    for (var p = 0, stLen = streetFeatureCollection.features.length; p < stLen; p++) {
-                        var curStF = streetFeatureCollection.features[p];
-                        var intersect = turf.intersect(curF1, curStF);
-                        // chop road
-                        // var intersect2 = turf.intersect(curFeat, curStF);
-                        if (intersect) {
-                            intersects = true;
+                finalGJFeats.push.apply(finalGJFeats, footprint);
+                if (genstreets) {
+                    var finalFeatures = [];
+                    var streetFeatureCollection = genStreetsGrid(ptsWithin, featExtent);
+                    // console.log(JSON.stringify(streetFeatureCollection));
+                    for (var l = 0; l < finalGJFeats.length; l++) {
+                        var curF1 = finalGJFeats[l];
+                        var intersects = false;
+                        for (var p = 0, stLen = streetFeatureCollection.features.length; p < stLen; p++) {
+                            var curStF = streetFeatureCollection.features[p];
+                            var intersect = turf.intersect(curF1, curStF);
+                            // chop road
+                            // var intersect2 = turf.intersect(curFeat, curStF);
+                            if (intersect) {
+                                intersects = true;
+                            }
+                        }
+                        if (intersects) {} else {
+                            // console.log(curF1.properties.height);
+                            finalFeatures.push(curF1);
                         }
                     }
-                    if (intersects) {} else {
-                        // console.log(curF1.properties.height);
-                        finalFeatures.push(curF1);
-                    }
+
+                    finalFeatures.push.apply(finalFeatures, streetFeatureCollection.features);
+                    finalGJFeats = finalFeatures;
                 }
 
-                finalFeatures.push.apply(finalFeatures, streetFeatureCollection.features);
-                finalGJFeats = finalFeatures;
             }
-
+        } else { // for policies
+            var prop = {
+                'color': curFeat.properties.color,
+                'roofColor': curFeat.properties.color,
+                'height': 0.01
+            }
+            curFeat.properties = prop;
+            finalGJFeats.push.apply(finalGJFeats, [curFeat]);
         }
-        // else { // for policies
-        //     var prop = {
-        //         'color': curFeat.properties.color,
-        //         'roofColor': curFeat.properties.color,
-
-        //         'height': 0.01
-        //     }
-        //     curFeat.properties = prop;
-        //     finalGJFeats.push.apply(finalGJFeats, [curFeat]);
-        // }
     }
 
     var fpolygons = {
