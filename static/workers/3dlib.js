@@ -326,7 +326,7 @@ function generateBuildingFootprints(ptsWithin, featProps, cellWidth, unit) {
     var roofColor = color;
     var systag = featProps.systag;
     var sysname = featProps.sysname;
-   
+
     var bufferWidth = cellWidth - 0.01; //30 meter buffer
 
     var alreadyAdded = { "type": "FeatureCollection", "features": [] };

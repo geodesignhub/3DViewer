@@ -234,14 +234,23 @@
 </body>
 <script>
     var apitoken = "<%= apitoken  %>"; //var test is now assigned to getTest which will only work on browsers
-    var projectid = "<%= projectid %>"; //var test is now assigned to getTest which will only work on browsers  
-    var diagramid = "<%= diagramid %>"; //var test is now assigned to getTest which will only work on browsers  
+    var projectid = "<%= projectid %>"; //var test is now assigned to getTest which will only work on browsers 
+    var diagramid = "<%= diagramid %>"; //var test is now assigned to getTest which will only work on browsers 
+    var synthesisid = "<%= synthesisid %>"; //var test is now assigned to getTest which will only work on browsers  
+    var cteamid = "<%= cteamid %>"; //var test is now assigned to getTest which will only work on browsers  
     var gjresults = <%- result %>;
     (function() {
-        if (apitoken !== "0" && projectid !== "0" && diagramid !== "0") {
-            // console.log(apitoken, projectid, diagramid);  
+        if ((apitoken !== "0" && projectid !== "0" && diagramid !== "0")  ) {
+           
             if (gjresults.features.length > 0) {
                 $("#gjTA").text(JSON.stringify(gjresults));
+                submitGJ();
+            }
+        }
+        else if (apitoken !== "0" && projectid !== "0" && cteamid !== "0" && synthesisid !=="0"){
+
+            if (gjresults[0].features.length > 0) {
+                $("#gjTA").text(JSON.stringify(gjresults[0]));
                 submitGJ();
             }
         }
