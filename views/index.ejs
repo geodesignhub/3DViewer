@@ -105,10 +105,10 @@
             state: false, // stores map position/rotation in url
             attribution: '© 3D <a href="http://osmbuildings.org/copyright/">OSM Buildings</a>'
         }).appendTo('glMap');
-        // osmb.addGeoJSONTiles('https://{s}.data.osmbuildings.org/0.2/anonymous/tile/{z}/{x}/{y}.json', {
-        //     "color": "#ffe9ec",
-        //     "fadeIn": true
-        // });
+        osmb.addGeoJSONTiles('https://{s}.data.osmbuildings.org/0.2/anonymous/tile/{z}/{x}/{y}.json', {
+            "color": "#ffe9ec",
+            "fadeIn": true
+        });
         // osmb.addMapTiles(
         //   'http://a.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         //     attribution: '© Data <a href="http://openstreetmap.org/copyright/">OpenStreetMap</a> · © Map <a href="http://mapbox.com">MapBox</a>'
