@@ -499,6 +499,19 @@ function filterStreets(streetgrid, inputFeats) {
     return filteredFeatures;
 }
 
+function bufferExistingRoads(inputroads) {
+    var streets = [];
+    for (var x = 0; x < inputroads.features.length; x++) {
+        var linestring = inputroads.features[x];
+        var street = turf.buffer(linestring, 0.0075, 'kilometers');
+        if (street['type'] === "Feature") {
+            streets.push(street);
+        }
+    }
+    return { "type": "FeatureCollection", "features": streets }
+
+
+}
 
 function generateFinal3DGeoms(constraintedModelDesigns, genstreets, existingroads) {
     var genstreets = (genstreets === 'false') ? false : true;
@@ -561,6 +574,7 @@ function generateFinal3DGeoms(constraintedModelDesigns, genstreets, existingroad
                 streetFeatureCollection = genStreetsGrid(ptsWithin, featExtent);
                 finalFeatures = filterStreets(streetFeatureCollection, finalGJFeats);
                 if (existingroads) {
+
                     finalFeatures = filterStreets(existingroads, finalFeatures);
                 }
 
@@ -595,6 +609,11 @@ function generateFinal3DGeoms(constraintedModelDesigns, genstreets, existingroad
 function generate3DGeoms(allFeaturesList, genstreets, existingroads) {;
     var allFeaturesList = JSON.parse(allFeaturesList);
     var existingroads = JSON.parse(existingroads);
+    // console.log(JSON.stringify(existingroads));
+    if (existingroads) {
+        existingroads = bufferExistingRoads(existingroads);
+
+    }
     var threeDOutput = generateFinal3DGeoms(allFeaturesList, genstreets, existingroads);
 
 }
