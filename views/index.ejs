@@ -41,10 +41,14 @@
 
                         </ol>
                     </div>
+
                     <textarea id="gjTA" name="styled-textarea">Paste GeoJSON from Geodesign Hub here...</textarea><br>
                     <input id="genStreetsCB" class="checkbox-custom" name="checkbox-1" type="checkbox"> Generate Streets
                     <br> <br>
-                    <p><button class="button" onclick="submitGJ()">Generate Scene</button></p>
+                    <div>
+                        <p><button class="button" onclick="submitGJ()">Generate Scene</button></p>
+                        <div id="loadingGIF"><img src="/assets/objs/loading.gif"></div>
+                    </div>
 
                     <p></p>
 
@@ -165,6 +169,7 @@
                 gj = JSON.parse(gj);
                 var genstreets = document.getElementById("genStreetsCB").checked;
                 start3dWorker(gj, genstreets);
+                $("#loadingGIF").show();
             }
         }
 
@@ -175,6 +180,10 @@
             var threeDWorker = new Worker('/assets/workers/3dlib.js');
             threeDWorker.onerror = function(e) {
                 console.log('Error: Line ' + e.lineno + ' in ' + e.filename + ': ' + e.message);
+                $("#loadingGIF").hide();
+                humane.log("There was a error in processing, please try again with a new geometry.. ", {
+                    addnCls: 'humane-flatty-error'
+                });
             };
             threeDWorker.postMessage({
                 'allFeaturesList': JSON.stringify(allFeaturesList),
@@ -187,6 +196,8 @@
                 var latlng = e.data.center;
                 setMapCenter(latlng);
                 updateGLData(gjsonData);
+
+
             }, false);
         }
 
@@ -210,7 +221,7 @@
         }
 
         function updateGLData(gjsonData) {
-
+            $("#loadingGIF").hide();
             humane.log("Rendering Scene..", {
                 addnCls: 'humane-flatty-success'
             });
@@ -234,6 +245,7 @@
     </script>
 </body>
 <script>
+    $("#loadingGIF").hide();
     var apitoken = "<%= apitoken  %>"; //var test is now assigned to getTest which will only work on browsers
     var projectid = "<%= projectid %>"; //var test is now assigned to getTest which will only work on browsers 
     var diagramid = "<%= diagramid %>"; //var test is now assigned to getTest which will only work on browsers 

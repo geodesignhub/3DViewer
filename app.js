@@ -17,7 +17,6 @@ app.use(bodyParser.json())
 
 app.get('/', function(request, response) {
     var opts = {};
-    console.log(request.query)
     if (request.query.apitoken && request.query.projectid && request.query.diagramid) {
         opts = { 'apitoken': request.query.apitoken, 'projectid': request.query.projectid, 'diagramid': request.query.diagramid, 'cteamid': '0', 'synthesisid': '0' };
 

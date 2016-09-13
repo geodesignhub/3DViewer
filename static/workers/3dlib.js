@@ -560,13 +560,14 @@ function generateFinal3DGeoms(constraintedModelDesigns, genstreets, existingroad
 
                 streetFeatureCollection = genStreetsGrid(ptsWithin, featExtent);
                 finalFeatures = filterStreets(streetFeatureCollection, finalGJFeats);
-                // console.log(JSON.stringify(finalFeatures));
-                finalSecondPass = filterStreets(existingroads, finalFeatures);
-                // console.log(JSON.stringify(finalSecondPass));
-                if (genstreets) {
-                    finalSecondPass.push.apply(finalSecondPass, streetFeatureCollection.features);
+                if (existingroads) {
+                    finalFeatures = filterStreets(existingroads, finalFeatures);
                 }
-                finalGJFeats = finalSecondPass;
+
+                if (genstreets) {
+                    finalFeatures.push.apply(finalFeatures, streetFeatureCollection.features);
+                }
+                finalGJFeats = finalFeatures;
 
             }
         } else { // for non white listed systems
