@@ -520,31 +520,31 @@ function generateFinal3DGeoms(constraintedModelDesigns, genstreets) {
             var footprint = generateBuildingFootprints(ptsWithin, featProps, cellWidth, unit);
 
             finalGJFeats.push.apply(finalGJFeats, footprint);
-            if (genstreets) {
-                var finalFeatures = [];
-                var streetFeatureCollection = genStreetsGrid(ptsWithin, featExtent);
-                // console.log(JSON.stringify(streetFeatureCollection));
-                for (var l = 0; l < finalGJFeats.length; l++) {
-                    var curF1 = finalGJFeats[l];
-                    var intersects = false;
-                    for (var p = 0, stLen = streetFeatureCollection.features.length; p < stLen; p++) {
-                        var curStF = streetFeatureCollection.features[p];
-                        var intersect = turf.intersect(curF1, curStF);
-                        // chop road
-                        // var intersect2 = turf.intersect(curFeat, curStF);
-                        if (intersect) {
-                            intersects = true;
-                        }
-                    }
-                    if (intersects) {} else {
-                        // console.log(curF1.properties.height);
-                        finalFeatures.push(curF1);
+
+            var finalFeatures = [];
+            var streetFeatureCollection = genStreetsGrid(ptsWithin, featExtent);
+            // console.log(JSON.stringify(streetFeatureCollection));
+            for (var l = 0; l < finalGJFeats.length; l++) {
+                var curF1 = finalGJFeats[l];
+                var intersects = false;
+                for (var p = 0, stLen = streetFeatureCollection.features.length; p < stLen; p++) {
+                    var curStF = streetFeatureCollection.features[p];
+                    var intersect = turf.intersect(curF1, curStF);
+                    // chop road
+                    // var intersect2 = turf.intersect(curFeat, curStF);
+                    if (intersect) {
+                        intersects = true;
                     }
                 }
-
-                finalFeatures.push.apply(finalFeatures, streetFeatureCollection.features);
-                finalGJFeats = finalFeatures;
+                if (intersects) {} else {
+                    // console.log(curF1.properties.height);
+                    finalFeatures.push(curF1);
+                }
             }
+            if (genstreets) {
+                finalFeatures.push.apply(finalFeatures, streetFeatureCollection.features);
+            }
+            finalGJFeats = finalFeatures;
 
         }
         // else { // for policies
