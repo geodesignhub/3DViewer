@@ -477,6 +477,27 @@ function generateBuildingFootprints(ptsWithin, featProps, cellWidth, unit) {
     return allGeneratedFeats;
 }
 
+function filterStreets(streetgrid, inputFeats) {
+    var filteredFeatures = [];
+    for (var l = 0; l < inputFeats.length; l++) {
+        var curF1 = inputFeats[l];
+        var intersects = false;
+        for (var p = 0, stLen = streetgrid.features.length; p < stLen; p++) {
+            var curStF = streetgrid.features[p];
+            var intersect = turf.intersect(curF1, curStF);
+            // chop road
+
+            if (intersect) {
+                intersects = true;
+            }
+        }
+        if (intersects) {} else {
+
+            filteredFeatures.push(curF1);
+        }
+    }
+    return filteredFeatures;
+}
 
 
 function generateFinal3DGeoms(constraintedModelDesigns, genstreets, existingroads) {
@@ -535,31 +556,17 @@ function generateFinal3DGeoms(constraintedModelDesigns, genstreets, existingroad
 
                 var finalFeatures = [];
                 var streetFeatureCollection;
-                if (genstreets) { // generate streets
-                    streetFeatureCollection = genStreetsGrid(ptsWithin, featExtent);
-                } else {
-                    streetFeatureCollection = existingroads;
-                }
-                console.log(JSON.stringify(streetFeatureCollection));
-                for (var l = 0; l < finalGJFeats.length; l++) {
-                    var curF1 = finalGJFeats[l];
-                    var intersects = false;
-                    for (var p = 0, stLen = streetFeatureCollection.features.length; p < stLen; p++) {
-                        var curStF = streetFeatureCollection.features[p];
-                        var intersect = turf.intersect(curF1, curStF);
-                        // chop road
+                // filter streets
 
-                        if (intersect) {
-                            intersects = true;
-                        }
-                    }
-                    if (intersects) {} else {
-
-                        finalFeatures.push(curF1);
-                    }
+                streetFeatureCollection = genStreetsGrid(ptsWithin, featExtent);
+                finalFeatures = filterStreets(streetFeatureCollection, finalGJFeats);
+                // console.log(JSON.stringify(finalFeatures));
+                finalSecondPass = filterStreets(existingroads, finalFeatures);
+                // console.log(JSON.stringify(finalSecondPass));
+                if (genstreets) {
+                    finalSecondPass.push.apply(finalSecondPass, streetFeatureCollection.features);
                 }
-                finalFeatures.push.apply(finalFeatures, streetFeatureCollection.features);
-                finalGJFeats = finalFeatures;
+                finalGJFeats = finalSecondPass;
 
             }
         } else { // for non white listed systems
