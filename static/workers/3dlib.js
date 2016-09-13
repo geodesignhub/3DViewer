@@ -292,7 +292,7 @@ function getRandomHeight(reqtype, reqname) {
     var hdhHeights = [24, 35, 40, 32, 45];
     var comHeights = [14, 25, 30, 22, 28];
     var indHeights = [5, 10, 12, 7];
-    var ldhHeights = [5, 10, 12, 7];
+    var ldhHeights = [1, 2, 3];
     var smbHeights = [2, 3, 5, 6, 7, 10];
     var labHeights = [15, 20, 25, 22, 12];
     var restHeights = [0, 2, 5];
@@ -396,7 +396,7 @@ function generateBuildingFootprints(ptsWithin, featProps, cellWidth, unit) {
 
                         var p = {
                             'height': height,
-                            'color': "#A2A2A2",
+                            'color': "#d0d0d0",
                             'roofColor': color
                         };
                         bldg.properties = p;
@@ -433,7 +433,7 @@ function generateBuildingFootprints(ptsWithin, featProps, cellWidth, unit) {
                     if (chosenValue) {
                         var p = {
                             'height': height,
-                            'color': "#A2A2A2",
+                            'color': "#d0d0d0",
                             'roofColor': color
                         };
                         bpoly.properties = p;
@@ -464,7 +464,7 @@ function generateBuildingFootprints(ptsWithin, featProps, cellWidth, unit) {
             if (chosenValue) {
                 var p = {
                     'height': height,
-                    'color': "#A2A2A2",
+                    'color': "#d0d0d0",
                     'roofColor': color
                 };
                 bpoly.properties = p;
@@ -609,7 +609,7 @@ function generateFinal3DGeoms(constraintedModelDesigns, genstreets, existingroad
 function generate3DGeoms(allFeaturesList, genstreets, existingroads) {;
     var allFeaturesList = JSON.parse(allFeaturesList);
     var existingroads = JSON.parse(existingroads);
-    // console.log(JSON.stringify(existingroads));
+    console.log(JSON.stringify(existingroads));
     if (existingroads) {
         existingroads = bufferExistingRoads(existingroads);
 
