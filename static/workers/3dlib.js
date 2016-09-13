@@ -120,8 +120,8 @@ function genStreetsHeatMapped(pointsWithin, extent) {
     function generateLineFeatures(curTriangleFeat) {
         var coords = curTriangleFeat.geometry.coordinates[0];
 
-        console.log(JSON.stringify(coords));
-        console.log(JSON.stringify(coords[0]));
+        // console.log(JSON.stringify(coords));
+        // console.log(JSON.stringify(coords[0]));
         var l1 = turf.lineString([coords[0], coords[1]]);
         var l2 = turf.lineString([coords[0], coords[2]]);
         var l3 = turf.lineString([coords[1], coords[2]]);
@@ -609,7 +609,7 @@ function generateFinal3DGeoms(constraintedModelDesigns, genstreets, existingroad
 function generate3DGeoms(allFeaturesList, genstreets, existingroads) {;
     var allFeaturesList = JSON.parse(allFeaturesList);
     var existingroads = JSON.parse(existingroads);
-    console.log(JSON.stringify(existingroads));
+    // console.log(JSON.stringify(existingroads));
     if (existingroads) {
         existingroads = bufferExistingRoads(existingroads);
 
