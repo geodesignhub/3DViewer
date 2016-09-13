@@ -178,6 +178,7 @@
             };
             threeDWorker.postMessage({
                 'allFeaturesList': JSON.stringify(allFeaturesList),
+                'existingroads': JSON.stringify(roads),
                 'genstreets': JSON.stringify(genstreets)
             });
             threeDWorker.addEventListener('message', function(e) {
@@ -239,18 +240,19 @@
     var synthesisid = "<%= synthesisid %>"; //var test is now assigned to getTest which will only work on browsers  
     var cteamid = "<%= cteamid %>"; //var test is now assigned to getTest which will only work on browsers  
     var gjresults = <%- result %>;
+    var roads = <%- roads %>;
+
     (function() {
-        if ((apitoken !== "0" && projectid !== "0" && diagramid !== "0")  ) {
-           
+        if ((apitoken !== "0" && projectid !== "0" && diagramid !== "0")) {
+
             if (gjresults.features.length > 0) {
                 $("#gjTA").text(JSON.stringify(gjresults));
                 submitGJ();
             }
-        }
-        else if (apitoken !== "0" && projectid !== "0" && cteamid !== "0" && synthesisid !=="0"){
+        } else if (apitoken !== "0" && projectid !== "0" && cteamid !== "0" && synthesisid !== "0") {
 
-            if (gjresults[0].features.length > 0) {
-                $("#gjTA").text(JSON.stringify(gjresults[0]));
+            if (gjresults.features.length > 0) {
+                $("#gjTA").text(JSON.stringify(gjresults));
                 submitGJ();
             }
         }
