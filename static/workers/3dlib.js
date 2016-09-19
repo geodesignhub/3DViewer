@@ -524,6 +524,7 @@ function generateFinal3DGeoms(constraintedModelDesigns, genstreets, existingroad
     var lng = centerPt.geometry.coordinates[0];
     // iterate over the features.
     var curFeats = constraintedModelDesigns.features;
+
     var flen = curFeats.length;
     for (var h = 0; h < flen; h++) {
         // for every feature , create a point grid.
@@ -584,6 +585,7 @@ function generateFinal3DGeoms(constraintedModelDesigns, genstreets, existingroad
                 finalGJFeats = finalFeatures;
 
             }
+
         } else { // for non white listed systems
 
             if (curFeat.properties.areatype === 'project') {
@@ -595,53 +597,57 @@ function generateFinal3DGeoms(constraintedModelDesigns, genstreets, existingroad
                 curFeat.properties = prop;
                 finalGJFeats.push.apply(finalGJFeats, [curFeat]);
             } else if (curFeat.properties.areatype === 'policy') {
-                var featExtent = turf.bbox(curFeat);
-                var cellWidth = 0.5;
+                var fe = turf.bbox(curFeat);
+                var cw = 0.05;
                 var unit = 'kilometers';
-                var diagJSON = {
+                var dJSON = {
                     "type": "FeatureCollection",
                     "features": [curFeat]
                 };
                 // make the grid of 50 meter points
-                var grid = turf.pointGrid(featExtent, cellWidth, unit);
-                var ptsWithin = turf.within(grid, diagJSON);
-                var ptswithinlen = ptsWithin.features.length;
+                var grd = turf.pointGrid(fe, cw, unit);
+                var pW = turf.within(grd, dJSON);
+                var pwLen = pW.features.length;
+
                 var prop = {
                     // 'color': curFeat.properties.color,
                     'roofColor': curFeat.properties.color,
                     'height': 0.01
                 }
-                for (var l1 = 0; l1 < ptswithinlen; l1++) {
-                    var curptwithin = ptsWithin.features[l1];
+                for (var l1 = 0; l1 < pwLen; l1++) {
+                    var curptwithin = pW.features[l1];
                     var bufFeat = turf.buffer(curptwithin, 0.0075, 'kilometers');
+                    bufFeat.properties = prop;
+
                     finalGJFeats.push.apply(finalGJFeats, [bufFeat]);
                 }
             }
         }
-
-        var fpolygons = {
-            "type": "FeatureCollection",
-            "features": finalGJFeats
-        };
-        // console.log(JSON.stringify(fpolygons));
-        self.postMessage({
-            'polygons': JSON.stringify(fpolygons),
-            'center': JSON.stringify([lat, lng])
-        });
     }
+    var fpolygons = {
+        "type": "FeatureCollection",
+        "features": finalGJFeats
+    };
+    // console.log(JSON.stringify(fpolygons));
+    self.postMessage({
+        'polygons': JSON.stringify(fpolygons),
+        'center': JSON.stringify([lat, lng])
+    });
+}
 
-    function generate3DGeoms(allFeaturesList, genstreets, existingroads) {;
-        var allFeaturesList = JSON.parse(allFeaturesList);
-        var existingroads = JSON.parse(existingroads);
-        // console.log(JSON.stringify(existingroads));
-        if (existingroads) {
-            existingroads = bufferExistingRoads(existingroads);
 
-        }
-        var threeDOutput = generateFinal3DGeoms(allFeaturesList, genstreets, existingroads);
+function generate3DGeoms(allFeaturesList, genstreets, existingroads) {;
+    var allFeaturesList = JSON.parse(allFeaturesList);
+    var existingroads = JSON.parse(existingroads);
+    // console.log(JSON.stringify(existingroads));
+    if (existingroads) {
+        existingroads = bufferExistingRoads(existingroads);
 
     }
+    var threeDOutput = generateFinal3DGeoms(allFeaturesList, genstreets, existingroads);
 
-    self.onmessage = function(e) {
-        generate3DGeoms(e.data.allFeaturesList, e.data.genstreets, e.data.existingroads);
-    }
+}
+
+self.onmessage = function(e) {
+    generate3DGeoms(e.data.allFeaturesList, e.data.genstreets, e.data.existingroads);
+}
