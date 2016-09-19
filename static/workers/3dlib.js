@@ -584,6 +584,31 @@ function generateFinal3DGeoms(constraintedModelDesigns, genstreets, existingroad
                 }
                 finalGJFeats = finalFeatures;
 
+            } else if (curFeat.properties.areatype === 'policy') {
+                var fe = turf.bbox(curFeat);
+                var cw = 0.03;
+                var unit = 'kilometers';
+                var dJSON = {
+                    "type": "FeatureCollection",
+                    "features": [curFeat]
+                };
+                // make the grid of 50 meter points
+                var grd = turf.pointGrid(fe, cw, unit);
+                var pW = turf.within(grd, dJSON);
+                var pwLen = pW.features.length;
+
+                var prop = {
+                    // 'color': curFeat.properties.color,
+                    'roofColor': curFeat.properties.color,
+                    'height': 0.01
+                }
+                for (var l1 = 0; l1 < pwLen; l1++) {
+                    var curptwithin = pW.features[l1];
+                    var bufFeat = turf.buffer(curptwithin, 0.0075, 'kilometers');
+                    bufFeat.properties = prop;
+
+                    finalGJFeats.push.apply(finalGJFeats, [bufFeat]);
+                }
             }
 
         } else { // for non white listed systems
@@ -598,7 +623,7 @@ function generateFinal3DGeoms(constraintedModelDesigns, genstreets, existingroad
                 finalGJFeats.push.apply(finalGJFeats, [curFeat]);
             } else if (curFeat.properties.areatype === 'policy') {
                 var fe = turf.bbox(curFeat);
-                var cw = 0.05;
+                var cw = 0.03;
                 var unit = 'kilometers';
                 var dJSON = {
                     "type": "FeatureCollection",
