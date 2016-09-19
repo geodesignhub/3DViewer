@@ -585,39 +585,63 @@ function generateFinal3DGeoms(constraintedModelDesigns, genstreets, existingroad
 
             }
         } else { // for non white listed systems
-            var prop = {
-                // 'color': curFeat.properties.color,
-                'roofColor': curFeat.properties.color,
-                'height': 0.01
+
+            if (curFeat.properties.areatype === 'project') {
+                var prop = {
+                    // 'color': curFeat.properties.color,
+                    'roofColor': curFeat.properties.color,
+                    'height': 0.01
+                }
+                curFeat.properties = prop;
+                finalGJFeats.push.apply(finalGJFeats, [curFeat]);
+            } else if (curFeat.properties.areatype === 'policy') {
+                var featExtent = turf.bbox(curFeat);
+                var cellWidth = 0.5;
+                var unit = 'kilometers';
+                var diagJSON = {
+                    "type": "FeatureCollection",
+                    "features": [curFeat]
+                };
+                // make the grid of 50 meter points
+                var grid = turf.pointGrid(featExtent, cellWidth, unit);
+                var ptsWithin = turf.within(grid, diagJSON);
+                var ptswithinlen = ptsWithin.features.length;
+                var prop = {
+                    // 'color': curFeat.properties.color,
+                    'roofColor': curFeat.properties.color,
+                    'height': 0.01
+                }
+                for (var l1 = 0; l1 < ptswithinlen; l1++) {
+                    var curptwithin = ptsWithin.features[l1];
+                    var bufFeat = turf.buffer(curptwithin, 0.0075, 'kilometers');
+                    finalGJFeats.push.apply(finalGJFeats, [bufFeat]);
+                }
             }
-            curFeat.properties = prop;
-            finalGJFeats.push.apply(finalGJFeats, [curFeat]);
         }
+
+        var fpolygons = {
+            "type": "FeatureCollection",
+            "features": finalGJFeats
+        };
+        // console.log(JSON.stringify(fpolygons));
+        self.postMessage({
+            'polygons': JSON.stringify(fpolygons),
+            'center': JSON.stringify([lat, lng])
+        });
     }
 
-    var fpolygons = {
-        "type": "FeatureCollection",
-        "features": finalGJFeats
-    };
-    // console.log(JSON.stringify(fpolygons));
-    self.postMessage({
-        'polygons': JSON.stringify(fpolygons),
-        'center': JSON.stringify([lat, lng])
-    });
-}
+    function generate3DGeoms(allFeaturesList, genstreets, existingroads) {;
+        var allFeaturesList = JSON.parse(allFeaturesList);
+        var existingroads = JSON.parse(existingroads);
+        // console.log(JSON.stringify(existingroads));
+        if (existingroads) {
+            existingroads = bufferExistingRoads(existingroads);
 
-function generate3DGeoms(allFeaturesList, genstreets, existingroads) {;
-    var allFeaturesList = JSON.parse(allFeaturesList);
-    var existingroads = JSON.parse(existingroads);
-    // console.log(JSON.stringify(existingroads));
-    if (existingroads) {
-        existingroads = bufferExistingRoads(existingroads);
+        }
+        var threeDOutput = generateFinal3DGeoms(allFeaturesList, genstreets, existingroads);
 
     }
-    var threeDOutput = generateFinal3DGeoms(allFeaturesList, genstreets, existingroads);
 
-}
-
-self.onmessage = function(e) {
-    generate3DGeoms(e.data.allFeaturesList, e.data.genstreets, e.data.existingroads);
-}
+    self.onmessage = function(e) {
+        generate3DGeoms(e.data.allFeaturesList, e.data.genstreets, e.data.existingroads);
+    }

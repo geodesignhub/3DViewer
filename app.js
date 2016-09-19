@@ -95,7 +95,7 @@ app.get('/', function(request, response) {
         var projectid = request.query.projectid;
         var cteamid = request.query.cteamid;
         var synthesisid = request.query.synthesisid;
-        var synprojectsurl = baseurl + projectid + '/cteams/' + cteamid + '/' + synthesisid + '/projects/';
+        var synprojectsurl = baseurl + projectid + '/cteams/' + cteamid + '/' + synthesisid + '/';
         var boundsurl = baseurl + projectid + '/bounds/';
         var URLS = [synprojectsurl, boundsurl];
 
