@@ -1,8 +1,8 @@
 importScripts('../js/turfjs/turf.min.js');
 
 
-var HDHousing = function(name) {
-    this.name = name;
+var HDHousing = function() {
+    // this.name = name;
     this.hsgfeatures;
 
     const gridsize = 0.025;
@@ -10,34 +10,56 @@ var HDHousing = function(name) {
     const heights = [36, 60, 90]; // in meters 
     const units = 'kilometers';
     var featExtent;
-    this.initialize = function() {
-        index = lunr(function() {
-            this.field('title', { boost: 1 })
-            this.field('tags', { boost: 5 })
-            this.ref('id')
-        });
-    };
+    var featProps;
+
     this.generateSquareGridandConstrain = function(featureGeometry) {
         // generate housing grid
+        this.featProps = featureGeometry.properties;
         this.featExtent = turf.bbox(featureGeometry);
         var sqgrid = turf.squareGrid(featExtent, this.gridsize, this.units);
         // constrain grid.
-
+        var constrainedgrid = { "type": "FeatureCollection", "features": [] };
+        var sqfeatslen = sqgrid.features;
+        for (var x = 0; x < sqfeatslen; x++) {
+            var cursqfeat = sqgrid.features[x];
+            var ifeat = turf.intersect(cursqfeat, featureGeometry);
+            if (ifeat) {
+                constrainedgrid.features.append(ifeat);
+            } else {
+                constrainedgrid.features.append(cursqfeat);
+            }
+        }
+        return constrainedgrid;
     };
-    this.constrainGrid = function(grid, featureGeometry) {
 
-    };
     this.generateBuildings = function(constrainedgrid) {
         // loop over the constrained grid
         // dont put housing in very small polygons
-
+        var consgridlen = constrainedgrid.features.length;
+        var generatedGeoJSON = { "type": "FeatureCollection", "features": [] };
         // find centroid
-        // buffer by 12 meters
-
-        // make it a highrise
-        // 
-        return index.search(searchterm);
+        for (var k1 = 0; k1 < consgridlen; k1++) {
+            var curconsfeat = constrainedgrid.features[k1];
+            var curarea = turf.area(curconsfeat);
+            if (curarea > 500) {
+                var centroid = turf.centroid(curconsfeat);
+                var bufferedCentroid = turf.buffer(centroid, footprintsize, 'kilometers');
+                var bbox = turf.bbox(bufferedCentroid);
+                var bboxpoly = turf.bboxPolygon(bbox);
+                var props = {
+                    "height": this.heights[Math.floor(Math.random() * this.heights.length)],
+                    "color": "#d0d0d0",
+                    "roofColor": featProps.color
+                };
+                bboxpoly.properties = props;
+                generatedGeoJSON.features.append(bboxpoly);
+            }
+        }
+        return generatedGeoJSON;
     }
+
+
+}
 
 };
 
@@ -340,7 +362,6 @@ function getGridCellWidth(featProps) {
 
 }
 
-
 function getRandomHeight(reqtype, reqname) {
     var taglist = ['Roads, transport', 'A law or regulation', 'Agriculture, Forestry', 'Small buildings, low density housing', 'Large buildings, Industry, commerce'];
     var checkSys = ['HDH', 'LDH', 'COM'];
@@ -611,34 +632,40 @@ function generateFinal3DGeoms(constraintedModelDesigns, genstreets, existingroad
                 var featProps = curFeat.properties;
                 var featExtent = turf.bbox(curFeat);
                 //100 meter cell width
-                if (curFeat.pro)
+                if (featProps.sysname == 'HDH') {
+                    var hdh = new HDHousing();
+                    var constrainedgrid = hdh.generateSquareGridandConstrain(curFeat);
+                    var bldgs = hdh.generateBuildings(constrainedgrid);
+                    finalFeatures.push.apply(finalFeatures, bldgs.features);
+
+                } else {
                     var cellWidth = getGridCellWidth(featProps);
-                var unit = 'kilometers';
-                var diagJSON = {
-                    "type": "FeatureCollection",
-                    "features": [curFeat]
-                };
-                // make the grid of 50 meter points
-                var grid = turf.pointGrid(featExtent, cellWidth, unit);
-                var ptsWithin = turf.within(grid, diagJSON);
-                var footprint = generateBuildingFootprints(ptsWithin, featProps, cellWidth, unit);
-                finalGJFeats.push.apply(finalGJFeats, footprint);
+                    var unit = 'kilometers';
+                    var diagJSON = {
+                        "type": "FeatureCollection",
+                        "features": [curFeat]
+                    };
+                    // make the grid of 50 meter points
+                    var grid = turf.pointGrid(featExtent, cellWidth, unit);
+                    var ptsWithin = turf.within(grid, diagJSON);
+                    var footprint = generateBuildingFootprints(ptsWithin, featProps, cellWidth, unit);
+                    finalGJFeats.push.apply(finalGJFeats, footprint);
 
-                var finalFeatures = [];
-                var streetFeatureCollection;
-                // filter streets
+                    var finalFeatures = [];
+                    var streetFeatureCollection;
+                    // filter streets
 
-                streetFeatureCollection = genStreetsGrid(ptsWithin, featExtent);
-                finalFeatures = filterStreets(streetFeatureCollection, finalGJFeats);
-                if (existingroads) {
-                    finalFeatures = filterStreets(existingroads, finalFeatures);
+                    streetFeatureCollection = genStreetsGrid(ptsWithin, featExtent);
+                    finalFeatures = filterStreets(streetFeatureCollection, finalGJFeats);
+                    if (existingroads) {
+                        finalFeatures = filterStreets(existingroads, finalFeatures);
+                    }
+
+                    if (genstreets) {
+                        finalFeatures.push.apply(finalFeatures, streetFeatureCollection.features);
+                    }
+                    finalGJFeats.push.apply(finalGJFeats, finalFeatures);
                 }
-
-                if (genstreets) {
-                    finalFeatures.push.apply(finalFeatures, streetFeatureCollection.features);
-                }
-                finalGJFeats = finalFeatures;
-
             } else if (curFeat.properties.areatype === 'policy') {
                 var fe = turf.bbox(curFeat);
                 var cw = 0.03;
