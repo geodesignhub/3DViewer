@@ -1,5 +1,47 @@
 importScripts('../js/turfjs/turf.min.js');
 
+
+var HDHousing = function(name) {
+    this.name = name;
+    this.hsgfeatures;
+
+    const gridsize = 0.025;
+    const footprintsize = 0.012;
+    const heights = [36, 60, 90]; // in meters 
+    const units = 'kilometers';
+    var featExtent;
+    this.initialize = function() {
+        index = lunr(function() {
+            this.field('title', { boost: 1 })
+            this.field('tags', { boost: 5 })
+            this.ref('id')
+        });
+    };
+    this.generateSquareGridandConstrain = function(featureGeometry) {
+        // generate housing grid
+        this.featExtent = turf.bbox(featureGeometry);
+        var sqgrid = turf.squareGrid(featExtent, this.gridsize, this.units);
+        // constrain grid.
+
+    };
+    this.constrainGrid = function(grid, featureGeometry) {
+
+    };
+    this.generateBuildings = function(constrainedgrid) {
+        // loop over the constrained grid
+        // dont put housing in very small polygons
+
+        // find centroid
+        // buffer by 12 meters
+
+        // make it a highrise
+        // 
+        return index.search(searchterm);
+    }
+
+};
+
+
 function genStreetsGrid(pointsWithin, extent) {
     // This module generates streets. given a grid of points. 
     var rows = [];
@@ -261,6 +303,18 @@ function genStreetsHeatMapped(pointsWithin, extent) {
 
 }
 
+function getPolygonGrid(featProps) {
+
+    var reqname = featProps.sysname;
+    var reqtype = featProps.systag;
+    var checkSys = ['HDH'];
+    if (checkSys.indexOf(reqname) >= 0) {
+        return 0.015;
+    } else {
+        return 0.01;
+    }
+}
+
 function getGridCellWidth(featProps) {
     // get the reqtag and req name 
 
@@ -285,6 +339,7 @@ function getGridCellWidth(featProps) {
     }
 
 }
+
 
 function getRandomHeight(reqtype, reqname) {
     var taglist = ['Roads, transport', 'A law or regulation', 'Agriculture, Forestry', 'Small buildings, low density housing', 'Large buildings, Industry, commerce'];
@@ -556,7 +611,8 @@ function generateFinal3DGeoms(constraintedModelDesigns, genstreets, existingroad
                 var featProps = curFeat.properties;
                 var featExtent = turf.bbox(curFeat);
                 //100 meter cell width
-                var cellWidth = getGridCellWidth(featProps);
+                if (curFeat.pro)
+                    var cellWidth = getGridCellWidth(featProps);
                 var unit = 'kilometers';
                 var diagJSON = {
                     "type": "FeatureCollection",
@@ -575,7 +631,6 @@ function generateFinal3DGeoms(constraintedModelDesigns, genstreets, existingroad
                 streetFeatureCollection = genStreetsGrid(ptsWithin, featExtent);
                 finalFeatures = filterStreets(streetFeatureCollection, finalGJFeats);
                 if (existingroads) {
-
                     finalFeatures = filterStreets(existingroads, finalFeatures);
                 }
 
