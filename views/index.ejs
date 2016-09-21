@@ -191,7 +191,7 @@
                 'genstreets': JSON.stringify(genstreets)
             });
             threeDWorker.addEventListener('message', function(e) {
-                //  console.log(e.data);
+                
                 var gjsonData = e.data.polygons;
                 var latlng = e.data.center;
                 setMapCenter(latlng);
