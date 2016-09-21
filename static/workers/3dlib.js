@@ -5,7 +5,7 @@ var HDHousing = function() {
     // this.name = name;
     this.hsgfeatures;
 
-    const gridsize = 0.025;
+    const gridsize = 0.03;
     const footprintsize = 0.012;
     const heights = [36, 60, 90]; // in meters 
     const units = 'kilometers';
@@ -19,19 +19,20 @@ var HDHousing = function() {
 
         // constrain grid.
         var constrainedgrid = { "type": "FeatureCollection", "features": [] };
-        var sqfeatslen = sqgrid.features;
+        var sqfeatslen = sqgrid.features.length;
+
         for (var x = 0; x < sqfeatslen; x++) {
             var cursqfeat = sqgrid.features[x];
 
             var ifeat = turf.intersect(cursqfeat, featureGeometry);
-            if (ifeat) {
 
+            if (ifeat) {
                 constrainedgrid.features.push(ifeat);
             } else {
                 constrainedgrid.features.push(cursqfeat);
             }
         }
-        console.log(JSON.stringify(constrainedgrid));
+
         return constrainedgrid;
     };
 
@@ -45,19 +46,22 @@ var HDHousing = function() {
         for (var k1 = 0; k1 < consgridlen; k1++) {
             var curconsfeat = constrainedgrid.features[k1];
             var curarea = turf.area(curconsfeat);
-            console.log(curarea);
+
             if (curarea > 500) {
                 var centroid = turf.centroid(curconsfeat);
                 var bufferedCentroid = turf.buffer(centroid, footprintsize, 'kilometers');
                 var bbox = turf.bbox(bufferedCentroid);
                 var bboxpoly = turf.bboxPolygon(bbox);
                 var props = {
-                    "height": this.heights[Math.floor(Math.random() * this.heights.length)],
+                    "height": heights[Math.floor(Math.random() * heights.length)],
                     "color": "#d0d0d0",
                     "roofColor": featProps.color
                 };
                 bboxpoly.properties = props;
-                generatedGeoJSON.features.append(bboxpoly);
+                var chosenValue = Math.random() < 0.5 ? true : false;
+                if (chosenValue) {
+                    generatedGeoJSON.features.push(bboxpoly);
+                }
             }
         }
         return generatedGeoJSON;
@@ -350,7 +354,7 @@ function generateBuildingFootprints(ptsWithin, featProps, cellWidth, unit) {
                 if (hasIntersect === false) {
                     var height = getRandomHeight(systag);
                     var chosenValue = Math.random() < 0.5 ? true : false;
-                    var chosenValue = true;
+                    // var chosenValue = true;
                     if (chosenValue) {
                         var p = {
                             'height': height,
