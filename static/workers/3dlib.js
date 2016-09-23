@@ -202,8 +202,8 @@ var LDHousing = function() {
 
 var HDHousing = function() {
     // this.name = name;
-    const gridsize = 0.05;
-    const footprintsize = 0.02;
+    const gridsize = 0.05; // changes the maximum area
+    const footprintsize = 0.015;
     const heights = [36, 60, 90]; // in meters 
     const units = 'kilometers';
     var featProps;
@@ -212,23 +212,18 @@ var HDHousing = function() {
         featProps = featureGeometry.properties;
         var featExtent = turf.bbox(featureGeometry);
         var sqgrid = turf.squareGrid(featExtent, gridsize, units);
-
         // constrain grid.
         var constrainedgrid = { "type": "FeatureCollection", "features": [] };
         var sqfeatslen = sqgrid.features.length;
-
         for (var x = 0; x < sqfeatslen; x++) {
             var cursqfeat = sqgrid.features[x];
-
             var ifeat = turf.intersect(cursqfeat, featureGeometry);
-
             if (ifeat) {
                 constrainedgrid.features.push(ifeat);
             } else {
                 constrainedgrid.features.push(cursqfeat);
             }
         }
-
         return constrainedgrid;
     };
 
@@ -238,10 +233,8 @@ var HDHousing = function() {
         // find centroid
         for (var k1 = 0; k1 < consgridlen; k1++) {
             var curconsfeat = constrainedgrid.features[k1];
-
             var curarea = turf.area(curconsfeat);
-
-            if (curarea > 1200) { //max area is 1600
+            if (curarea > 2000) { //max area is 2500 gridsize squared
                 var chosenValue = Math.random() > 0.6 ? true : false;
                 if (chosenValue) {
                     var centroid = turf.centroid(curconsfeat);
@@ -265,14 +258,14 @@ var HDHousing = function() {
 };
 
 var MXDBuildings = function() {
-    const outerringradius = 0.02;
-    const middleringradius = 0.012;
-    const innerringradius = 0.007;
+    const outerringradius = 0.04;
+    const middleringradius = 0.02;
+    const innerringradius = 0.01;
     // this.name = name;
-    const gridsize = 0.05;
+    const gridsize = 0.08;
     const innergridsize = 0.02;
 
-    const heights = [9, 12, 8, 7, 11]; // in meters 
+    const heights = [9, 12, 8, 11]; // in meters 
     const units = 'kilometers';
 
     var featProps;
@@ -308,50 +301,62 @@ var MXDBuildings = function() {
             var curconsfeat = constrainedgrid.features[k1];
             var curarea = turf.area(curconsfeat);
             var center = turf.centroid(curconsfeat);
-            if (curarea > 1570) { //max area is 1600 need entire parcel. 
-                var outerring = turf.buffer(center, outerringradius, units);
-                var innerring = turf.buffer(center, innerringradius, units);
-                var middlering = turf.buffer(center, middleringradius, units);
-                // get bbox
-                var outerringbbox = turf.bbox(outerring);
-                var innerringbbox = turf.bbox(innerring);
-                var middleringbbox = turf.bbox(middlering);
-                //get bbox polygon
-                var outerringpoly = turf.bboxPolygon(outerringbbox);
-                var innerringpoly = turf.bboxPolygon(innerringbbox);
-                var middleringpoly = turf.bboxPolygon(middleringbbox);
 
-                //erase inner from outerring to get hybrid hole
-                var hybridhole = turf.difference(outerringpoly, innerringpoly);
+            if (curarea > 6300) { //max area is 3600 need entire parcel. 
+                var cv = Math.random() < 0.5 ? true : false;
+                if (cv) {
+                    var outerring = turf.buffer(center, outerringradius, units);
+                    var innerring = turf.buffer(center, innerringradius, units);
+                    var middlering = turf.buffer(center, middleringradius, units);
+                    // get bbox
+                    var outerringbbox = turf.bbox(outerring);
+                    var innerringbbox = turf.bbox(innerring);
+                    var middleringbbox = turf.bbox(middlering);
+                    //get bbox polygon
+                    var outerringpoly = turf.bboxPolygon(outerringbbox);
+                    var innerringpoly = turf.bboxPolygon(innerringbbox);
+                    var middleringpoly = turf.bboxPolygon(middleringbbox);
 
-                // erease middle from hybrid hole
-                var buildingpoly = turf.difference(hybridhole, middleringpoly);
+                    //erase inner from outerring to get hybrid hole
+                    var hybridhole = turf.difference(outerringpoly, innerringpoly);
 
-                // generate square grid
-                var sqrgrid = turf.squareGrid(outerringbbox, innergridsize, units);
-                // interserct squre grid with hole. 
-                // console.log(JSON.stringify(buildingpoly));
-                // console.log(JSON.stringify(sqrgrid));
-                // for each feature in the hole. 
-                for (var j1 = 0; j1 < sqrgrid.features.length; j1++) {
-                    var cursqgrid = sqrgrid.features[j1];
-                    var chosenValue = Math.random() < 0.5 ? true : false;
-                    if (chosenValue) {
-                        var blgdfeat = turf.intersect(buildingpoly, cursqgrid);
-                        if (blgdfeat) {
-                            var cv = Math.random() < 0.5 ? true : false;
-                            if (cv) {
-                                var props = {
-                                    "height": heights[Math.floor(Math.random() * heights.length)],
-                                    "color": "#d0d0d0",
-                                    "roofColor": featProps.color
-                                };
-                                blgdfeat.properties = props;
-                                generatedGeoJSON.features.push(blgdfeat);
-                            }
-                        }
-                    }
+                    // erease middle from hybrid hole
+                    var buildingpoly = turf.difference(hybridhole, middleringpoly);
+
+                    var props = {
+                        "height": heights[Math.floor(Math.random() * heights.length)],
+                        "color": "#d0d0d0",
+                        "roofColor": featProps.color
+                    };
+                    buildingpoly.properties = props;
+
+                    generatedGeoJSON.features.push(buildingpoly);
                 }
+                // generate square grid
+                // var sqrgrid = turf.squareGrid(outerringbbox, innergridsize, units);
+                // // interserct squre grid with hole. 
+                // console.log(JSON.stringify(buildingpoly));
+                // // for each feature in the hole. 
+                // for (var j1 = 0; j1 < sqrgrid.features.length; j1++) {
+                //     var cursqgrid = sqrgrid.features[j1];
+
+
+                //     var blgdfeat = turf.intersect(buildingpoly, cursqgrid);
+                //     if (blgdfeat) {
+                //         var area = turf.area(blgdfeat); // max area is 400
+                //         // var cv = Math.random() < 0.5 ? true : false;
+                //         if (area > 300) {
+                //             var props = {
+                //                 "height": heights[Math.floor(Math.random() * heights.length)],
+                //                 "color": "#d0d0d0",
+                //                 "roofColor": featProps.color
+                //             };
+                //             blgdfeat.properties = props;
+                //             generatedGeoJSON.features.push(blgdfeat);
+
+                //         }
+                //     }
+                // }
             }
         }
         return generatedGeoJSON;
