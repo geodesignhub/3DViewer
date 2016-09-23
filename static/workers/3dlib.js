@@ -244,7 +244,7 @@ var HDHousing = function() {
 
             var curarea = turf.area(curconsfeat);
 
-            if (curarea > 900) { //max area is 1600
+            if (curarea > 1200) { //max area is 1600
                 var centroid = turf.centroid(curconsfeat);
                 var bufferedCentroid = turf.buffer(centroid, footprintsize, 'kilometers');
                 var bbox = turf.bbox(bufferedCentroid);
@@ -678,9 +678,19 @@ function bufferExistingRoads(inputroads) {
 }
 
 function generatePolicyFeatures(curFeat) {
+    function getCW(d) {
+        return d > 10000000 ? 1 :
+            d > 6000000 ? 0.75 :
+            d > 5000000 ? 0.5 :
+            d > 3000000 ? 0.3 :
+            d > 2000000 ? 0.15 :
+            d > 1000000 ? 0.08 :
+            0.04;
+    }
     var policyFeats = [];
     var fe = turf.bbox(curFeat);
-    var cw = 0.03;
+    var area = Math.round(turf.area(curFeat));
+    var cw = getCW(area);
     var unit = 'kilometers';
     var dJSON = {
         "type": "FeatureCollection",
