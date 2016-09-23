@@ -276,7 +276,6 @@ var MXDBuildings = function() {
     const units = 'kilometers';
 
     var featProps;
-
     this.generateSquareGridandConstrain = function(featureGeometry) {
         featProps = featureGeometry.properties;
         var featExtent = turf.bbox(featureGeometry);
