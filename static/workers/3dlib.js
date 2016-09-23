@@ -11,8 +11,6 @@ var COMBuilding = function() {
     const nearestSearch = [0, 1, 2];
     var featProps;
     var featExtent;
-
-
     this.genGrid = function(curFeat) {
         featProps = curFeat.properties;
         featExtent = turf.bbox(curFeat);
@@ -204,11 +202,10 @@ var LDHousing = function() {
 
 var HDHousing = function() {
     // this.name = name;
-    const gridsize = 0.04;
-    const footprintsize = 0.015;
+    const gridsize = 0.05;
+    const footprintsize = 0.02;
     const heights = [36, 60, 90]; // in meters 
     const units = 'kilometers';
-
     var featProps;
 
     this.generateSquareGridandConstrain = function(featureGeometry) {
@@ -245,18 +242,19 @@ var HDHousing = function() {
             var curarea = turf.area(curconsfeat);
 
             if (curarea > 1200) { //max area is 1600
-                var centroid = turf.centroid(curconsfeat);
-                var bufferedCentroid = turf.buffer(centroid, footprintsize, 'kilometers');
-                var bbox = turf.bbox(bufferedCentroid);
-                var bboxpoly = turf.bboxPolygon(bbox);
-                var props = {
-                    "height": heights[Math.floor(Math.random() * heights.length)],
-                    "color": "#d0d0d0",
-                    "roofColor": featProps.color
-                };
-                bboxpoly.properties = props;
-                var chosenValue = Math.random() < 0.5 ? true : false;
+                var chosenValue = Math.random() > 0.6 ? true : false;
                 if (chosenValue) {
+                    var centroid = turf.centroid(curconsfeat);
+                    var bufferedCentroid = turf.buffer(centroid, footprintsize, 'kilometers');
+                    var bbox = turf.bbox(bufferedCentroid);
+                    var bboxpoly = turf.bboxPolygon(bbox);
+                    var props = {
+                        "height": heights[Math.floor(Math.random() * heights.length)],
+                        "color": "#d0d0d0",
+                        "roofColor": featProps.color
+                    };
+                    bboxpoly.properties = props;
+
                     generatedGeoJSON.features.push(bboxpoly);
                 }
             }
@@ -490,18 +488,19 @@ var SMBBuildings = function() {
 
     this.generateBuildingFootprints = function(ptsWithin) {
         for (var k = 0, ptslen = ptsWithin.features.length; k < ptslen; k++) {
-            var curPt = ptsWithin.features[k];
-            var buffered = turf.buffer(curPt, bufferWidth, units); // buffer 48 meters
-            var bds = turf.bbox(buffered); // get the extent of the buffered features
-            var bfrdextPlgn = turf.bboxPolygon(bds);
-            var centrepoint = turf.centroid(bfrdextPlgn);
-            var bldg = turf.buffer(centrepoint, bldgfootprint, units);
-            var bdgply = turf.bbox(bldg); // get the extent of the buffered features
-            var bpoly = turf.bboxPolygon(bdgply);
-            var height = smbHeights[Math.floor(Math.random() * smbHeights.length)];
             var chosenValue = Math.random() < 0.5 ? true : false;
 
             if (chosenValue) {
+                var curPt = ptsWithin.features[k];
+                var buffered = turf.buffer(curPt, bufferWidth, units); // buffer 48 meters
+                var bds = turf.bbox(buffered); // get the extent of the buffered features
+                var bfrdextPlgn = turf.bboxPolygon(bds);
+                var centrepoint = turf.centroid(bfrdextPlgn);
+                var bldg = turf.buffer(centrepoint, bldgfootprint, units);
+                var bdgply = turf.bbox(bldg); // get the extent of the buffered features
+                var bpoly = turf.bboxPolygon(bdgply);
+                var height = smbHeights[Math.floor(Math.random() * smbHeights.length)];
+
                 var p = {
                     'height': height,
                     'color': "#d0d0d0",
