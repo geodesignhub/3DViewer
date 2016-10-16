@@ -143,6 +143,8 @@ var COMBuilding = function() {
 
 var LDHousing = function() {
     // this.name = name;
+    const density = 30; // dwellings / hectare
+    const buildingsperhectare = 20;
     const gridsize = 0.04;
     const footprintsize = 0.012;
     const ldhheights = [1, 2, 3]; // in meters 
@@ -194,14 +196,14 @@ var LDHousing = function() {
             allGeneratedFeats.push(bpoly);
 
         }
-
         return allGeneratedFeats;
-
     }
 };
 
 var HDHousing = function() {
     // this.name = name;
+    const density = 80; // dwellings / hectare
+    const buildingsperhectare = 2;
     const gridsize = 0.05; // changes the maximum area
     const footprintsize = 0.015;
     const heights = [36, 60, 90]; // in meters 
@@ -209,19 +211,25 @@ var HDHousing = function() {
     var featProps;
 
     this.generateSquareGridandConstrain = function(featureGeometry) {
+        var featarea = turf.area(featureGeometry);
+        var numberofextrusions = Math.round((featarea * 0.0001) * buildingsperhectare);
         featProps = featureGeometry.properties;
         var featExtent = turf.bbox(featureGeometry);
         var sqgrid = turf.squareGrid(featExtent, gridsize, units);
         // constrain grid.
         var constrainedgrid = { "type": "FeatureCollection", "features": [] };
         var sqfeatslen = sqgrid.features.length;
+        var extrudedfeaturescount = 0;
         for (var x = 0; x < sqfeatslen; x++) {
-            var cursqfeat = sqgrid.features[x];
-            var ifeat = turf.intersect(cursqfeat, featureGeometry);
-            if (ifeat) {
-                constrainedgrid.features.push(ifeat);
-            } else {
-                constrainedgrid.features.push(cursqfeat);
+            if (extrudedfeaturescount < numberofextrusions) {
+                var cursqfeat = sqgrid.features[x];
+                var ifeat = turf.intersect(cursqfeat, featureGeometry);
+                if (ifeat) {
+                    constrainedgrid.features.push(ifeat);
+                } else {
+                    constrainedgrid.features.push(cursqfeat);
+                }
+                extrudedfeaturescount += 1;
             }
         }
         return constrainedgrid;
@@ -231,9 +239,11 @@ var HDHousing = function() {
         var consgridlen = constrainedgrid.features.length;
         var generatedGeoJSON = { "type": "FeatureCollection", "features": [] };
         // find centroid
+        var extrusionconter = 0;
         for (var k1 = 0; k1 < consgridlen; k1++) {
             var curconsfeat = constrainedgrid.features[k1];
             var curarea = turf.area(curconsfeat);
+
             if (curarea > 2000) { //max area is 2500 gridsize squared
                 var chosenValue = Math.random() > 0.6 ? true : false;
                 if (chosenValue) {
@@ -247,17 +257,16 @@ var HDHousing = function() {
                         "roofColor": featProps.color
                     };
                     bboxpoly.properties = props;
-
                     generatedGeoJSON.features.push(bboxpoly);
                 }
             }
         }
         return generatedGeoJSON;
     }
-
 };
 
 var MXDBuildings = function() {
+    const density = 40; // dwellings per hectare.
     const outerringradius = 0.04;
     const middleringradius = 0.02;
     const innerringradius = 0.01;
