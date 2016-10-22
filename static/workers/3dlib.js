@@ -1,7 +1,7 @@
 importScripts('../js/turfjs/turf.min.js');
 
 
-var COMBuilding = function () {
+var COMBuilding = function() {
     // this.name = name;
     const gridsize = 0.03;
     const footprintsize = 0.015;
@@ -11,7 +11,7 @@ var COMBuilding = function () {
     const nearestSearch = [0, 1, 2];
     var featProps;
     var featExtent;
-    this.genGrid = function (curFeat) {
+    this.genGrid = function(curFeat) {
         featProps = curFeat.properties;
         featExtent = turf.bbox(curFeat);
         var diagJSON = {
@@ -24,7 +24,7 @@ var COMBuilding = function () {
     };
 
 
-    this.generateBuildingFootprints = function (ptsWithin) {
+    this.generateBuildingFootprints = function(ptsWithin) {
         var allGeneratedFeats = [];
         var color = featProps.color;
         var systag = featProps.systag;
@@ -141,7 +141,7 @@ var COMBuilding = function () {
     }
 };
 
-var LDHousing = function () {
+var LDHousing = function() {
     // this.name = name;
     const density = 30; // dwellings / hectare
     const buildingsperhectare = 20;
@@ -153,7 +153,7 @@ var LDHousing = function () {
     var featProps;
     var featExtent;
 
-    this.genGrid = function (curFeat) {
+    this.genGrid = function(curFeat) {
         featProps = curFeat.properties;
         featExtent = turf.bbox(curFeat);
         var diagJSON = {
@@ -165,7 +165,7 @@ var LDHousing = function () {
         return [ptsWithin, featExtent];
     };
 
-    this.generateBuildingFootprints = function (ptsWithin) {
+    this.generateBuildingFootprints = function(ptsWithin) {
 
         var allGeneratedFeats = [];
         var color = featProps.color;
@@ -200,7 +200,7 @@ var LDHousing = function () {
     }
 };
 
-var HDHousing = function () {
+var HDHousing = function() {
     // this.name = name;
     const density = 80; // dwellings / hectare
     const buildingsperhectare = 2;
@@ -210,10 +210,9 @@ var HDHousing = function () {
     const units = 'kilometers';
     var featProps;
 
-    this.generateSquareGridandConstrain = function (featureGeometry) {
+    this.generateSquareGridandConstrain = function(featureGeometry) {
         var featarea = turf.area(featureGeometry);
         var numberofextrusions = Math.round((featarea * 0.0001) * buildingsperhectare);
-
         featProps = featureGeometry.properties;
         var featExtent = turf.bbox(featureGeometry);
         var sqgrid = turf.squareGrid(featExtent, gridsize, units);
@@ -221,9 +220,10 @@ var HDHousing = function () {
         var constrainedgrid = { "type": "FeatureCollection", "features": [] };
         var sqfeatslen = sqgrid.features.length;
         // number of extrusions is counted. 
-        console.log(numberofextrusions, )
+        // console.log(numberofextrusions, sqfeatslen);
+        var ratio = (numberofextrusions / sqfeatslen);
         var extrudedfeaturescount = 0;
-        if (ratio > 0.5) {
+        if (ratio < 0.20) {
             for (var x = 0; x < sqfeatslen; x++) {
                 if (extrudedfeaturescount < numberofextrusions) {
                     var cursqfeat = sqgrid.features[x];
@@ -236,8 +236,7 @@ var HDHousing = function () {
                     extrudedfeaturescount += 1;
                 }
             }
-        }
-        else {
+        } else {
             var gridStore = {};
             var gridid = 0;
             for (var x1 = 0; x1 < sqfeatslen; x1++) {
@@ -259,12 +258,10 @@ var HDHousing = function () {
                 extrudedfeaturescount += 1;
             }
         }
-
-
         return constrainedgrid;
     };
 
-    this.generateBuildings = function (constrainedgrid) {
+    this.generateBuildings = function(constrainedgrid) {
         var consgridlen = constrainedgrid.features.length;
         var generatedGeoJSON = { "type": "FeatureCollection", "features": [] };
         // find centroid
@@ -272,7 +269,6 @@ var HDHousing = function () {
         for (var k1 = 0; k1 < consgridlen; k1++) {
             var curconsfeat = constrainedgrid.features[k1];
             var curarea = turf.area(curconsfeat);
-
             if (curarea > 2000) { //max area is 2500 gridsize squared
                 var chosenValue = Math.random() > 0.6 ? true : false;
                 if (chosenValue) {
@@ -294,7 +290,7 @@ var HDHousing = function () {
     }
 };
 
-var MXDBuildings = function () {
+var MXDBuildings = function() {
     const density = 40; // dwellings per hectare.
     const outerringradius = 0.04;
     const middleringradius = 0.02;
@@ -307,7 +303,7 @@ var MXDBuildings = function () {
     const units = 'kilometers';
 
     var featProps;
-    this.generateSquareGridandConstrain = function (featureGeometry) {
+    this.generateSquareGridandConstrain = function(featureGeometry) {
         featProps = featureGeometry.properties;
         var featExtent = turf.bbox(featureGeometry);
         var sqgrid = turf.squareGrid(featExtent, gridsize, units);
@@ -331,7 +327,7 @@ var MXDBuildings = function () {
         return constrainedgrid;
     };
 
-    this.generateBuildings = function (constrainedgrid) {
+    this.generateBuildings = function(constrainedgrid) {
         var consgridlen = constrainedgrid.features.length;
         var generatedGeoJSON = { "type": "FeatureCollection", "features": [] };
         // find centroid
@@ -402,7 +398,7 @@ var MXDBuildings = function () {
 
 }
 
-var LABBuildings = function () {
+var LABBuildings = function() {
     var reqtype;
     var labHeights = [10, 15];
     const nearestSearch = [0, 1, 2];
@@ -412,7 +408,7 @@ var LABBuildings = function () {
     var featProps;
     var featExtent;
 
-    this.genGrid = function (curFeat) {
+    this.genGrid = function(curFeat) {
         featProps = curFeat.properties;
         featExtent = turf.bbox(curFeat);
         var diagJSON = {
@@ -424,7 +420,7 @@ var LABBuildings = function () {
         return [ptsWithin, featExtent];
     };
 
-    this.generateBuildingFootprints = function (ptsWithin) {
+    this.generateBuildingFootprints = function(ptsWithin) {
         var allGeneratedFeats = [];
         var color = featProps.color;
         var roofColor = color;
@@ -505,7 +501,7 @@ var LABBuildings = function () {
     }
 };
 
-var SMBBuildings = function () {
+var SMBBuildings = function() {
     var reqtype;
     var smbHeights = [2, 3, 5, 6, 7, 10];
     const gridsize = 0.04;
@@ -516,7 +512,7 @@ var SMBBuildings = function () {
     var featExtent;
 
     const bldgfootprint = 0.015;
-    this.genGrid = function (curFeat) {
+    this.genGrid = function(curFeat) {
         featProps = curFeat.properties;
         featExtent = turf.bbox(curFeat);
         var diagJSON = {
@@ -528,7 +524,7 @@ var SMBBuildings = function () {
         return [ptsWithin, featExtent];
     };
 
-    this.generateBuildingFootprints = function (ptsWithin) {
+    this.generateBuildingFootprints = function(ptsWithin) {
         for (var k = 0, ptslen = ptsWithin.features.length; k < ptslen; k++) {
             var chosenValue = Math.random() < 0.5 ? true : false;
 
@@ -558,8 +554,8 @@ var SMBBuildings = function () {
     return allGeneratedFeats;
 
 };
-var StreetsHelper = function () {
-    this.genStreetsGrid = function (pointsWithin, extent) {
+var StreetsHelper = function() {
+    this.genStreetsGrid = function(pointsWithin, extent) {
         // This module generates streets. given a grid of points. 
         var rows = [];
         var columns = [];
@@ -571,10 +567,10 @@ var StreetsHelper = function () {
             var curPt = pointsWithin.features[k];
             var curLng = curPt.geometry.coordinates[0];
             var curLat = curPt.geometry.coordinates[1];
-            if (rows[curLng]) { } else {
+            if (rows[curLng]) {} else {
                 rows[curLng] = [];
             }
-            if (columns[curLat]) { } else {
+            if (columns[curLat]) {} else {
                 columns[curLat] = [];
             }
             rows[curLng].push(curPt);
@@ -598,22 +594,22 @@ var StreetsHelper = function () {
 
         var rCounter = 0;
         var cCounter = 0;
-        var sortedCols = allCols.sort(function (a, b) {
+        var sortedCols = allCols.sort(function(a, b) {
             return parseFloat(a.key) - parseFloat(b.key);
         });
-        var sortedRows = allRows.sort(function (a, b) {
+        var sortedRows = allRows.sort(function(a, b) {
             return parseFloat(a.key) - parseFloat(b.key);
         });
         for (var x2 = 0, collen = sortedCols.length; x2 < collen; x2++) {
             var feattype = (rCounter % 3 === 0) ? "road" : "building";
             // var pts = sortedCols[x2].points;
-            (feattype === 'road') ? roadPoints.push(sortedCols[x2]) : buildingPoints.push(sortedCols[x2]);
+            (feattype === 'road') ? roadPoints.push(sortedCols[x2]): buildingPoints.push(sortedCols[x2]);
             rCounter += 1;
         }
         for (var x3 = 0, rowlen = sortedRows.length; x3 < rowlen; x3++) {
             var feattype = (cCounter % 5 === 0) ? "road" : "building";
             // var pts = sortedCols[x2].points;
-            (feattype === 'road') ? roadPointsVert.push(sortedRows[x3]) : buildingPointsVert.push(sortedRows[x3]);
+            (feattype === 'road') ? roadPointsVert.push(sortedRows[x3]): buildingPointsVert.push(sortedRows[x3]);
             cCounter += 1;
         }
         // var allLines = [];
@@ -674,7 +670,7 @@ var StreetsHelper = function () {
         };
         return s;
     }
-    this.filterStreets = function (streetgrid, inputFeats) {
+    this.filterStreets = function(streetgrid, inputFeats) {
         var filteredFeatures = [];
         for (var l = 0; l < inputFeats.length; l++) {
             var curF1 = inputFeats[l];
@@ -687,7 +683,7 @@ var StreetsHelper = function () {
                     intersects = true;
                 }
             }
-            if (intersects) { } else {
+            if (intersects) {} else {
 
                 filteredFeatures.push(curF1);
             }
@@ -722,11 +718,11 @@ function generatePolicyFeatures(curFeat) {
     function getCW(d) {
         return d > 10000000 ? 1 :
             d > 6000000 ? 0.75 :
-                d > 5000000 ? 0.5 :
-                    d > 3000000 ? 0.3 :
-                        d > 2000000 ? 0.15 :
-                            d > 1000000 ? 0.08 :
-                                0.04;
+            d > 5000000 ? 0.5 :
+            d > 3000000 ? 0.3 :
+            d > 2000000 ? 0.15 :
+            d > 1000000 ? 0.08 :
+            0.04;
     }
     var policyFeats = [];
     var fe = turf.bbox(curFeat);
@@ -939,6 +935,6 @@ function generate3DGeoms(allFeaturesList, genstreets, existingroads) {
 
 }
 
-self.onmessage = function (e) {
+self.onmessage = function(e) {
     generate3DGeoms(e.data.allFeaturesList, e.data.genstreets, e.data.existingroads);
 }
