@@ -754,7 +754,7 @@ function generatePolicyFeatures(curFeat) {
 
 function generateFinal3DGeoms(constraintedModelDesigns, genstreets, existingroads) {
     var genstreets = (genstreets === 'false') ? false : true;
-    var whiteListedSysName = ['HDH', 'LDH', 'IND', 'COM', 'COMIND', 'HSG', 'MXD'];
+    var whiteListedSysName = ['HDH', 'LDH', 'IND', 'COM', 'COMIND', 'HSG', 'HSNG', 'MXD'];
     var finalGJFeats = [];
     // get the center of the design so that the map once returned can be recentered.
     var centerPt = turf.center(constraintedModelDesigns);
