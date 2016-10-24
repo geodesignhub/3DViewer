@@ -69,7 +69,7 @@ app.get('/', function(request, response) {
                 if (err) return response.sendStatus(500);
                 opts['result'] = gj;
                 var rfc1 = { "type": "FeatureCollection", "features": [] };
-                if (roads[0].features === 'null') {} else {
+                if (roads[0].features === null) {} else {
                     var rlen1 = roads[0].features.length;
                     for (var x7 = 0; x7 < rlen1; x7++) {
                         var curroad = roads[0].features[x7];
@@ -140,7 +140,7 @@ app.get('/', function(request, response) {
                 if (err) return response.sendStatus(500);
                 opts['result'] = gj;
                 var rfc = { "type": "FeatureCollection", "features": [] };
-                if (roads[0].features === 'null') {} else {
+                if (roads[0].features === null) {} else {
                     var rlen = roads[0].features.length;
                     for (var x5 = 0; x5 < rlen; x5++) {
                         var curroad = roads[0].features[x5];
