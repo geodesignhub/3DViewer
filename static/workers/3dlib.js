@@ -737,9 +737,9 @@ function generatePolicyFeatures(curFeat) {
     var grd = turf.pointGrid(fe, cw, unit);
     var pW = turf.within(grd, dJSON);
     var pwLen = pW.features.length;
-
+    console.log(curFeat.properties.description);
+    console.log(curFeat.properties.color);
     var prop = {
-
         "roofColor": curFeat.properties.color,
         "height": 0.01
     }
