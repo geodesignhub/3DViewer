@@ -69,13 +69,14 @@ app.get('/', function(request, response) {
                 if (err) return response.sendStatus(500);
                 opts['result'] = gj;
                 var rfc1 = { "type": "FeatureCollection", "features": [] };
-                console.log(roads);
-                var rlen1 = roads[0].features.length;
-                for (var x7 = 0; x7 < rlen1; x7++) {
-                    var curroad = roads[0].features[x7];
-                    var roadgj = JSON.parse(curroad.properties.st_asgeojson);
-                    var f8 = { "type": "Feature", "properties": {}, "geometry": roadgj };
-                    rfc1.features.push(f8);
+                if (roads[0].features === 'null') {} else {
+                    var rlen1 = roads[0].features.length;
+                    for (var x7 = 0; x7 < rlen1; x7++) {
+                        var curroad = roads[0].features[x7];
+                        var roadgj = JSON.parse(curroad.properties.st_asgeojson);
+                        var f8 = { "type": "Feature", "properties": {}, "geometry": roadgj };
+                        rfc1.features.push(f8);
+                    }
                 }
                 opts['roads'] = JSON.stringify(rfc1);
 
@@ -98,7 +99,6 @@ app.get('/', function(request, response) {
         var synprojectsurl = baseurl + projectid + '/cteams/' + cteamid + '/' + synthesisid + '/';
         var boundsurl = baseurl + projectid + '/bounds/';
         var URLS = [synprojectsurl, boundsurl];
-        console.log(synprojectsurl);
         async.map(URLS, function(url, done) {
             req({
                 url: url,
@@ -140,12 +140,14 @@ app.get('/', function(request, response) {
                 if (err) return response.sendStatus(500);
                 opts['result'] = gj;
                 var rfc = { "type": "FeatureCollection", "features": [] };
-                var rlen = roads[0].features.length;
-                for (var x5 = 0; x5 < rlen; x5++) {
-                    var curroad = roads[0].features[x5];
-                    var roadgj = JSON.parse(curroad.properties.st_asgeojson);
-                    var f = { "type": "Feature", "properties": {}, "geometry": roadgj };
-                    rfc.features.push(f);
+                if (roads[0].features === 'null') {} else {
+                    var rlen = roads[0].features.length;
+                    for (var x5 = 0; x5 < rlen; x5++) {
+                        var curroad = roads[0].features[x5];
+                        var roadgj = JSON.parse(curroad.properties.st_asgeojson);
+                        var f = { "type": "Feature", "properties": {}, "geometry": roadgj };
+                        rfc.features.push(f);
+                    }
                 }
                 opts['roads'] = JSON.stringify(rfc);
                 response.render('index', opts);
