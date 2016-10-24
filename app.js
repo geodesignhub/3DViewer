@@ -72,7 +72,7 @@ app.get('/', function(request, response) {
 
                 var rlen1 = roads.features.length;
                 for (var x7 = 0; x7 < rlen1; x7++) {
-                    var curroad = roads[0].features[x7];
+                    var curroad = roads.features[x7];
                     var roadgj = JSON.parse(curroad.properties.st_asgeojson);
                     var f8 = { "type": "Feature", "properties": {}, "geometry": roadgj };
                     rfc1.features.push(f8);
@@ -139,7 +139,7 @@ app.get('/', function(request, response) {
                 if (err) return response.sendStatus(500);
                 opts['result'] = gj;
                 var rfc = { "type": "FeatureCollection", "features": [] };
-                var rlen = roads[0].features.length;
+                var rlen = roads.features.length;
                 for (var x5 = 0; x5 < rlen; x5++) {
                     var curroad = roads.features[x5];
                     var roadgj = JSON.parse(curroad.properties.st_asgeojson);
