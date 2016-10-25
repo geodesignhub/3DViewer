@@ -223,7 +223,7 @@ var HDHousing = function() {
         // console.log(numberofextrusions, sqfeatslen);
         var ratio = (numberofextrusions / sqfeatslen);
         var extrudedfeaturescount = 0;
-        if (ratio < 0.20 || numberofextrusions < 5) {
+        if (ratio < 0.20 || numberofextrusions < 15) {
             for (var x = 0; x < sqfeatslen; x++) {
                 if (extrudedfeaturescount < numberofextrusions) {
                     var cursqfeat = sqgrid.features[x];
@@ -738,9 +738,11 @@ function generatePolicyFeatures(curFeat) {
     var pW = turf.within(grd, dJSON);
     var pwLen = pW.features.length;
     console.log(curFeat.properties.description);
-    console.log(curFeat.properties.color);
+
+    var color = '"' + curFeat.properties.color + '"';
+    console.log(color);
     var prop = {
-        "roofColor": curFeat.properties.color,
+        "roofColor": color,
         "height": 0.01
     }
     for (var l1 = 0; l1 < pwLen; l1++) {
