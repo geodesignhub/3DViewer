@@ -921,20 +921,40 @@ function generateFinal3DGeoms(constraintedModelDesigns, genstreets, existingroad
         'center': JSON.stringify([lat, lng])
     });
 }
+function constrainFeatures(allFeaturesList,selectedsystems){
+    // constrain output ot only features in the list. 
+        var cFeats = allFeaturesList.features;
+    var constraintedFeatures = {"type":"FeatureCollection", "features":[]};
+    var featlen = cFeats.length;
+    for (var d = 0; d < featlen; d++) {
+        var curfeatprop = cFeats[d].properties;
+        var curFeatSys = curfeatprop.sysname;
+        if(selectedsystems.indexOf(curFeatSys) > -1){
+            constraintedFeatures.features.push(cFeats[d]);
+        }
+    }
+    return constraintedFeatures
+}
 
-
-function generate3DGeoms(allFeaturesList, genstreets, existingroads) {
+function generate3DGeoms(allFeaturesList, genstreets, existingroads, selectedsystems) {
     var allFeaturesList = JSON.parse(allFeaturesList);
     var existingroads = JSON.parse(existingroads);
+    var selectedsystems = JSON.parse(selectedsystems);
     // console.log(JSON.stringify(existingroads));
     if (existingroads) {
         existingroads = bufferExistingRoads(existingroads);
-
     }
-    var threeDOutput = generateFinal3DGeoms(allFeaturesList, genstreets, existingroads);
-
+    var threeDOutput;
+    if (selectedsystems.length > 0)
+    {
+        var constraintedFeatures = constrainFeatures(allFeaturesList,selectedsystems);
+        threeDOutput = generateFinal3DGeoms(constraintedFeatures, genstreets, existingroads);
+    }
+    else{
+    threeDOutput = generateFinal3DGeoms(allFeaturesList, genstreets, existingroads);
+    }
 }
 
 self.onmessage = function(e) {
-    generate3DGeoms(e.data.allFeaturesList, e.data.genstreets, e.data.existingroads);
+    generate3DGeoms(e.data.allFeaturesList, e.data.genstreets, e.data.existingroads, e.data.selectedsystems);
 }
