@@ -39,14 +39,10 @@
                     </div>
 
                     <textarea id="gjTA" name="styled-textarea">Paste GeoJSON from Geodesign Hub here...</textarea><br>
-<<<<<<< HEAD
-                    <input id="genStreetsCB" class="checkbox-custom" name="checkbox-1" type="checkbox"> Display generated streets
-                    <br> 
-=======
+
                     <input id="genStreetsCB" class="checkbox-custom" name="checkbox-1" type="checkbox"> Display generated streets<br><br>
                     <div id ="systemsCBCont" style="display:none"> <h4>Systems:</h4><div id ="systemsCB"></div></div>
                      <br>
->>>>>>> origin/master
                     <div>
                         <p><button class="button" onclick="submitGJ()">Generate Scene</button></p>
                         <div id="loadingGIF"><img src="/assets/objs/loading.gif">&nbsp;Processing...</div>
@@ -265,7 +261,7 @@
 
             if (gjresults.features.length > 0) {
                 $("#gjTA").text(JSON.stringify(gjresults));
-                 generateSystemCB(systems);
+                generateSystemCB(systems);
                 submitGJ();
             }
         }
