@@ -33,15 +33,20 @@
                         <ol>
                             <li>Use the Geodeisgn Hub API <a href="https://www.geodesignhub.com/api/" target="_blank">GET Synthesis JSON</a> call to get a design JSON. Sample GeoJSON is <a href="https://gist.github.com/hrishiballal/7e02d0d04b37c5d0fcb6?short_path=9ecf4a9">here</a>.</li>
                             <li>Paste the GeoJSON below</li>
-                            <li>Choose if you want streets to be rendered</li>
                             <li>Click "Generate Scene" button</li>
 
                         </ol>
                     </div>
 
                     <textarea id="gjTA" name="styled-textarea">Paste GeoJSON from Geodesign Hub here...</textarea><br>
+<<<<<<< HEAD
                     <input id="genStreetsCB" class="checkbox-custom" name="checkbox-1" type="checkbox"> Display generated streets
                     <br> 
+=======
+                    <input id="genStreetsCB" class="checkbox-custom" name="checkbox-1" type="checkbox"> Display generated streets<br><br>
+                    <div id ="systemsCBCont" style="display:none"> <h4>Systems:</h4><div id ="systemsCB"></div></div>
+                     <br>
+>>>>>>> origin/master
                     <div>
                         <p><button class="button" onclick="submitGJ()">Generate Scene</button></p>
                         <div id="loadingGIF"><img src="/assets/objs/loading.gif">&nbsp;Processing...</div>
@@ -134,12 +139,23 @@
                 }
             });
         }
-
+        function generateSystemCB(systems){
+            $('#systemsCBCont').show();
+            
+            for (var x =0; x<systems.length;x++){
+                $('#systemsCB').append('<input name="sysCB" id='+"'"+ systems[x].sysname+"'" +'type="checkbox" checked /> ' + systems[x].sysname + '</input>&nbsp;&nbsp;');
+            }
+        }
         function setbg(color) {
             document.getElementById("styled").style.background = color;
         }
 
         function submitGJ() {
+            var selectedsystems = [];
+            $('#systemsCB input:checked').each(function() {
+                selectedsystems.push($(this).attr('id'));
+            });
+            
             var gj = document.getElementById("gjTA").value;
             var gjerrors = geojsonhint.hint(gj);
             if (gjerrors.length > 0) {
@@ -149,12 +165,12 @@
             } else {
                 gj = JSON.parse(gj);
                 var genstreets = document.getElementById("genStreetsCB").checked;
-                start3dWorker(gj, genstreets);
+                start3dWorker(gj, genstreets, selectedsystems);
                 $("#loadingGIF").show();
             }
         }
 
-        function start3dWorker(allFeaturesList, genstreets) {
+        function start3dWorker(allFeaturesList, genstreets, selectedsystems) {
             humane.log("Processing..", {
                 addnCls: 'humane-flatty-info'
             });
@@ -169,7 +185,8 @@
             threeDWorker.postMessage({
                 'allFeaturesList': JSON.stringify(allFeaturesList),
                 'existingroads': JSON.stringify(roads),
-                'genstreets': JSON.stringify(genstreets)
+                'genstreets': JSON.stringify(genstreets),
+                'selectedsystems': JSON.stringify(selectedsystems)
             });
             threeDWorker.addEventListener('message', function(e) {
 
@@ -232,21 +249,23 @@
     var projectid = "<%= projectid %>"; //var test is now assigned to getTest which will only work on browsers 
     var diagramid = "<%= diagramid %>"; //var test is now assigned to getTest which will only work on browsers 
     var synthesisid = "<%= synthesisid %>"; //var test is now assigned to getTest which will only work on browsers  
-    var cteamid = "<%= cteamid %>"; //var test is now assigned to getTest which will only work on browsers  
+    var cteamid = "<%= cteamid %>"; //var test is now assigned to getTest which will only work on browsers   
+    var systems = <%- systems %>; //var test is now assigned to getTest which will only work on browsers  
     var gjresults = <%- result %>;
     var roads = <%- roads %>;
-
     (function() {
         if ((apitoken !== "0" && projectid !== "0" && diagramid !== "0")) {
-
+            // it is synthesis. 
             if (gjresults.features.length > 0) {
                 $("#gjTA").text(JSON.stringify(gjresults));
+               
                 submitGJ();
             }
         } else if (apitoken !== "0" && projectid !== "0" && cteamid !== "0" && synthesisid !== "0") {
 
             if (gjresults.features.length > 0) {
                 $("#gjTA").text(JSON.stringify(gjresults));
+                 generateSystemCB(systems);
                 submitGJ();
             }
         }
