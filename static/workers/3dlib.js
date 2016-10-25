@@ -223,7 +223,7 @@ var HDHousing = function() {
         // console.log(numberofextrusions, sqfeatslen);
         var ratio = (numberofextrusions / sqfeatslen);
         var extrudedfeaturescount = 0;
-        if (ratio < 0.20) {
+        if (ratio < 0.20 || numberofextrusions < 5) {
             for (var x = 0; x < sqfeatslen; x++) {
                 if (extrudedfeaturescount < numberofextrusions) {
                     var cursqfeat = sqgrid.features[x];
@@ -921,15 +921,16 @@ function generateFinal3DGeoms(constraintedModelDesigns, genstreets, existingroad
         'center': JSON.stringify([lat, lng])
     });
 }
-function constrainFeatures(allFeaturesList,selectedsystems){
+
+function constrainFeatures(allFeaturesList, selectedsystems) {
     // constrain output ot only features in the list. 
-        var cFeats = allFeaturesList.features;
-    var constraintedFeatures = {"type":"FeatureCollection", "features":[]};
+    var cFeats = allFeaturesList.features;
+    var constraintedFeatures = { "type": "FeatureCollection", "features": [] };
     var featlen = cFeats.length;
     for (var d = 0; d < featlen; d++) {
         var curfeatprop = cFeats[d].properties;
         var curFeatSys = curfeatprop.sysname;
-        if(selectedsystems.indexOf(curFeatSys) > -1){
+        if (selectedsystems.indexOf(curFeatSys) > -1) {
             constraintedFeatures.features.push(cFeats[d]);
         }
     }
@@ -945,13 +946,11 @@ function generate3DGeoms(allFeaturesList, genstreets, existingroads, selectedsys
         existingroads = bufferExistingRoads(existingroads);
     }
     var threeDOutput;
-    if (selectedsystems.length > 0)
-    {
-        var constraintedFeatures = constrainFeatures(allFeaturesList,selectedsystems);
+    if (selectedsystems.length > 0) {
+        var constraintedFeatures = constrainFeatures(allFeaturesList, selectedsystems);
         threeDOutput = generateFinal3DGeoms(constraintedFeatures, genstreets, existingroads);
-    }
-    else{
-    threeDOutput = generateFinal3DGeoms(allFeaturesList, genstreets, existingroads);
+    } else {
+        threeDOutput = generateFinal3DGeoms(allFeaturesList, genstreets, existingroads);
     }
 }
 
