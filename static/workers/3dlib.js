@@ -187,7 +187,7 @@ var LDHousing = function() {
             var bldg = turf.buffer(centrepoint, bldgfootprint, units);
             var bdgply = turf.bbox(bldg); // get the extent of the buffered features
             var bpoly = turf.bboxPolygon(bdgply);
-            var height = elevationoffset+ ldhheights[Math.floor(Math.random() * ldhheights.length)];
+            var height = elevationoffset + ldhheights[Math.floor(Math.random() * ldhheights.length)];
 
             var p = {
                 'height': height,
@@ -413,7 +413,7 @@ var LABBuildings = function() {
     var availablePts = {};
     var featProps;
     var featExtent;
-    
+
 
     this.genGrid = function(curFeat) {
         featProps = curFeat.properties;
@@ -567,6 +567,7 @@ var StreetsHelper = function() {
     this.genStreetsGrid = function(pointsWithin, extent) {
         // This module generates streets. given a grid of points. 
         var rows = [];
+        var elevationoffset = 10;
         var columns = [];
         var buildingPoints = [];
         var roadPoints = [];
@@ -640,11 +641,11 @@ var StreetsHelper = function() {
                 if (street['type'] === "Feature") {
                     street = { "type": "FeatureCollection", "features": [street] }
                 }
-
+                var height = elevationoffset + 0.1;
                 street.features[0].properties = {
                     "color": "#202020",
                     "roofColor": "#202020",
-                    "height": 0.1
+                    "height": height
                 };
                 streets.push.apply(streets, street.features);
             }
@@ -664,10 +665,11 @@ var StreetsHelper = function() {
                     if (street['type'] === "Feature") {
                         street = { "type": "FeatureCollection", "features": [street] }
                     }
+                    var height = elevationoffset + 0.1;
                     street.features[0].properties = {
                         "color": "#202020",
                         "roofColor": "#202020",
-                        "height": 0.1
+                        "height": height
                     };
                     streets.push.apply(streets, street.features);
                 }
@@ -726,6 +728,7 @@ function bufferExistingRoads(inputroads) {
 function generatePolicyFeatures(curFeat) {
 
     const elevationoffset = 10;
+
     function getCW(d) {
         return d > 10000000 ? 1 :
             d > 6000000 ? 0.75 :
@@ -776,11 +779,15 @@ function generateFinal3DGeoms(constraintedModelDesigns, genstreets, existingroad
     var curFeats = constraintedModelDesigns.features;
 
     var flen = curFeats.length;
+
+    var fullproc = flen;
+    var counter = 0;
     for (var h = 0; h < flen; h++) {
         // for every feature , create a point grid.
         var curFeat = curFeats[h];
         var curFeatSys = curFeat.properties.sysname;
         // if it is a line then simply buffer it and paint it black with a small height
+
         if (curFeat.geometry.type === "LineString") {
             f = turf.buffer(curFeat, 0.005, 'kilometers');
             if (f['type'] === "Feature") {
@@ -799,131 +806,139 @@ function generateFinal3DGeoms(constraintedModelDesigns, genstreets, existingroad
 
                 finalGJFeats.push(curlineFeat);
             }
+        } else if (curFeat.geometry.type === "Polygon") {
+
+            var featProps = curFeat.properties;
+            if (whiteListedSysName.indexOf(curFeatSys) >= 0) { // system is whitelisted
+                if (curFeat.properties.areatype === 'project') {
+                    //100 meter cell width
+                    if (featProps.sysname === 'HDH') {
+                        var hdh = new HDHousing();
+                        var constrainedgrid = hdh.generateSquareGridandConstrain(curFeat);
+                        var bldgs = hdh.generateBuildings(constrainedgrid);
+                        for (var k2 = 0; k2 < bldgs.features.length; k2++) {
+                            finalGJFeats.push(bldgs.features[k2]);
+                        }
+                    }
+                    if (featProps.sysname === 'MXD') {
+                        var mxd = new MXDBuildings();
+                        var mxdgrid = mxd.generateSquareGridandConstrain(curFeat);
+                        // console.log(JSON.stringify(mxdgrid));
+                        var mxdbld = mxd.generateBuildings(mxdgrid);
+                        // console.log(JSON.stringify(mxdbld));
+                        for (var k3 = 0; k3 < mxdbld.features.length; k3++) {
+                            finalGJFeats.push(mxdbld.features[k3]);
+                        }
+                    } else if (featProps.sysname === 'LDH') {
+                        var ldh = new LDHousing();
+                        var p = ldh.genGrid(curFeat);
+                        var ptsWithin = p[0];
+                        var featExtent = p[1];
+                        var bldgs = ldh.generateBuildingFootprints(ptsWithin);
+                        var ldhstreets = new StreetsHelper();
+                        var ldhstreetFeatureCollection = ldhstreets.genStreetsGrid(ptsWithin, featExtent);
+                        var ldhfinalFeatures = ldhstreets.filterStreets(ldhstreetFeatureCollection, bldgs);
+                        if (existingroads) {
+                            ldhfinalFeatures = ldhstreets.filterStreets(existingroads, ldhfinalFeatures);
+                        }
+                        if (genstreets) {
+                            ldhfinalFeatures.push.apply(ldhfinalFeatures, ldhstreetFeatureCollection.features);
+                        }
+                        for (var k1 = 0; k1 < ldhfinalFeatures.length; k1++) {
+                            finalGJFeats.push(ldhfinalFeatures[k1]);
+                        }
+                    } else if ((featProps.sysname === 'COM') || (featProps.sysname === 'COMIND')) {
+                        var com = new COMBuilding();
+                        var comp = com.genGrid(curFeat);
+                        var comptsWithin = comp[0];
+                        var comfeatExtent = comp[1];
+                        var combldgs = com.generateBuildingFootprints(comptsWithin);
+                        var comstreets = new StreetsHelper();
+                        var comstreetFeatureCollection = comstreets.genStreetsGrid(comptsWithin, comfeatExtent);
+                        var comfinalFeatures = comstreets.filterStreets(comstreetFeatureCollection, combldgs);
+                        if (existingroads) {
+                            comfinalFeatures = comstreets.filterStreets(existingroads, comfinalFeatures);
+                        }
+                        if (genstreets) {
+                            comfinalFeatures.push.apply(comfinalFeatures, comstreetFeatureCollection.features);
+                        }
+                        for (var k1 = 0; k1 < comfinalFeatures.length; k1++) {
+                            finalGJFeats.push(comfinalFeatures[k1]);
+                        }
+                    }
+                } else if (curFeat.properties.areatype === 'policy') { // whitelisted policy
+                    var policyF = generatePolicyFeatures(curFeat);
+                    for (var pf = 0; pf < policyF.length; pf++) {
+                        finalGJFeats.push(policyF[pf]);
+                    }
+                }
+
+            }
+            // for non white listed systems that are buildings
+            else if ((featProps.systag === 'Large buildings, Industry, commerce') && (featProps.areatype === 'project')) { // 
+
+                var lab = new LABBuildings();
+                var labgrid = lab.genGrid(curFeat);
+                var labptsWithin = labgrid[0];
+                var labfeatExtent = labgrid[1];
+                var labbldgs = lab.generateBuildingFootprints(labptsWithin);
+
+                var labstreets = new StreetsHelper();
+                var labStreetsFC = labstreets.genStreetsGrid(labptsWithin, labfeatExtent);
+                var labFinalFeatures = labstreets.filterStreets(labStreetsFC, labbldgs);
+                if (existingroads) {
+                    labFinalFeatures = labstreets.filterStreets(existingroads, labFinalFeatures);
+                }
+                if (genstreets) {
+                    labFinalFeatures.push.apply(labFinalFeatures, labStreetsFC.features);
+                }
+                for (var k1 = 0; k1 < labFinalFeatures.length; k1++) {
+                    finalGJFeats.push(labFinalFeatures[k1]);
+                }
+
+            } else if ((featProps.reqtype === 'Small buildings, low density housing') && (featProps.areatype === 'project')) {
+                var smb = new SMBBuildings();
+                var smbgrid = smb.genGrid(curFeat);
+                var smbptsWithin = smbgrid[0];
+                var smbfeatExtent = smbgrid[1];
+                var smbbldgs = smb.generateBuildingFootprints(smbptsWithin);
+
+                var smbStreets = genStreetsGrid(smbptsWithin, smbfeatExtent);
+                var smbFinalFeatures = filterStreets(smbStreets, smbbldgs);
+                if (existingroads) {
+                    smbFinalFeatures = filterStreets(existingroads, smbFinalFeatures);
+                }
+                if (genstreets) {
+                    smbFinalFeatures.push.apply(smbFinalFeatures, smbStreets.features);
+                }
+                for (var k1 = 0; k1 < smbFinalFeatures.length; k1++) {
+                    finalGJFeats.push(smbFinalFeatures[k1]);
+                }
+
+
+            } else { // all systems that not buildings
+                if (curFeat.properties.areatype === 'project') {
+                    var height = elevationoffset + 0.01;
+                    var prop = {
+                        "roofColor": curFeat.properties.color,
+                        "height": height
+                    }
+                    curFeat.properties = prop;
+                    finalGJFeats.push.apply(finalGJFeats, [curFeat]);
+                } else if (curFeat.properties.areatype === 'policy') {
+                    var policyF = generatePolicyFeatures(curFeat);
+                    for (var pf = 0; pf < policyF.length; pf++) {
+                        finalGJFeats.push(policyF[pf]);
+                    }
+                }
+            }
+
         }
-        var featProps = curFeat.properties;
-        if (whiteListedSysName.indexOf(curFeatSys) >= 0) {
-            if (curFeat.properties.areatype === 'project') {
-                //100 meter cell width
-                if (featProps.sysname === 'HDH') {
-                    var hdh = new HDHousing();
-                    var constrainedgrid = hdh.generateSquareGridandConstrain(curFeat);
-                    var bldgs = hdh.generateBuildings(constrainedgrid);
-                    for (var k2 = 0; k2 < bldgs.features.length; k2++) {
-                        finalGJFeats.push(bldgs.features[k2]);
-                    }
-                }
-                if (featProps.sysname === 'MXD') {
-                    var mxd = new MXDBuildings();
-                    var mxdgrid = mxd.generateSquareGridandConstrain(curFeat);
-                    // console.log(JSON.stringify(mxdgrid));
-                    var mxdbld = mxd.generateBuildings(mxdgrid);
-                    // console.log(JSON.stringify(mxdbld));
-                    for (var k3 = 0; k3 < mxdbld.features.length; k3++) {
-                        finalGJFeats.push(mxdbld.features[k3]);
-                    }
-                } else if (featProps.sysname === 'LDH') {
-                    var ldh = new LDHousing();
-                    var p = ldh.genGrid(curFeat);
-                    var ptsWithin = p[0];
-                    var featExtent = p[1];
-                    var bldgs = ldh.generateBuildingFootprints(ptsWithin);
-                    var ldhstreets = new StreetsHelper();
-                    var ldhstreetFeatureCollection = ldhstreets.genStreetsGrid(ptsWithin, featExtent);
-                    var ldhfinalFeatures = ldhstreets.filterStreets(ldhstreetFeatureCollection, bldgs);
-                    if (existingroads) {
-                        ldhfinalFeatures = ldhstreets.filterStreets(existingroads, ldhfinalFeatures);
-                    }
-                    if (genstreets) {
-                        ldhfinalFeatures.push.apply(ldhfinalFeatures, ldhstreetFeatureCollection.features);
-                    }
-                    for (var k1 = 0; k1 < ldhfinalFeatures.length; k1++) {
-                        finalGJFeats.push(ldhfinalFeatures[k1]);
-                    }
-                } else if ((featProps.sysname === 'COM') || (featProps.sysname === 'COMIND')) {
-                    var com = new COMBuilding();
-                    var comp = com.genGrid(curFeat);
-                    var comptsWithin = comp[0];
-                    var comfeatExtent = comp[1];
-                    var combldgs = com.generateBuildingFootprints(comptsWithin);
-                    var comstreets = new StreetsHelper();
-                    var comstreetFeatureCollection = comstreets.genStreetsGrid(comptsWithin, comfeatExtent);
-                    var comfinalFeatures = comstreets.filterStreets(comstreetFeatureCollection, combldgs);
-                    if (existingroads) {
-                        comfinalFeatures = comstreets.filterStreets(existingroads, comfinalFeatures);
-                    }
-                    if (genstreets) {
-                        comfinalFeatures.push.apply(comfinalFeatures, comstreetFeatureCollection.features);
-                    }
-                    for (var k1 = 0; k1 < comfinalFeatures.length; k1++) {
-                        finalGJFeats.push(comfinalFeatures[k1]);
-                    }
-                }
-            } else if (curFeat.properties.areatype === 'policy') { // whitelisted policy
-                var policyF = generatePolicyFeatures(curFeat);
-                for (var pf = 0; pf < policyF.length; pf++) {
-                    finalGJFeats.push(policyF[pf]);
-                }
-            }
-
-        }
-        // for non white listed systems that are buildings
-        else if ((featProps.systag === 'Large buildings, Industry, commerce') && (featProps.areatype === 'project')) {
-
-            var lab = new LABBuildings();
-            var labgrid = lab.genGrid(curFeat);
-            var labptsWithin = labgrid[0];
-            var labfeatExtent = labgrid[1];
-            var labbldgs = lab.generateBuildingFootprints(labptsWithin);
-
-            var labstreets = new StreetsHelper();
-            var labStreetsFC = labstreets.genStreetsGrid(labptsWithin, labfeatExtent);
-            var labFinalFeatures = labstreets.filterStreets(labStreetsFC, labbldgs);
-            if (existingroads) {
-                labFinalFeatures = labstreets.filterStreets(existingroads, labFinalFeatures);
-            }
-            if (genstreets) {
-                labFinalFeatures.push.apply(labFinalFeatures, labStreetsFC.features);
-            }
-            for (var k1 = 0; k1 < labFinalFeatures.length; k1++) {
-                finalGJFeats.push(labFinalFeatures[k1]);
-            }
-
-        } else if ((featProps.reqtype === 'Small buildings, low density housing') && (featProps.areatype === 'project')) {
-            var smb = new SMBBuildings();
-            var smbgrid = smb.genGrid(curFeat);
-            var smbptsWithin = smbgrid[0];
-            var smbfeatExtent = smbgrid[1];
-            var smbbldgs = smb.generateBuildingFootprints(smbptsWithin);
-
-            var smbStreets = genStreetsGrid(smbptsWithin, smbfeatExtent);
-            var smbFinalFeatures = filterStreets(smbStreets, smbbldgs);
-            if (existingroads) {
-                smbFinalFeatures = filterStreets(existingroads, smbFinalFeatures);
-            }
-            if (genstreets) {
-                smbFinalFeatures.push.apply(smbFinalFeatures, smbStreets.features);
-            }
-            for (var k1 = 0; k1 < smbFinalFeatures.length; k1++) {
-                finalGJFeats.push(smbFinalFeatures[k1]);
-            }
-
-
-        } else { // all systems that not buildings
-            if (curFeat.properties.areatype === 'project') {
-                var height = elevationoffset + 0.01;
-                var prop = {
-                    "roofColor": curFeat.properties.color,
-                    "height": height
-                }
-                curFeat.properties = prop;
-                finalGJFeats.push.apply(finalGJFeats, [curFeat]);
-            } else if (curFeat.properties.areatype === 'policy') {
-                var policyF = generatePolicyFeatures(curFeat);
-                for (var pf = 0; pf < policyF.length; pf++) {
-                    finalGJFeats.push(policyF[pf]);
-                }
-            }
-        }
+        counter += 1;
+        self.postMessage({
+            'percentcomplete': parseInt((100 * counter) / fullproc),
+            'mode': 'status',
+        });
     }
     var fpolygons = {
         "type": "FeatureCollection",
@@ -934,6 +949,7 @@ function generateFinal3DGeoms(constraintedModelDesigns, genstreets, existingroad
         'polygons': JSON.stringify(fpolygons),
         'center': JSON.stringify([lat, lng])
     });
+
 }
 
 function constrainFeatures(allFeaturesList, selectedsystems) {
@@ -953,6 +969,7 @@ function constrainFeatures(allFeaturesList, selectedsystems) {
 
 function generate3DGeoms(allFeaturesList, genstreets, existingroads, selectedsystems) {
     var allFeaturesList = JSON.parse(allFeaturesList);
+
     var existingroads = JSON.parse(existingroads);
     var selectedsystems = JSON.parse(selectedsystems);
     // console.log(JSON.stringify(existingroads));

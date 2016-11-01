@@ -45,7 +45,7 @@
                      <br>
                     <div>
                         <p><button class="button" onclick="submitGJ()">Generate Scene</button></p>
-                        <div id="loadingGIF"><img src="/assets/objs/loading.gif">&nbsp;Processing...</div>
+                        <div id="loadingGIF"><img src="/assets/objs/loading.gif">&nbsp;<span id ="procstatus">Processing</span>...</div>
                     </div>
                     <br>
                     <div class="glcontrol">
@@ -186,16 +186,24 @@
             });
             threeDWorker.addEventListener('message', function(e) {
 
+            if (e.data.mode === 'status') {
+                // update status. 
+                updateWorkerStatus(e.data.percentcomplete)
+            } else{
                 var gjsonData = e.data.polygons;
                 var latlng = e.data.center;
                 // console.log(JSON.stringify(gjsonData));
                 setMapCenter(latlng);
                 updateGLData(gjsonData);
-
+            }
 
             }, false);
         }
-
+        function updateWorkerStatus(percentcomplete){
+            var pc = percentcomplete.toString() + '% processing completed..'
+            $("#procstatus").html(pc);
+            
+        }
         function setMapCenter(latlng) {
             ll = JSON.parse(latlng);
             osmb.setPosition({
