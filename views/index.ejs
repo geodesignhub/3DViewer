@@ -2,82 +2,87 @@
 <html>
 
 <head>
-    <title>Geodesign Hub OSM Buildings Viewer</title>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+	<title>Geodesign Hub OSM Buildings Viewer</title>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
-    <link type="text/css" rel="stylesheet" href="assets/css/bootstrap.min.css">
-    <link rel="stylesheet" type="text/css" href="assets/css/style.css">
-    <link rel="stylesheet" type="text/css" href="assets/css/base.css">
-    <link rel='shortcut icon' href='/assets/objs/favicon.ico' type='image/x-icon' />
-    <link rel="stylesheet" href="/assets/OSMBuildings/OSMBuildings.css">
-    <link rel="stylesheet" href="/assets/js/humane/flatty.css">
-    <link href='https://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css'>
-    <link href='https://fonts.googleapis.com/css?family=Raleway' rel='stylesheet' type='text/css'>
-    <script type="text/javascript" src="/assets/js/jquery/jquery.min.js"></script>
-    <script type="text/javascript" src="/assets/OSMBuildings/OSMBuildings.js"></script>
-    <script type="text/javascript" src="/assets/js/geojsonlint/geojsonlint.js"></script>
-    <script type="text/javascript" src="/assets/js/humane/humane.min.js"></script>
+	<link type="text/css" rel="stylesheet" href="assets/css/bootstrap.min.css">
+	<link rel="stylesheet" type="text/css" href="assets/css/style.css">
+	<link rel="stylesheet" type="text/css" href="assets/css/base.css">
+	<link rel='shortcut icon' href='/assets/objs/favicon.ico' type='image/x-icon' />
+	<link rel="stylesheet" href="/assets/OSMBuildings/OSMBuildings.css">
+	<link rel="stylesheet" href="/assets/js/humane/flatty.css">
+	<link href='https://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css'>
+	<link href='https://fonts.googleapis.com/css?family=Raleway' rel='stylesheet' type='text/css'>
+	<script type="text/javascript" src="/assets/js/jquery/jquery.min.js"></script>
+	<script type="text/javascript" src="/assets/OSMBuildings/OSMBuildings.js"></script>
+	<script type="text/javascript" src="/assets/js/geojsonlint/geojsonlint.js"></script>
+	<script type="text/javascript" src="/assets/js/humane/humane.min.js"></script>
 </head>
 
 <body>
-    <div class="container-fluid">
-        <div class="row">
+	<div class="container-fluid">
+		<div class="row">
 
-            <div class="col-sm-4 col-md-4 main">
-                <h1 class="page-header">Geodesign Hub 3D Viewer</h1>
-                <section class="information">
-                    <p class="description">This project uses <a href="http://osmbuildings.org/" target="_blank">OSM Buildings</a> library for visualization and design data from <a href="http://www.geodesignhub.com/">Geodesign Hub</a>. See the <a href="https://github.com/hrishiballal/GDH3DViewer">GitHub repository</a>.</p>
-                    <br>
-                    <div class="instruction">
-                        <ol>
-                            <li>Use the Geodeisgn Hub API <a href="https://www.geodesignhub.com/api/" target="_blank">GET Synthesis JSON</a> call to get a design JSON. Sample GeoJSON is <a href="https://gist.github.com/hrishiballal/7e02d0d04b37c5d0fcb6?short_path=9ecf4a9">here</a>.</li>
-                            <li>Paste the GeoJSON below</li>
-                            <li>Click "Generate Scene" button</li>
+			<div class="col-sm-4 col-md-4 main">
+				<h1 class="page-header">Geodesign Hub 3D Viewer</h1>
+				<section class="information">
+					<p class="description">This project uses <a href="http://osmbuildings.org/" target="_blank">OSM Buildings</a> library for visualization and
+						design data from <a href="http://www.geodesignhub.com/">Geodesign Hub</a>. See the <a href="https://github.com/hrishiballal/GDH3DViewer">GitHub repository</a>.</p>
+					<br>
+					<div class="instruction">
+						<ol>
+							<li>Use the Geodeisgn Hub API <a href="https://www.geodesignhub.com/api/" target="_blank">GET Synthesis JSON</a> call
+								to get a design JSON. Sample GeoJSON is <a href="https://gist.github.com/hrishiballal/7e02d0d04b37c5d0fcb6?short_path=9ecf4a9">here</a>.</li>
+							<li>Paste the GeoJSON below</li>
+							<li>Click "Generate Scene" button</li>
 
-                        </ol>
-                    </div>
+						</ol>
+					</div>
 
-                    <textarea id="gjTA" name="styled-textarea">Paste GeoJSON from Geodesign Hub here...</textarea><br>
+					<textarea id="gjTA" name="styled-textarea">Paste GeoJSON from Geodesign Hub here...</textarea><br>
 
-                    <input id="genStreetsCB" class="checkbox-custom" name="checkbox-1" type="checkbox"> Display generated streets<br><br>
-                    <div id ="systemsCBCont" style="display:none"> <h4>Systems</h4><div id ="systemsCB"></div></div>
-                     <br>
-                    <div>
-                        <p><button class="button" onclick="submitGJ()">Generate Scene</button></p>
-                        <div id="loadingGIF"><img src="/assets/objs/loading.gif">&nbsp;<span id ="procstatus">Processing</span>...</div>
-                    </div>
-                    <br>
-                    <div class="glcontrol">
-                        <h4>Map Controls</h4>
-                        <span class="tilt">
+					<input id="genStreetsCB" class="checkbox-custom" name="checkbox-1" type="checkbox"> Display generated streets<br><br>
+					<div id="systemsCBCont" style="display:none">
+						<h4>Systems</h4>
+						<div id="systemsCB"></div>
+					</div>
+					<br>
+					<div>
+						<p><button class="button" onclick="submitGJ()">Generate Scene</button></p>
+						<div id="loadingGIF"><img src="/assets/objs/loading.gif">&nbsp;<span id="procstatus">Processing</span>...</div>
+					</div>
+					<br>
+					<div class="glcontrol">
+						<h4>Map Controls</h4>
+						<span class="tilt">
           <button class="dec">&#8601;</button>
           <button class="inc">&#8599;</button>
         </span>
-                        <span class="rotation">
+						<span class="rotation">
           <button class="inc">&#8630;</button>
           <button class="dec">&#8631;</button>
         </span>
-                        <span class="zoom">
+						<span class="zoom">
           <button class="dec">-</button>
           <button class="inc">+</button>
         </span>
-                    </div>
-                    <br>
-                </section>
+					</div>
+					<br>
+				</section>
 
-            </div>
+			</div>
 
-            <div id="glMap" class="col-sm-8 col-md-8 sidebar">
+			<div id="glMap" class="col-sm-8 col-md-8 sidebar">
 
-            </div>
+			</div>
 
-        </div>
-    </div>
+		</div>
+	</div>
 
 
 
-    <script>
+	<script>
         var glb = {};
         var osmb = new OSMBuildings({
             baseURL: 'assets/OSMBuildings/',
@@ -136,7 +141,7 @@
             });
         }
         function generateSystemCB(systems){
-            $('#systemsCBCont').show();
+           
             
             for (var x =0; x<systems.length;x++){
                 $('#systemsCB').append('<input name="sysCB" id='+"'"+ systems[x].sysname+"'" +'type="checkbox" checked /> ' + systems[x].sysname + '</input>&nbsp;&nbsp;');
@@ -188,13 +193,13 @@
 
             if (e.data.mode === 'status') {
                 // update status. 
-                updateWorkerStatus(e.data.percentcomplete)
+                updateWorkerStatus(e.data.percentcomplete);
             } else{
-                var gjsonData = e.data.polygons;
+                generatedData = e.data.polygons;
                 var latlng = e.data.center;
                 // console.log(JSON.stringify(gjsonData));
                 setMapCenter(latlng);
-                updateGLData(gjsonData);
+                updateGLData(generatedData);
             }
 
             }, false);
@@ -225,6 +230,7 @@
 
         function updateGLData(gjsonData) {
             $("#loadingGIF").hide();
+            $("#procstatus").html("Processing..");
             humane.log("Rendering Scene..", {
                 addnCls: 'humane-flatty-success'
             });
@@ -249,6 +255,7 @@
 </body>
 <script>
     $("#loadingGIF").hide();
+    var generatedData;
     var apitoken = "<%= apitoken  %>"; //var test is now assigned to getTest which will only work on browsers
     var projectid = "<%= projectid %>"; //var test is now assigned to getTest which will only work on browsers 
     var diagramid = "<%= diagramid %>"; //var test is now assigned to getTest which will only work on browsers 
@@ -262,7 +269,6 @@
             // it is synthesis. 
             if (gjresults.features.length > 0) {
                 $("#gjTA").text(JSON.stringify(gjresults));
-               
                 submitGJ();
             }
         } else if (apitoken !== "0" && projectid !== "0" && cteamid !== "0" && synthesisid !== "0") {
@@ -270,10 +276,41 @@
             if (gjresults.features.length > 0) {
                 $("#gjTA").text(JSON.stringify(gjresults));
                 generateSystemCB(systems);
+                 $('#systemsCBCont').show();
                 submitGJ();
+                $('#systemsCB').click(function(){
+                var selectedsystems = [];
+                $('#systemsCB input:checked').each(function() {
+                    selectedsystems.push($(this).attr('id'));
+                });
+                $("#loadingGIF").show();
+                var constrainWorker = new Worker('/assets/workers/constrainGeneratedFeatures.js');
+                constrainWorker.onerror = function(e) {
+                    console.log('Error: Line ' + e.lineno + ' in ' + e.filename + ': ' + e.message);
+                    $("#loadingGIF").hide();
+                    humane.log("There was a error in processing, please try again.. ", {
+                        addnCls: 'humane-flatty-error'
+                    });
+                };
+                console.log(selectedsystems);
+                constrainWorker.postMessage({
+                    'allFeaturesList': generatedData,
+                    'selectedsystems': JSON.stringify(selectedsystems)
+                });
+                constrainWorker.addEventListener('message', function(e) {
+                if (e.data.mode === 'status') {
+                   
+                    updateWorkerStatus(e.data.percentcomplete);
+                } else {
+                     updateGLData(e.data.polygons);
+                }
+                }, false);
+            
+                });
             }
         }
     })();
+
 </script>
 
 </html>
