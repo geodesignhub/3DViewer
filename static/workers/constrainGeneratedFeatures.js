@@ -1,4 +1,3 @@
-
 function constrainFeatures(allFeaturesList, selectedsystems) {
     // constrain output ot only features in the list. 
     var constraintedFeatures = { "type": "FeatureCollection", "features": [] };
@@ -12,11 +11,11 @@ function constrainFeatures(allFeaturesList, selectedsystems) {
     for (var d = 0; d < featlen; d++) {
         var curfeatprop = af[d].properties;
         var curFeatSys = curfeatprop.sysname;
+
         if (selectedsystems.indexOf(curFeatSys) > -1) {
             constraintedFeatures.features.push(af[d]);
         }
         counter += 1;
-
         self.postMessage({
             'percentcomplete': parseInt((100 * counter) / fullproc),
             'mode': 'status',
@@ -28,6 +27,6 @@ function constrainFeatures(allFeaturesList, selectedsystems) {
     });
 }
 
-self.onmessage = function (e) {
+self.onmessage = function(e) {
     constrainFeatures(e.data.allFeaturesList, e.data.selectedsystems);
 }

@@ -91,7 +91,7 @@ var COMBuilding = function() {
                             'height': height,
                             'color': "#d0d0d0",
                             'roofColor': color,
-                            'sysname':sysname
+                            'sysname': sysname
                         };
                         bldg.properties = p;
                         alreadyAdded.features.push(bldg);
@@ -130,7 +130,7 @@ var COMBuilding = function() {
                             'height': height,
                             'color': "#d0d0d0",
                             'roofColor': color,
-                            'sysname':sysname
+                            'sysname': sysname
                         };
                         bpoly.properties = p;
                         alreadyAdded.features.push(bpoly);
@@ -195,7 +195,7 @@ var LDHousing = function() {
                 'height': height,
                 'color': "#d0d0d0",
                 'roofColor': color,
-                'sysname':sysname
+                'sysname': sysname
             };
             bpoly.properties = p;
             allGeneratedFeats.push(bpoly);
@@ -287,7 +287,7 @@ var HDHousing = function() {
                         "height": height,
                         "color": "#d0d0d0",
                         "roofColor": featProps.color,
-                        'sysname':featProps.sysname
+                        'sysname': featProps.sysname
                     };
                     bboxpoly.properties = props;
                     generatedGeoJSON.features.push(bboxpoly);
@@ -370,7 +370,7 @@ var MXDBuildings = function() {
                         "height": height,
                         "color": "#d0d0d0",
                         "roofColor": featProps.color,
-                        'sysname':featProps.sysname
+                        'sysname': featProps.sysname
                     };
                     buildingpoly.properties = props;
 
@@ -500,7 +500,7 @@ var LABBuildings = function() {
                             'height': height,
                             'color': "#d0d0d0",
                             'roofColor': color,
-                            'sysname':sysname
+                            'sysname': sysname
                         };
                         bldg.properties = p;
                         alreadyAdded.features.push(bldg);
@@ -557,7 +557,7 @@ var SMBBuildings = function() {
                     'height': height,
                     'color': "#d0d0d0",
                     'roofColor': color,
-                    'sysname':featProps.sysname
+                    'sysname': featProps.sysname
                 };
                 bpoly.properties = p;
                 allGeneratedFeats.push(bpoly);
@@ -733,7 +733,7 @@ function bufferExistingRoads(inputroads) {
 }
 
 function generatePolicyFeatures(curFeat) {
-
+    var curFeatprops = curFeat.properties;
     const elevationoffset = 10;
 
     function getCW(d) {
@@ -760,8 +760,9 @@ function generatePolicyFeatures(curFeat) {
     var pwLen = pW.features.length;
     var height = elevationoffset + 0.01;
     var prop = {
-        "roofColor": curFeat.properties.color,
-        "height": height
+        "roofColor": curFeatprops.color,
+        "height": height,
+        "sysname": curFeatprops.sysname
     }
     for (var l1 = 0; l1 < pwLen; l1++) {
         var curptwithin = pW.features[l1];
@@ -784,9 +785,7 @@ function generateFinal3DGeoms(constraintedModelDesigns, genstreets, existingroad
     var lng = centerPt.geometry.coordinates[0];
     // iterate over the features.
     var curFeats = constraintedModelDesigns.features;
-
     var flen = curFeats.length;
-
     var fullproc = flen;
     var counter = 0;
     for (var h = 0; h < flen; h++) {
@@ -794,7 +793,6 @@ function generateFinal3DGeoms(constraintedModelDesigns, genstreets, existingroad
         var curFeat = curFeats[h];
         var curFeatSys = curFeat.properties.sysname;
         // if it is a line then simply buffer it and paint it black with a small height
-
         if (curFeat.geometry.type === "LineString") {
             f = turf.buffer(curFeat, 0.005, 'kilometers');
             if (f['type'] === "Feature") {
@@ -808,7 +806,7 @@ function generateFinal3DGeoms(constraintedModelDesigns, genstreets, existingroad
                 curlineFeat.properties = {
                     "color": curFeat.properties.color,
                     "roofColor": curFeat.properties.color,
-                    "sysname":curFeat.properties.sysname,
+                    "sysname": curFeat.properties.sysname,
                     "height": height
                 };
 
@@ -930,7 +928,7 @@ function generateFinal3DGeoms(constraintedModelDesigns, genstreets, existingroad
                     var prop = {
                         "roofColor": curFeat.properties.color,
                         "height": height,
-                        "sysname":curFeat.properties.sysname
+                        "sysname": curFeat.properties.sysname
                     }
                     curFeat.properties = prop;
                     finalGJFeats.push.apply(finalGJFeats, [curFeat]);
