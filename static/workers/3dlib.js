@@ -287,7 +287,7 @@ var HDHousing = function() {
                         "height": height,
                         "color": "#d0d0d0",
                         "roofColor": featProps.color,
-                        'sysname': featProps.sysname
+                        "sysname": featProps.sysname
                     };
                     bboxpoly.properties = props;
                     generatedGeoJSON.features.push(bboxpoly);
@@ -370,7 +370,7 @@ var MXDBuildings = function() {
                         "height": height,
                         "color": "#d0d0d0",
                         "roofColor": featProps.color,
-                        'sysname': featProps.sysname
+                        "sysname": featProps.sysname
                     };
                     buildingpoly.properties = props;
 
@@ -499,8 +499,8 @@ var LABBuildings = function() {
                         var p = {
                             'height': height,
                             'color': "#d0d0d0",
-                            'roofColor': color,
-                            'sysname': sysname
+                            'roofColor': featProps.color,
+                            'sysname': featProps.sysname
                         };
                         bldg.properties = p;
                         alreadyAdded.features.push(bldg);
