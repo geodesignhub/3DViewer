@@ -827,7 +827,6 @@ function generateFinal3DGeoms(constraintedModelDesigns, genstreets, existingroad
                         var constrainedgrid = hdh.generateSquareGridandConstrain(curFeat);
                         var bldgs = hdh.generateBuildings(constrainedgrid);
                         for (var k2 = 0; k2 < bldgs.features.length; k2++) {
-                            console.log(JSON.stringify(bldgs.features[k2]));
                             finalGJFeats.push(bldgs.features[k2]);
                         }
                     }

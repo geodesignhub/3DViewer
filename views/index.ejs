@@ -144,7 +144,7 @@
            
             
             for (var x =0; x<systems.length;x++){
-                $('#systemsCB').append('<input name="sysCB" id='+"'"+ systems[x].sysname+"'" +'type="checkbox" checked /> ' + systems[x].sysname + '</input>&nbsp;&nbsp;');
+                $('#systemsCB').append('<input name="sysCB" id='+"'"+ systems[x].sysname+"'" +'type="checkbox" checked /> <span class="square c-'+ systems[x].syscolor.substring(1) +'"></span>&nbsp;&nbsp;' + systems[x].sysname + '</input>&nbsp;&nbsp;');
             }
         }
         function setbg(color) {
