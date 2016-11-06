@@ -806,7 +806,7 @@ function generateFinal3DGeoms(constraintedModelDesigns, genstreets, existingroad
             var linefeatlen = linefeats.length;
             for (var x1 = 0; x1 < linefeatlen; x1++) {
                 curlineFeat = linefeats[x1];
-                var height = elevationoffset + 2;
+                var height = elevationoffset + 0.5;
                 curlineFeat.properties = {
                     "color": curFeat.properties.color,
                     "roofColor": curFeat.properties.color,
