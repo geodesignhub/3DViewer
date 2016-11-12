@@ -82,7 +82,7 @@ var COMBuilding = function() {
                         try {
                             ifeat = turf.intersect(curalreadyadded, bldg);
                         } catch (err) {
-                            console.log(JSON.stringify(err));
+                            // console.log(JSON.stringify(err));
                         }
                         if (ifeat) {
                             hasIntersect = true;
@@ -121,7 +121,7 @@ var COMBuilding = function() {
                     try {
                         ifeat = turf.intersect(curalreadyadded, bldg);
                     } catch (err) {
-                        console.log(JSON.stringify(err));
+                        // console.log(JSON.stringify(err));
                     }
                     if (ifeat) {
                         hasIntersect = true;
@@ -244,7 +244,7 @@ var HDHousing = function() {
                     try {
                         var ifeat = turf.intersect(cursqfeat, featureGeometry);
                     } catch (err) {
-                        console.log(JSON.stringify(err));
+                        // console.log(JSON.stringify(err));
                     }
                     if (ifeat) {
                         constrainedgrid.features.push(ifeat);
@@ -262,6 +262,7 @@ var HDHousing = function() {
                 gridStore[gridid] = cursqgrid;
                 gridid += 1;
             }
+            
             while (extrudedfeaturescount < numberofextrusions + 1) {
                 var randomgridid = Math.floor(Math.random() * (sqfeatslen - 0 + 1)) + 0;
                 // get the id from gridStore
@@ -270,7 +271,7 @@ var HDHousing = function() {
                 try {
                     var ifeat = turf.intersect(cursqfeat, featureGeometry);
                 } catch (err) {
-                    console.log(JSON.stringify(err));
+                    // console.log(JSON.stringify(err));
                 }
 
                 if (ifeat) {
@@ -343,7 +344,7 @@ var MXDBuildings = function() {
             try {
                 var ifeat = turf.intersect(cursqfeat, featureGeometry);
             } catch (err) {
-                console.log(JSON.stringify(err));
+                // console.log(JSON.stringify(err));
             }
             if (ifeat) {
                 constrainedgrid.features.push(ifeat);
@@ -508,7 +509,7 @@ var LABBuildings = function() {
                         try {
                             ifeat = turf.intersect(curalreadyadded, bldg);
                         } catch (err) {
-                            console.log(JSON.stringify(err));
+                            // console.log(JSON.stringify(err));
                         }
                         if (ifeat) {
                             hasIntersect = true;
@@ -588,7 +589,6 @@ var SMBBuildings = function() {
                     "roofColor": color,
                     "sysname": featProps.sysname
                 };
-                console.log(p);
                 bpoly.properties = p;
                 allGeneratedFeats.push(bpoly);
             }
@@ -725,7 +725,7 @@ var StreetsHelper = function() {
                 try {
                     var intersect = turf.intersect(curF1, curStF);
                 } catch (err) {
-                    console.log(JSON.stringify(err));
+                    // console.log(JSON.stringify(err));
                 }
                 // chop road
                 if (intersect) {
@@ -857,7 +857,7 @@ function generateFinal3DGeoms(constraintedModelDesigns, genstreets, existingroad
                             finalGJFeats.push(bldgs.features[k2]);
                         }
                     }
-                    if (featProps.sysname === 'MXD') {
+                    else if (featProps.sysname === 'MXD') {
                         var mxd = new MXDBuildings();
                         var mxdgrid = mxd.generateSquareGridandConstrain(curFeat);
                         // console.log(JSON.stringify(mxdgrid));
@@ -913,7 +913,7 @@ function generateFinal3DGeoms(constraintedModelDesigns, genstreets, existingroad
             }
             // for non white listed systems that are buildings
             else if ((featProps.systag === 'Large buildings, Industry, commerce') && (featProps.areatype === 'project')) { // 
-                console.log('here')
+                // console.log('here')
                 var lab = new LABBuildings();
                 var labgrid = lab.genGrid(curFeat);
                 var labptsWithin = labgrid[0];
