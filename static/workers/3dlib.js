@@ -79,7 +79,11 @@ var COMBuilding = function() {
                     var alreadyaddedlen = alreadyAdded.features.length;
                     for (var x1 = 0; x1 < alreadyaddedlen; x1++) {
                         curalreadyadded = alreadyAdded.features[x1];
-                        ifeat = turf.intersect(curalreadyadded, bldg);
+                        try {
+                            ifeat = turf.intersect(curalreadyadded, bldg);
+                        } catch (err) {
+                            console.log(JSON.stringify(err));
+                        }
                         if (ifeat) {
                             hasIntersect = true;
                             break;
@@ -114,7 +118,11 @@ var COMBuilding = function() {
 
                 for (var x2 = 0; x2 < alreadyaddedlen; x2++) {
                     curalreadyadded = alreadyAdded.features[x2];
-                    ifeat = turf.intersect(curalreadyadded, bldg);
+                    try {
+                        ifeat = turf.intersect(curalreadyadded, bldg);
+                    } catch (err) {
+                        console.log(JSON.stringify(err));
+                    }
                     if (ifeat) {
                         hasIntersect = true;
                         break;
@@ -233,7 +241,11 @@ var HDHousing = function() {
             for (var x = 0; x < sqfeatslen; x++) {
                 if (extrudedfeaturescount < numberofextrusions) {
                     var cursqfeat = sqgrid.features[x];
-                    var ifeat = turf.intersect(cursqfeat, featureGeometry);
+                    try {
+                        var ifeat = turf.intersect(cursqfeat, featureGeometry);
+                    } catch (err) {
+                        console.log(JSON.stringify(err));
+                    }
                     if (ifeat) {
                         constrainedgrid.features.push(ifeat);
                     } else {
@@ -255,7 +267,12 @@ var HDHousing = function() {
                 // get the id from gridStore
                 var cursqfeat = gridStore[randomgridid];
                 // have the feature
-                var ifeat = turf.intersect(cursqfeat, featureGeometry);
+                try {
+                    var ifeat = turf.intersect(cursqfeat, featureGeometry);
+                } catch (err) {
+                    console.log(JSON.stringify(err));
+                }
+
                 if (ifeat) {
                     constrainedgrid.features.push(ifeat);
                 } else {
@@ -323,9 +340,11 @@ var MXDBuildings = function() {
 
         for (var x = 0; x < sqfeatslen; x++) {
             var cursqfeat = sqgrid.features[x];
-
-            var ifeat = turf.intersect(cursqfeat, featureGeometry);
-
+            try {
+                var ifeat = turf.intersect(cursqfeat, featureGeometry);
+            } catch (err) {
+                console.log(JSON.stringify(err));
+            }
             if (ifeat) {
                 constrainedgrid.features.push(ifeat);
             } else {
@@ -486,7 +505,11 @@ var LABBuildings = function() {
                     var alreadyaddedlen = alreadyAdded.features.length;
                     for (var x1 = 0; x1 < alreadyaddedlen; x1++) {
                         curalreadyadded = alreadyAdded.features[x1];
-                        ifeat = turf.intersect(curalreadyadded, bldg);
+                        try {
+                            ifeat = turf.intersect(curalreadyadded, bldg);
+                        } catch (err) {
+                            console.log(JSON.stringify(err));
+                        }
                         if (ifeat) {
                             hasIntersect = true;
                             break;
@@ -699,7 +722,11 @@ var StreetsHelper = function() {
             var intersects = false;
             for (var p = 0, stLen = streetgrid.features.length; p < stLen; p++) {
                 var curStF = streetgrid.features[p];
-                var intersect = turf.intersect(curF1, curStF);
+                try {
+                    var intersect = turf.intersect(curF1, curStF);
+                } catch (err) {
+                    console.log(JSON.stringify(err));
+                }
                 // chop road
                 if (intersect) {
                     intersects = true;
