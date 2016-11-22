@@ -307,6 +307,16 @@
         }
     })();
 
+    function downloadGJ() {
+        var hiddenElement = document.createElement('a');
+
+        hiddenElement.href = 'data:attachment/text,' + encodeURI(JSON.stringify(generatedData));
+        hiddenElement.target = '_blank';
+        hiddenElement.download =  'generatedbuildings.geojson';
+        hiddenElement.click();
+
+    }
+
 </script>
 
 </html>
