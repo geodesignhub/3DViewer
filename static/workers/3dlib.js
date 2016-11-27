@@ -95,7 +95,7 @@ var COMBuilding = function() {
                             'height': height,
                             'color': "#d0d0d0",
                             'roofColor': color,
-                            'sysname': sysname
+                            'sysname': sysname,
                         };
                         bldg.properties = p;
                         alreadyAdded.features.push(bldg);
@@ -262,7 +262,7 @@ var HDHousing = function() {
                 gridStore[gridid] = cursqgrid;
                 gridid += 1;
             }
-            
+
             while (extrudedfeaturescount < numberofextrusions + 1) {
                 var randomgridid = Math.floor(Math.random() * (sqfeatslen - 0 + 1)) + 0;
                 // get the id from gridStore
@@ -856,8 +856,7 @@ function generateFinal3DGeoms(constraintedModelDesigns, genstreets, existingroad
                         for (var k2 = 0; k2 < bldgs.features.length; k2++) {
                             finalGJFeats.push(bldgs.features[k2]);
                         }
-                    }
-                    else if (featProps.sysname === 'MXD') {
+                    } else if (featProps.sysname === 'MXD') {
                         var mxd = new MXDBuildings();
                         var mxdgrid = mxd.generateSquareGridandConstrain(curFeat);
                         // console.log(JSON.stringify(mxdgrid));
