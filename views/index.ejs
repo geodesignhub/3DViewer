@@ -73,7 +73,8 @@
 						<p><button class="button buttongreen" onclick="downloadGJ()">Download Data</button></p>
 					</div>
                     </div>
-					
+					<br>
+					<br>
 				</section>
 
 			</div>
@@ -313,23 +314,16 @@
         }
     })();
 
+    function downloadGJ() {
+        var hiddenElement = document.createElement('a');
 
-function downloadGJ() {
-    filename = 'generatedgeometries.geojson';
-    text = JSON.stringify(generatedData);    
-    var pom = document.createElement('a');
-    pom.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
-    pom.setAttribute('download', filename);
+        hiddenElement.href = 'data:attachment/text,' + encodeURI(JSON.stringify(generatedData));
+        hiddenElement.target = '_blank';
+        hiddenElement.download =  'generatedbuildings.geojson';
+        hiddenElement.click();
 
-    if (document.createEvent) {
-        var event = document.createEvent('MouseEvents');
-        event.initEvent('click', true, true);
-        pom.dispatchEvent(event);
     }
-    else {
-        pom.click();
-    }
-}
+
 </script>
 
 </html>
