@@ -20,7 +20,10 @@
     height: 500px;
 }
 
-
+.main {
+    padding-left: 10px;
+    padding-right: 10px;
+}
 /*
 #glMap {
     width: 100%;
@@ -83,7 +86,7 @@ textarea#gjTA {
 }
 
 .button {
-    background-color: #4CAF50;
+   
     /* Green */
     font-family: 'Open Sans', sans-serif;
     border: none;
@@ -96,11 +99,14 @@ textarea#gjTA {
     margin: 4px 2px;
     cursor: pointer;
 }
-
+.buttonblue {
+   background-color: #3498db;
+    /*border: 2px solid #008CBA;*/
+}
 .buttongreen {
-    background-color: white;
-    color: black;
-    border: 2px solid #008CBA;
+   background-color: #4CAF50;
+   
+    /*border: 2px solid #008CBA;*/
 }
 
 ol {
@@ -313,20 +319,6 @@ ul.input-list li {
     border: solid 5px #969696;
 }
 
-.button {
-    background-color: #4CAF50;
-    /* Green */
-    font-family: 'Open Sans', sans-serif;
-    border: none;
-    color: white;
-    padding: 8px 16px;
-    text-align: center;
-    text-decoration: none;
-    display: inline-block;
-    font-size: 14px;
-    margin: 2px 1px;
-    cursor: pointer;
-}
 
 span.grey {
     font-family: 'Open Sans', sans-serif;

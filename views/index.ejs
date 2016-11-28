@@ -24,56 +24,61 @@
 	<div class="container-fluid">
 		<div class="row">
 
-			<div class="col-sm-4 col-md-4 main">
+			<div class="col-sm-3 col-md-3 main">
 				<h1 class="page-header">Geodesign Hub 3D Viewer</h1>
 				<section class="information">
-					<p class="description">This project uses <a href="http://osmbuildings.org/" target="_blank">OSM Buildings</a> library for visualization and
+					<p class="description">This plugin uses <a href="http://osmbuildings.org/" target="_blank">OSM Buildings</a> library for visualization and
 						design data from <a href="http://www.geodesignhub.com/">Geodesign Hub</a>. See the <a href="https://github.com/hrishiballal/GDH3DViewer">GitHub repository</a>.</p>
 					<br>
 					<div class="instruction">
 						<ol>
-							<li>Use the Geodeisgn Hub API <a href="https://www.geodesignhub.com/api/" target="_blank">GET Synthesis JSON</a> call
-								to get a design JSON. Sample GeoJSON is <a href="https://gist.github.com/hrishiballal/7e02d0d04b37c5d0fcb6?short_path=9ecf4a9">here</a>.</li>
-							<li>Paste the GeoJSON below</li>
-							<li>Click "Generate Scene" button</li>
+							<li>Wait till the processing is complete</li>
+							<li>Turn on or off streets and systems</li>
+							<li>Click "Regenerate Scene" button to rebuild</li>
 
 						</ol>
 					</div>
-
-					<textarea id="gjTA" name="styled-textarea">Paste GeoJSON from Geodesign Hub here...</textarea><br>
-
-					<input id="genStreetsCB" class="checkbox-custom" name="checkbox-1" type="checkbox"> Display generated streets<br><br>
+					<textarea id="gjTA" style="display:none" name="styled-textarea">Paste GeoJSON from Geodesign Hub here...</textarea>
+                    <h4>Streets</h4>
+					<input id="genStreetsCB" class="checkbox-custom" name="checkbox-1" type="checkbox" checked> Display generated streets<br><br>
 					<div id="systemsCBCont" style="display:none">
 						<h4>Systems</h4>
 						<div id="systemsCB"></div>
 					</div>
 					<br>
+                    <h4>Refresh</h4>
 					<div>
-						<p><button class="button" onclick="submitGJ()">Generate Scene</button></p>
+						<p><button class="button buttonblue" onclick="submitGJ()">Regenerate Scene</button></p>
 						<div id="loadingGIF"><img src="/assets/objs/loading.gif">&nbsp;<span id="procstatus">Processing</span>...</div>
 					</div>
 					<br>
 					<div class="glcontrol">
 						<h4>Map Controls</h4>
 						<span class="tilt">
-          <button class="dec">&#8601;</button>
-          <button class="inc">&#8599;</button>
-        </span>
-						<span class="rotation">
-          <button class="inc">&#8630;</button>
-          <button class="dec">&#8631;</button>
-        </span>
-						<span class="zoom">
-          <button class="dec">-</button>
-          <button class="inc">+</button>
-        </span>
+                            <button class="dec">&#8601;</button>
+                            <button class="inc">&#8599;</button>
+                            </span>
+                                            <span class="rotation">
+                            <button class="inc">&#8630;</button>
+                            <button class="dec">&#8631;</button>
+                            </span>
+                                            <span class="zoom">
+                            <button class="dec">-</button>
+                            <button class="inc">+</button>
+                            </span>
+					</div><br>
+                    <div id='downloadLink' style='display:none'>
+                    <h4>Download</h4>
+					<div>
+						<p><button class="button buttongreen" onclick="downloadGJ()">Download Data</button></p>
 					</div>
-					<br>
+                    </div>
+					
 				</section>
 
 			</div>
 
-			<div id="glMap" class="col-sm-8 col-md-8 sidebar">
+			<div id="glMap" class="col-sm-9 col-md-9 sidebar">
 
 			</div>
 
@@ -226,6 +231,7 @@
 
         function updateGLData(gjsonData) {
             $("#loadingGIF").hide();
+            $("#downloadLink").show();
             $("#procstatus").html("Processing..");
             humane.log("Rendering Scene..", {
                 addnCls: 'humane-flatty-success'
