@@ -95,6 +95,7 @@ var COMBuilding = function () {
                             'height': height,
                             'color': "#d0d0d0",
                             'roofColor': color,
+                            "isStreet": 0,
                             'sysname': sysname,
                         };
                         bldg.properties = p;
@@ -138,6 +139,7 @@ var COMBuilding = function () {
                             'height': height,
                             'color': "#d0d0d0",
                             'roofColor': color,
+                            "isStreet": 0,
                             'sysname': sysname
                         };
                         bpoly.properties = p;
@@ -203,6 +205,7 @@ var LDHousing = function () {
                 'height': height,
                 'color': "#d0d0d0",
                 'roofColor': color,
+                "isStreet": 0,
                 'sysname': sysname
             };
             bpoly.properties = p;
@@ -305,7 +308,8 @@ var HDHousing = function () {
                         "height": height,
                         "color": "#d0d0d0",
                         "roofColor": featProps.color,
-                        "sysname": featProps.sysname
+                        "sysname": featProps.sysname,
+                        "isStreet": 0
                     };
                     bboxpoly.properties = props;
                     generatedGeoJSON.features.push(bboxpoly);
@@ -390,6 +394,7 @@ var MXDBuildings = function () {
                         "height": height,
                         "color": "#d0d0d0",
                         "roofColor": featProps.color,
+                        "isStreet": 0,
                         "sysname": featProps.sysname
                     };
                     buildingpoly.properties = props;
@@ -524,6 +529,7 @@ var LABBuildings = function () {
                             'height': height,
                             'color': "#d0d0d0",
                             'roofColor': featProps.color,
+                            "isStreet": 0,
                             'sysname': featProps.sysname
                         };
                         bldg.properties = p;
@@ -587,6 +593,7 @@ var SMBBuildings = function () {
                     "height": height,
                     "color": "#d0d0d0",
                     "roofColor": color,
+                    "isStreet": 0,
                     "sysname": featProps.sysname
                 };
                 bpoly.properties = p;
@@ -795,6 +802,7 @@ function generatePolicyFeatures(curFeat) {
     var prop = {
         "roofColor": curFeatprops.color,
         "height": height,
+        "isStreet": 0,
         "sysname": curFeatprops.sysname
     }
     for (var l1 = 0; l1 < pwLen; l1++) {
@@ -839,6 +847,7 @@ function generateFinal3DGeoms(constraintedModelDesigns, genstreets, existingroad
                 curlineFeat.properties = {
                     "color": curFeat.properties.color,
                     "roofColor": curFeat.properties.color,
+                    "isStreet": 0,
                     "sysname": curFeat.properties.sysname,
                     "height": height
                 };
@@ -960,6 +969,7 @@ function generateFinal3DGeoms(constraintedModelDesigns, genstreets, existingroad
                     var height = elevationoffset + 0.01;
                     var prop = {
                         "roofColor": curFeat.properties.color,
+                        "isStreet": 0,
                         "height": height,
                         "sysname": curFeat.properties.sysname
                     }
