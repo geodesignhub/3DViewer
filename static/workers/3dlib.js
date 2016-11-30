@@ -95,7 +95,7 @@ var COMBuilding = function () {
                             'height': height,
                             'color': "#d0d0d0",
                             'roofColor': color,
-                            "isStreet": 0,
+                            'isStreet': 0,
                             'sysname': sysname,
                         };
                         bldg.properties = p;
@@ -139,7 +139,7 @@ var COMBuilding = function () {
                             'height': height,
                             'color': "#d0d0d0",
                             'roofColor': color,
-                            "isStreet": 0,
+                            'isStreet': 0,
                             'sysname': sysname
                         };
                         bpoly.properties = p;
@@ -205,7 +205,7 @@ var LDHousing = function () {
                 'height': height,
                 'color': "#d0d0d0",
                 'roofColor': color,
-                "isStreet": 0,
+                'isStreet': 0,
                 'sysname': sysname
             };
             bpoly.properties = p;
@@ -529,7 +529,7 @@ var LABBuildings = function () {
                             'height': height,
                             'color': "#d0d0d0",
                             'roofColor': featProps.color,
-                            "isStreet": 0,
+                            'isStreet': 0,
                             'sysname': featProps.sysname
                         };
                         bldg.properties = p;

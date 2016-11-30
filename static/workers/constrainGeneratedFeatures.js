@@ -8,9 +8,11 @@ function constrainFeatures(allFeaturesList, selectedsystems, showstreets) {
     var counter = 0;
     var fullproc = featlen;
     for (var d = 0; d < featlen; d++) {
+        
         var curfeatprop = af[d].properties;
         var curFeatSys = curfeatprop.sysname;
         var isSteet = curfeatprop.isSteet;
+        console.log(isSteet, showstreets);
         if (isSteet && showstreets) {
             constraintedFeatures.features.push(af[d]);
         }
