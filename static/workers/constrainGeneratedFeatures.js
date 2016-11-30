@@ -11,9 +11,8 @@ function constrainFeatures(allFeaturesList, selectedsystems, showstreets) {
         
         var curfeatprop = af[d].properties;
         var curFeatSys = curfeatprop.sysname;
-        var isSteet = curfeatprop.isSteet;
-        console.log(isSteet, showstreets);
-        if (isSteet && showstreets) {
+        var isStreet = curfeatprop.isStreet;
+        if (isStreet && JSON.parse(showstreets)) {
             constraintedFeatures.features.push(af[d]);
         }
         else {
