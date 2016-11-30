@@ -314,7 +314,7 @@
                 $('#systemsCB input:checked').each(function() {
                     selectedsystems.push($(this).attr('id'));
                 });
-                var showStreets =  ($('#showStreetsCB input').is(":checked")) ?1:0;
+                var showStreets =  ($('#showStreetsCB').is(":checked")) ?1:0;
                 $("#loadingGIF").show();
                 var constrainWorker = new Worker('/assets/workers/constrainGeneratedFeatures.js');
                 constrainWorker.onerror = function(e) {
