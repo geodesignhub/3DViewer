@@ -10,7 +10,7 @@ function constrainFeatures(allFeaturesList, selectedsystems, showstreets) {
     for (var d = 0; d < featlen; d++) {
         var curfeatprop = af[d].properties;
         var curFeatSys = curfeatprop.sysname;
-        var isSteet = curFeatSys.isSteet;
+        var isSteet = curfeatprop.isSteet;
         if (isSteet && showstreets) {
             constraintedFeatures.features.push(af[d]);
         }
