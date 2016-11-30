@@ -40,7 +40,7 @@
 					</div>
 					<textarea id="gjTA" style="display:none" name="styled-textarea">Paste GeoJSON from Geodesign Hub here...</textarea>
                     <h4>Streets</h4>
-					<input id="genStreetsCB" class="checkbox-custom" name="checkbox-1" type="checkbox" checked> Display generated streets<br><br>
+					<input id="showStreetsCB" class="checkbox-custom" name="checkbox-1" type="checkbox" checked> Display generated streets<br><br>
 					<div id="systemsCBCont" style="display:none">
 						<h4>Systems</h4>
 						<div id="systemsCB"></div>
@@ -142,9 +142,7 @@
                 }
             });
         }
-        function generateSystemCB(systems){
-           
-            
+        function generateSystemCB(systems){    
             for (var x =0; x<systems.length;x++){
                 $('#systemsCB').append('<input name="sysCB" id='+"'"+ systems[x].sysname+"'" +'type="checkbox" checked /> <span class="square c-'+ systems[x].syscolor.substring(1) +'"></span>&nbsp;&nbsp;' + systems[x].sysname + '</input>&nbsp;&nbsp;');
             }
@@ -167,7 +165,7 @@
                 });
             } else {
                 gj = JSON.parse(gj);
-                var genstreets = document.getElementById("genStreetsCB").checked;
+                var genstreets = document.getElementById("showStreetsCB").checked;
                 start3dWorker(gj, genstreets, selectedsystems);
                 $("#loadingGIF").show();
             }
@@ -281,7 +279,9 @@
                 generateSystemCB(systems);
                  $('#systemsCBCont').show();
                 submitGJ();
-                $('#systemsCB').click(function(){
+                $("#showStreetsCB").click(function(){
+                    var showstreets = ($(this).is(":checked")) ?1:0;
+
                 var selectedsystems = [];
                 $('#systemsCB input:checked').each(function() {
                     selectedsystems.push($(this).attr('id'));
@@ -298,7 +298,37 @@
                 // console.log(selectedsystems);
                 constrainWorker.postMessage({
                     'allFeaturesList': generatedData,
-                    'selectedsystems': JSON.stringify(selectedsystems)
+                    'selectedsystems': JSON.stringify(selectedsystems),
+                    'showstreets': showstreets
+                });
+                constrainWorker.addEventListener('message', function(e) {
+                if (e.data.mode === 'status') {
+                    updateWorkerStatus(e.data.percentcomplete);
+                } else {
+                     updateGLData(e.data.polygons);
+                }
+                }, false);
+                });
+                $('#systemsCB').click(function(){
+                var selectedsystems = [];
+                $('#systemsCB input:checked').each(function() {
+                    selectedsystems.push($(this).attr('id'));
+                });
+                var showStreets =  ($('#showStreetsCB input').is(":checked")) ?1:0;
+                $("#loadingGIF").show();
+                var constrainWorker = new Worker('/assets/workers/constrainGeneratedFeatures.js');
+                constrainWorker.onerror = function(e) {
+                    console.log('Error: Line ' + e.lineno + ' in ' + e.filename + ': ' + e.message);
+                    $("#loadingGIF").hide();
+                    humane.log("There was a error in processing, please try again.. ", {
+                        addnCls: 'humane-flatty-error'
+                    });
+                };
+                // console.log(selectedsystems);
+                constrainWorker.postMessage({
+                    'allFeaturesList': generatedData,
+                    'selectedsystems': JSON.stringify(selectedsystems),
+                    'showstreets':showStreets
                 });
                 constrainWorker.addEventListener('message', function(e) {
                 if (e.data.mode === 'status') {
