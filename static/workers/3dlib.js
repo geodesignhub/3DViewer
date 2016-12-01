@@ -295,7 +295,13 @@ var HDHousing = function () {
         var extrusionconter = 0;
         for (var k1 = 0; k1 < consgridlen; k1++) {
             var curconsfeat = constrainedgrid.features[k1];
-            var curarea = turf.area(curconsfeat);
+            var curarea;
+            try {
+                curarea = turf.area(curconsfeat);
+            }
+            catch (err) {
+                curarea = 0;
+            }
             if (curarea > 2000) { //max area is 2500 gridsize squared
                 var chosenValue = Math.random() > 0.6 ? true : false;
                 if (chosenValue) {
@@ -366,12 +372,19 @@ var MXDBuildings = function () {
         // find centroid
         for (var k1 = 0; k1 < consgridlen; k1++) {
             var curconsfeat = constrainedgrid.features[k1];
-            var curarea = turf.area(curconsfeat);
-            var center = turf.centroid(curconsfeat);
+            var curarea;
+            try {
+                curarea = turf.area(curconsfeat);
+            }
+            catch (err) {
+                curarea = 0;
+            }
 
             if (curarea > 6300) { //max area is 3600 need entire parcel. 
+
                 var cv = Math.random() < 0.5 ? true : false;
                 if (cv) {
+                    var center = turf.centroid(curconsfeat);
                     var outerring = turf.buffer(center, outerringradius, units);
                     var innerring = turf.buffer(center, innerringradius, units);
                     var middlering = turf.buffer(center, middleringradius, units);
