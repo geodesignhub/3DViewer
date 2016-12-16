@@ -907,7 +907,7 @@ function generateFinal3DGeoms(constraintedModelDesigns, genstreets, existingroad
                         for (var k1 = 0; k1 < ldhfinalFeatures.length; k1++) {
                             finalGJFeats.push(ldhfinalFeatures[k1]);
                         }
-                    } else if ((featProps.sysname === 'COM') || (featProps.sysname === 'COMIND')) {
+                    } else if ((featProps.sysname === 'COM')) {
                         var com = new COMBuilding();
                         var comp = com.genGrid(curFeat);
                         var comptsWithin = comp[0];
@@ -924,6 +924,26 @@ function generateFinal3DGeoms(constraintedModelDesigns, genstreets, existingroad
                         }
                         for (var k1 = 0; k1 < comfinalFeatures.length; k1++) {
                             finalGJFeats.push(comfinalFeatures[k1]);
+                        }
+                    }
+                    else if (featProps.sysname === 'COMIND') {
+                        var lab = new LABBuildings();
+                        var labgrid = lab.genGrid(curFeat);
+                        var labptsWithin = labgrid[0];
+                        var labfeatExtent = labgrid[1];
+                        var labbldgs = lab.generateBuildingFootprints(labptsWithin);
+
+                        var labstreets = new StreetsHelper();
+                        var labStreetsFC = labstreets.genStreetsGrid(labptsWithin, labfeatExtent);
+                        var labFinalFeatures = labstreets.filterStreets(labStreetsFC, labbldgs);
+                        if (existingroads) {
+                            labFinalFeatures = labstreets.filterStreets(existingroads, labFinalFeatures);
+                        }
+                        if (genstreets) {
+                            labFinalFeatures.push.apply(labFinalFeatures, labStreetsFC.features);
+                        }
+                        for (var k1 = 0; k1 < labFinalFeatures.length; k1++) {
+                            finalGJFeats.push(labFinalFeatures[k1]);
                         }
                     }
                 } else if (curFeat.properties.areatype === 'policy') { // whitelisted policy
