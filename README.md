@@ -1,6 +1,10 @@
 # GDH-3DViewer
-A 3D viewer for designs on Geodesign Hub, using OSM Buildings
+A 3D viewer for designs on Geodesign Hub, using OSM Buildings. 
 
-Live Demo here: https://gdh3dviewer.herokuapp.com/
+#### Screenshots
+![screenshot](https://i.imgur.com/SOibKbs.png)
 
-Blog post here: http://hrishikeshballal.net/2016/02/26/generating-buildings-and-roads-from-geojson/ 
+![screenshot](https://i.imgur.com/3QhOBvR.png)
+
+
+
