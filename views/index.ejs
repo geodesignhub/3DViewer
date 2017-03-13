@@ -27,8 +27,7 @@
             <div class="col-sm-3 col-md-3 main">
                 <h1 class="page-header">Geodesign Hub 3D Viewer</h1>
                 <section class="information">
-                    <p class="description">This plugin uses <a href="http://osmbuildings.org/" target="_blank">OSM Buildings</a> library for visualization
-                        and design data from <a href="http://www.geodesignhub.com/">Geodesign Hub</a>. See the <a href="https://github.com/hrishiballal/GDH3DViewer">GitHub repository</a>.</p>
+                    <p class="description">This plugin uses <a href="http://osmbuildings.org/" target="_blank">OSM Buildings</a> library for visualization and design data from <a href="http://www.geodesignhub.com/">Geodesign Hub</a>. See the <a href="https://github.com/geodesignhub/3DViewer">GitHub repository</a>.</p>
                     <br>
                     <div class="instruction">
                         <ol>
@@ -40,8 +39,7 @@
                     </div>
                     <textarea id="gjTA" style="display:none" name="styled-textarea">Paste GeoJSON from Geodesign Hub here...</textarea>
                     <h4>Streets</h4>
-                    <input id="showStreetsCB" class="checkbox-custom" name="checkbox-1" type="checkbox" checked> Display
-                    generated streets<br><br>
+                    <input id="showStreetsCB" class="checkbox-custom" name="checkbox-1" type="checkbox" checked> Display generated streets<br><br>
                     <div id="systemsCBCont" style="display:none">
                         <h4>Systems</h4>
                         <div id="systemsCB"></div>
@@ -144,11 +142,13 @@
                 }
             });
         }
-        function generateSystemCB(systems){    
-            for (var x =0; x<systems.length;x++){
-                $('#systemsCB').append('<input name="sysCB" id='+"'"+ systems[x].sysname+"'" +'type="checkbox" checked /> <span class="square c-'+ systems[x].syscolor.substring(1) +'"></span>&nbsp;&nbsp;' + systems[x].sysname + '</input>&nbsp;&nbsp;');
+
+        function generateSystemCB(systems) {
+            for (var x = 0; x < systems.length; x++) {
+                $('#systemsCB').append('<input name="sysCB" id=' + "'" + systems[x].sysname + "'" + 'type="checkbox" checked /> <span class="square c-' + systems[x].syscolor.substring(1) + '"></span>&nbsp;&nbsp;' + systems[x].sysname + '</input>&nbsp;&nbsp;');
             }
         }
+
         function setbg(color) {
             document.getElementById("styled").style.background = color;
         }
@@ -158,7 +158,7 @@
             $('#systemsCB input:checked').each(function() {
                 selectedsystems.push($(this).attr('id'));
             });
-            
+
             var gj = document.getElementById("gjTA").value;
             var gjerrors = geojsonhint.hint(gj);
             if (gjerrors.length > 0) {
@@ -193,24 +193,26 @@
             });
             threeDWorker.addEventListener('message', function(e) {
 
-            if (e.data.mode === 'status') {
-                // update status. 
-                updateWorkerStatus(e.data.percentcomplete);
-            } else{
-                generatedData = e.data.polygons;
-                var latlng = e.data.center;
-                // console.log(JSON.stringify(gjsonData));
-                setMapCenter(latlng);
-                updateGLData(generatedData);
-            }
+                if (e.data.mode === 'status') {
+                    // update status. 
+                    updateWorkerStatus(e.data.percentcomplete);
+                } else {
+                    generatedData = e.data.polygons;
+                    var latlng = e.data.center;
+                    // console.log(JSON.stringify(gjsonData));
+                    setMapCenter(latlng);
+                    updateGLData(generatedData);
+                }
 
             }, false);
         }
-        function updateWorkerStatus(percentcomplete){
+
+        function updateWorkerStatus(percentcomplete) {
             var pc = percentcomplete.toString() + '% processing completed..'
             $("#procstatus").html(pc);
-            
+
         }
+
         function setMapCenter(latlng) {
             ll = JSON.parse(latlng);
             osmb.setPosition({
@@ -251,7 +253,9 @@
             //     }
             // }
 
-            var x = osmb.addGeoJSON(JSON.parse(gjsonData), {elevation:-10});
+            var x = osmb.addGeoJSON(JSON.parse(gjsonData), {
+                elevation: -10
+            });
             glb.gjLayer = x;
         }
     </script>
@@ -279,109 +283,113 @@
             if (gjresults.features.length > 0) {
                 $("#gjTA").text(JSON.stringify(gjresults));
                 generateSystemCB(systems);
-                 $('#systemsCBCont').show();
+                $('#systemsCBCont').show();
                 submitGJ();
-                $("#showStreetsCB").click(function(){
-                    var showstreets = ($(this).is(":checked")) ?1:0;
+                $("#showStreetsCB").click(function() {
+                    var showstreets = ($(this).is(":checked")) ? 1 : 0;
 
-                var selectedsystems = [];
-                $('#systemsCB input:checked').each(function() {
-                    selectedsystems.push($(this).attr('id'));
-                });
-                $("#loadingGIF").show();
-                var constrainWorker = new Worker('/assets/workers/constrainGeneratedFeatures.js');
-                constrainWorker.onerror = function(e) {
-                    console.log('Error: Line ' + e.lineno + ' in ' + e.filename + ': ' + e.message);
-                    $("#loadingGIF").hide();
-                    humane.log("There was a error in processing, please try again.. ", {
-                        addnCls: 'humane-flatty-error'
+                    var selectedsystems = [];
+                    $('#systemsCB input:checked').each(function() {
+                        selectedsystems.push($(this).attr('id'));
                     });
-                };
-                // console.log(selectedsystems);
-                constrainWorker.postMessage({
-                    'allFeaturesList': generatedData,
-                    'selectedsystems': JSON.stringify(selectedsystems),
-                    'showstreets': showstreets
-                });
-                constrainWorker.addEventListener('message', function(e) {
-                if (e.data.mode === 'status') {
-                    updateWorkerStatus(e.data.percentcomplete);
-                } else {
-                     updateGLData(e.data.polygons);
-                }
-                }, false);
-                });
-                $('#systemsCB').click(function(){
-                var selectedsystems = [];
-                $('#systemsCB input:checked').each(function() {
-                    selectedsystems.push($(this).attr('id'));
-                });
-                var showStreets =  ($('#showStreetsCB').is(":checked")) ?1:0;
-                $("#loadingGIF").show();
-                var constrainWorker = new Worker('/assets/workers/constrainGeneratedFeatures.js');
-                constrainWorker.onerror = function(e) {
-                    console.log('Error: Line ' + e.lineno + ' in ' + e.filename + ': ' + e.message);
-                    $("#loadingGIF").hide();
-                    humane.log("There was a error in processing, please try again.. ", {
-                        addnCls: 'humane-flatty-error'
+                    $("#loadingGIF").show();
+                    var constrainWorker = new Worker('/assets/workers/constrainGeneratedFeatures.js');
+                    constrainWorker.onerror = function(e) {
+                        console.log('Error: Line ' + e.lineno + ' in ' + e.filename + ': ' + e.message);
+                        $("#loadingGIF").hide();
+                        humane.log("There was a error in processing, please try again.. ", {
+                            addnCls: 'humane-flatty-error'
+                        });
+                    };
+                    // console.log(selectedsystems);
+                    constrainWorker.postMessage({
+                        'allFeaturesList': generatedData,
+                        'selectedsystems': JSON.stringify(selectedsystems),
+                        'showstreets': showstreets
                     });
-                };
-                // console.log(selectedsystems);
-                constrainWorker.postMessage({
-                    'allFeaturesList': generatedData,
-                    'selectedsystems': JSON.stringify(selectedsystems),
-                    'showstreets':showStreets
+                    constrainWorker.addEventListener('message', function(e) {
+                        if (e.data.mode === 'status') {
+                            updateWorkerStatus(e.data.percentcomplete);
+                        } else {
+                            updateGLData(e.data.polygons);
+                        }
+                    }, false);
                 });
-                constrainWorker.addEventListener('message', function(e) {
-                if (e.data.mode === 'status') {
-                   
-                    updateWorkerStatus(e.data.percentcomplete);
-                } else {
-                     updateGLData(e.data.polygons);
-                }
-                }, false);
-            
+                $('#systemsCB').click(function() {
+                    var selectedsystems = [];
+                    $('#systemsCB input:checked').each(function() {
+                        selectedsystems.push($(this).attr('id'));
+                    });
+                    var showStreets = ($('#showStreetsCB').is(":checked")) ? 1 : 0;
+                    $("#loadingGIF").show();
+                    var constrainWorker = new Worker('/assets/workers/constrainGeneratedFeatures.js');
+                    constrainWorker.onerror = function(e) {
+                        console.log('Error: Line ' + e.lineno + ' in ' + e.filename + ': ' + e.message);
+                        $("#loadingGIF").hide();
+                        humane.log("There was a error in processing, please try again.. ", {
+                            addnCls: 'humane-flatty-error'
+                        });
+                    };
+                    // console.log(selectedsystems);
+                    constrainWorker.postMessage({
+                        'allFeaturesList': generatedData,
+                        'selectedsystems': JSON.stringify(selectedsystems),
+                        'showstreets': showStreets
+                    });
+                    constrainWorker.addEventListener('message', function(e) {
+                        if (e.data.mode === 'status') {
+
+                            updateWorkerStatus(e.data.percentcomplete);
+                        } else {
+                            updateGLData(e.data.polygons);
+                        }
+                    }, false);
+
                 });
             }
         }
     })();
-(function(console){
-console.save = function(data, filename){
-if(!data) {
-            console.error('Console.save: No data')
-            return;
+    (function(console) {
+        console.save = function(data, filename) {
+            if (!data) {
+                console.error('Console.save: No data')
+                return;
+            }
+            if (!filename) filename = 'generatedfootprints.geojson'
+            if (typeof data === "object") {
+                data = JSON.stringify(data, undefined, 4)
+            }
+            var blob = new Blob([data], {
+                    type: 'text/json'
+                }),
+                e = document.createEvent('MouseEvents'),
+                a = document.createElement('a')
+            a.download = filename
+            a.href = window.URL.createObjectURL(blob)
+            a.dataset.downloadurl = ['text/json', a.download, a.href].join(':')
+            e.initMouseEvent('click', true, false, window, 0, 0, 0, 0, 0, false, false, false, false, 0, null)
+            a.dispatchEvent(e)
         }
-if(!filename) filename = 'generatedfootprints.geojson'
-if(typeof data === "object"){
-            data = JSON.stringify(data, undefined, 4)
-        }
-var blob = new Blob([data], {type: 'text/json'}),
-            e    = document.createEvent('MouseEvents'),
-            a    = document.createElement('a')
-a.download = filename
-        a.href = window.URL.createObjectURL(blob)
-        a.dataset.downloadurl =  ['text/json', a.download, a.href].join(':')
-        e.initMouseEvent('click', true, false, window, 0, 0, 0, 0, 0, false, false, false, false, 0, null)
-        a.dispatchEvent(e)
-    }
-})(console)
+    })(console)
 
     function downloadGJ() {
         // filter out streets
         var gd = JSON.parse(generatedData);
-      var filteredGJ = {"type":"FeatureCollection", "features":[]};
-      var gendataFeatlen = gd.features.length;
-      for (var k =0; k< gendataFeatlen;k++){
-          var curFeat = gd.features[k];
-        var prop = curFeat.properties;
-        if (prop.isStreet){} else{
-            filteredGJ.features.push(curFeat);
+        var filteredGJ = {
+            "type": "FeatureCollection",
+            "features": []
+        };
+        var gendataFeatlen = gd.features.length;
+        for (var k = 0; k < gendataFeatlen; k++) {
+            var curFeat = gd.features[k];
+            var prop = curFeat.properties;
+            if (prop.isStreet) {} else {
+                filteredGJ.features.push(curFeat);
+            }
         }
-      }
         console.save(filteredGJ);
 
     }
-
 </script>
 
 </html>
