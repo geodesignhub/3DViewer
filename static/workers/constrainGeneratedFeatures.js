@@ -8,14 +8,13 @@ function constrainFeatures(allFeaturesList, selectedsystems, showstreets) {
     var counter = 0;
     var fullproc = featlen;
     for (var d = 0; d < featlen; d++) {
-        
+
         var curfeatprop = af[d].properties;
         var curFeatSys = curfeatprop.sysname;
         var isStreet = curfeatprop.isStreet;
         if (isStreet && JSON.parse(showstreets)) {
             constraintedFeatures.features.push(af[d]);
-        }
-        else {
+        } else {
             if (selectedsystems.indexOf(curFeatSys) > -1) {
                 constraintedFeatures.features.push(af[d]);
             }
@@ -32,6 +31,6 @@ function constrainFeatures(allFeaturesList, selectedsystems, showstreets) {
     });
 }
 
-self.onmessage = function (e) {
+self.onmessage = function(e) {
     constrainFeatures(e.data.allFeaturesList, e.data.selectedsystems, e.data.showstreets);
 }
