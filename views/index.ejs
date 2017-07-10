@@ -38,8 +38,7 @@
                         </ol>
                     </div>
                     <textarea id="gjTA" style="display:none" name="styled-textarea">Paste GeoJSON from Geodesign Hub here...</textarea>
-                    <h4>Streets</h4>
-                    <input id="showStreetsCB" class="checkbox-custom" name="checkbox-1" type="checkbox" checked> Display generated streets<br><br>
+                   <br>
                     <div id="systemsCBCont" style="display:none">
                         <h4>Systems</h4>
                         <div id="systemsCB"></div>
@@ -167,13 +166,12 @@
                 });
             } else {
                 gj = JSON.parse(gj);
-                var genstreets = document.getElementById("showStreetsCB").checked;
-                start3dWorker(gj, genstreets, selectedsystems);
+                start3dWorker(gj, selectedsystems);
                 $("#loadingGIF").show();
             }
         }
 
-        function start3dWorker(allFeaturesList, genstreets, selectedsystems) {
+        function start3dWorker(allFeaturesList, selectedsystems) {
             humane.log("Processing..", {
                 addnCls: 'humane-flatty-info'
             });
@@ -187,8 +185,6 @@
             };
             threeDWorker.postMessage({
                 'allFeaturesList': JSON.stringify(allFeaturesList),
-                'existingroads': JSON.stringify(roads),
-                'genstreets': JSON.stringify(genstreets),
                 'selectedsystems': JSON.stringify(selectedsystems)
             });
             threeDWorker.addEventListener('message', function(e) {
@@ -270,7 +266,6 @@
     var cteamid = "<%= cteamid %>"; //var test is now assigned to getTest which will only work on browsers   
     var systems = <%- systems %>; //var test is now assigned to getTest which will only work on browsers  
     var gjresults = <%- result %>;
-    var roads = <%- roads %>;
     (function() {
         if ((apitoken !== "0" && projectid !== "0" && diagramid !== "0")) {
             // it is synthesis. 
@@ -285,42 +280,12 @@
                 generateSystemCB(systems);
                 $('#systemsCBCont').show();
                 submitGJ();
-                $("#showStreetsCB").click(function() {
-                    var showstreets = ($(this).is(":checked")) ? 1 : 0;
-
-                    var selectedsystems = [];
-                    $('#systemsCB input:checked').each(function() {
-                        selectedsystems.push($(this).attr('id'));
-                    });
-                    $("#loadingGIF").show();
-                    var constrainWorker = new Worker('/assets/workers/constrainGeneratedFeatures.js');
-                    constrainWorker.onerror = function(e) {
-                        console.log('Error: Line ' + e.lineno + ' in ' + e.filename + ': ' + e.message);
-                        $("#loadingGIF").hide();
-                        humane.log("There was a error in processing, please try again.. ", {
-                            addnCls: 'humane-flatty-error'
-                        });
-                    };
-                    // console.log(selectedsystems);
-                    constrainWorker.postMessage({
-                        'allFeaturesList': generatedData,
-                        'selectedsystems': JSON.stringify(selectedsystems),
-                        'showstreets': showstreets
-                    });
-                    constrainWorker.addEventListener('message', function(e) {
-                        if (e.data.mode === 'status') {
-                            updateWorkerStatus(e.data.percentcomplete);
-                        } else {
-                            updateGLData(e.data.polygons);
-                        }
-                    }, false);
-                });
                 $('#systemsCB').click(function() {
                     var selectedsystems = [];
                     $('#systemsCB input:checked').each(function() {
                         selectedsystems.push($(this).attr('id'));
                     });
-                    var showStreets = ($('#showStreetsCB').is(":checked")) ? 1 : 0;
+                    
                     $("#loadingGIF").show();
                     var constrainWorker = new Worker('/assets/workers/constrainGeneratedFeatures.js');
                     constrainWorker.onerror = function(e) {
@@ -334,7 +299,7 @@
                     constrainWorker.postMessage({
                         'allFeaturesList': generatedData,
                         'selectedsystems': JSON.stringify(selectedsystems),
-                        'showstreets': showStreets
+                        
                     });
                     constrainWorker.addEventListener('message', function(e) {
                         if (e.data.mode === 'status') {

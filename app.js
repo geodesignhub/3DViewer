@@ -50,41 +50,9 @@ app.get('/', function(request, response) {
             var gj = JSON.stringify(results[0]['geojson']);
             var bounds = results[1];
 
-            var roadsURL = "https://geodzn.com/api/v1/sql/gdhsupport?q=SELECT ST_AsGeoJSON(threedviewer.roadsall.the_geom) FROM threedviewer.roadsall WHERE threedviewer.roadsall.the_geom @ ST_MakeEnvelope(" + bounds['bounds'] + ")&key=54ed6c30bec7a53df8202d6057806a03";
+            opts['systems'] = 0;
 
-            var rURls = [roadsURL];
-
-            async.map(rURls, function(url, done) {
-                req({
-                    url: url,
-                    headers: {
-                        "Content-Type": "application/json"
-                    }
-                }, function(err, response, body) {
-                    if (err || response.statusCode !== 200) {
-                        return done(err || new Error());
-                    }
-                    return done(null, JSON.parse(body));
-                });
-            }, function(err, roads) {
-                if (err) return response.sendStatus(500);
-                opts['result'] = gj;
-                var rfc1 = { "type": "FeatureCollection", "features": [] };
-                if (roads[0].features === null) {} else {
-                    var rlen1 = roads[0].features.length;
-                    for (var x7 = 0; x7 < rlen1; x7++) {
-                        var curroad = roads[0].features[x7];
-                        var roadgj = JSON.parse(curroad.properties.st_asgeojson);
-                        var f8 = { "type": "Feature", "properties": {}, "geometry": roadgj };
-                        rfc1.features.push(f8);
-                    }
-
-                }
-                opts['roads'] = JSON.stringify(rfc1);
-                opts['systems'] = 0;
-
-                response.render('index', opts);
-            });
+            response.render('index', opts);
 
         });
 
@@ -160,7 +128,7 @@ app.get('/', function(request, response) {
         });
 
     } else {
-        opts = { 'apitoken': '0', 'projectid': '0', 'diagramid': '0', 'result': '0', 'cteamid': '0', 'systems': '0', 'synthesisid': '0', 'roads': '0' };
+        opts = { 'apitoken': '0', 'projectid': '0', 'diagramid': '0', 'result': '0', 'cteamid': '0', 'systems': '0', 'synthesisid': '0' };
         response.render('index', opts);
     }
 
