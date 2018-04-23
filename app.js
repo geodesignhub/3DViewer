@@ -21,8 +21,8 @@ app.get('/', function(request, response) {
         // only diagram ID is given
         opts = { 'apitoken': request.query.apitoken, 'projectid': request.query.projectid, 'diagramid': request.query.diagramid, 'cteamid': '0', 'synthesisid': '0' };
 
-        // var baseurl = 'https://www.geodesignhub.com/api/v1/projects/';
-        var baseurl = 'http://local.test:8000/api/v1/projects/';
+        var baseurl = 'https://www.geodesignhub.com/api/v1/projects/';
+        // var baseurl = 'http://local.test:8000/api/v1/projects/';
         var apikey = request.query.apitoken;
         var cred = "Token " + apikey;
         var projectid = request.query.projectid;
@@ -61,8 +61,8 @@ app.get('/', function(request, response) {
         // synthesis ID is given
         opts = { 'apitoken': request.query.apitoken, 'projectid': request.query.projectid, 'synthesisid': request.query.synthesisid, 'cteamid': request.query.cteamid, 'diagramid': '0' };
 
-        // var baseurl = 'https://www.geodesignhub.com/api/v1/projects/';
-        var baseurl = 'http://local.test:8000/api/v1/projects/';
+        var baseurl = 'https://www.geodesignhub.com/api/v1/projects/';
+        // var baseurl = 'http://local.test:8000/api/v1/projects/';
 
         var apikey = request.query.apitoken;
         var cred = "Token " + apikey;
