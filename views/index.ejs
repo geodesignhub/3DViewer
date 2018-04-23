@@ -9,12 +9,15 @@
     <link type="text/css" rel="stylesheet" href="assets/css/bootstrap.min.css">
     <link rel="stylesheet" type="text/css" href="assets/css/style.css">
     <link rel="stylesheet" type="text/css" href="assets/css/base.css">
+    <link rel="stylesheet" type="text/css" href="assets/css/leaflet.css">
     <link rel='shortcut icon' href='/assets/objs/favicon.ico' type='image/x-icon' />
     <link rel="stylesheet" href="/assets/OSMBuildings/OSMBuildings.css">
     <link rel="stylesheet" href="/assets/js/humane/flatty.css">
     <link href='https://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css'>
     <link href='https://fonts.googleapis.com/css?family=Raleway' rel='stylesheet' type='text/css'>
     <script type="text/javascript" src="/assets/js/jquery/jquery.min.js"></script>
+    <script type="text/javascript" src="/assets/js/leaflet/leaflet.js"></script>
+    <script type="text/javascript" src="/assets/js/svg/svg.min.js"></script>
     <script type="text/javascript" src="/assets/OSMBuildings/OSMBuildings.js"></script>
     <script type="text/javascript" src="/assets/js/geojsonlint/geojsonlint.js"></script>
     <script type="text/javascript" src="/assets/js/humane/humane.min.js"></script>
@@ -29,6 +32,7 @@
                 <section class="information">
                     <p class="description">This plugin uses <a href="http://osmbuildings.org/" target="_blank">OSM Buildings</a> library for visualization and design data from <a href="http://www.geodesignhub.com/">Geodesign Hub</a>. See the <a href="https://github.com/geodesignhub/3DViewer">GitHub repository</a>.</p>
                     <br>
+                    <!-- <br>
                     <div class="instruction">
                         <ol>
                             <li>Wait till the processing is complete</li>
@@ -36,18 +40,18 @@
                             <li>Click "Regenerate Scene" button to rebuild</li>
 
                         </ol>
+                    </div> -->
+                    <!-- <textarea id="gjTA" style="display:none" name="styled-textarea">Paste GeoJSON from Geodesign Hub here...</textarea> -->
+                    <br>
+                    <h4>Design</h4>
+                    <div>
+                        <div id="inputmap"></div>
                     </div>
-                    <textarea id="gjTA" style="display:none" name="styled-textarea">Paste GeoJSON from Geodesign Hub here...</textarea>
-                   <br>
+                    <br>
+                    <hr style=" margin-top:20px !important; margin-bottom:20px !important; " />
                     <div id="systemsCBCont" style="display:none">
                         <h4>Systems</h4>
                         <div id="systemsCB"></div>
-                    </div>
-                    <br>
-                    <h4>Refresh</h4>
-                    <div>
-                        <p><button class="button buttonblue" onclick="submitGJ()">Regenerate Scene</button></p>
-                        <div id="loadingGIF"><img src="/assets/objs/loading.gif">&nbsp;<span id="procstatus">Processing</span>...</div>
                     </div>
                     <br>
                     <div class="glcontrol">
@@ -73,6 +77,8 @@
                     </div>
                     <br>
                     <br>
+
+                    <div id="drawing"></div>
                 </section>
 
             </div>
@@ -142,6 +148,10 @@
             });
         }
 
+
+
+
+
         function generateSystemCB(systems) {
             for (var x = 0; x < systems.length; x++) {
                 $('#systemsCB').append('<input name="sysCB" id=' + "'" + systems[x].sysname + "'" + 'type="checkbox" checked /> <span class="square c-' + systems[x].syscolor.substring(1) + '"></span>&nbsp;&nbsp;' + systems[x].sysname + '</input>&nbsp;&nbsp;');
@@ -158,7 +168,8 @@
                 selectedsystems.push($(this).attr('id'));
             });
 
-            var gj = document.getElementById("gjTA").value;
+            var gj = JSON.stringify(gjresults);
+            // document.getElementById("gjTA").value;
             var gjerrors = geojsonhint.hint(gj);
             if (gjerrors.length > 0) {
                 humane.log("The GeoJSON you have entered is invalid.. ", {
@@ -266,17 +277,130 @@
     var cteamid = "<%= cteamid %>"; //var test is now assigned to getTest which will only work on browsers   
     var systems = <%- systems %>; //var test is now assigned to getTest which will only work on browsers  
     var gjresults = <%- result %>;
+    var bounds = <%- bounds %>;
+
+    var inputmap = L.map('inputmap', {
+        zoomControl: true,
+        minZoom: 6,
+        maxZoom: 18,
+        scrollWheelZoom: false,
+        dragging: false,
+        zoomControl: false,
+        doubleClickZoom: false
+    });
+    // FeatureGroup is to store editable layers
+    var designLayer = new L.FeatureGroup();
+
+    var inputbaseLayer = L.tileLayer('https://cartodb-basemaps-{s}.global.ssl.fastly.net/light_all/{z}/{x}/{y}.png', {
+        attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, &copy; <a href="https://cartodb.com/attributions">CartoDB</a>',
+        maxZoom: 18,
+    }).addTo(inputmap);
+    var latLngs = bounds.split(',');
+    var southWest = L.latLng(latLngs[1], latLngs[0]);
+    var northEast = L.latLng(latLngs[3], latLngs[2]);
+    var mb = L.latLngBounds(southWest, northEast);
+    inputmap.fitBounds(mb);
+
+    var svgDrawing = SVG('drawing').size(10, 10);
+
+    function miniMapstyleComp(feature) {
+        // console.log(feature.properties)
+        var curFeature = feature.geometry.type;
+        if (curFeature === 'LineString') {
+            // console.log(feature)
+            return {
+                weight: 2,
+                opacity: .9,
+                color: feature.properties.color,
+                dashArray: '',
+
+            };
+        } else {
+            // var fillColor = getColor(feature.properties.areatype);
+
+            if (feature.properties.areatype == 'project') {
+                var fillColor = feature.properties.color;
+            } else { // it is policy
+                var fillPattern = setSVGStyle(feature.properties.color);
+                var fillColor = fillPattern;
+            }
+
+            return {
+                // fillColor: feature.properties.color,
+                // fillColor:'#333333',
+                weight: 1,
+                stroke: true,
+                opacity: 0.9,
+                fillColor: fillColor,
+                color: feature.properties.color,
+                dashArray: '',
+                // opacity: 0.2,
+                fillOpacity: 0.8,
+            };
+        }
+
+    }
+
+    function setSVGStyle(reqColor) {
+        var pattern = svgDrawing.pattern(6, 6, function(add) {
+            // add.rect(5, 5).fill(reqColor)
+            add.line(0, 0, 6, 6).stroke({
+                width: 1,
+                color: reqColor
+            })
+            add.line(6, 0, 0, 6).stroke({
+                width: 1,
+                color: reqColor
+            })
+        });
+        return pattern.fill();
+    }
+
+    function getColor(type) {
+
+        return type === 'policy' ? '#707070 ' :
+            type === 'project' ? '#a69695 ' :
+            type === 'red2' ? '#bd0026' :
+            type === 'red' ? '#f03b20' :
+            type === 'yellow' ? '#FFFF00' :
+            type === 'green' ? '#74c476' :
+            type === 'green2' ? '#31a354' :
+            type === 'green3' ? '#006d2c' :
+            type === 'purple' ? '#CFACF7' :
+            type === 'purple2' ? '#8D6CBF' :
+            type === 'purple3' ? '#601286' :
+            type === 'orange' ? '#FFA927' :
+            type === 'orange2' ? '#F8872E' :
+            type === 'orange3' ? '#FC6B0A' :
+            type === 'constraints' ? '#343434' :
+            type === 'boundaries' ? '#a6cee3' :
+            type === 'boundaries2' ? '#b2df8a' :
+            '#808080';
+    }
+
+
+    function onEachFeature(feature, layer) {
+        // does this feature have a property named popupContent?
+        if (feature.properties && feature.properties.description) {
+            layer.bindPopup(feature.properties.description);
+        }
+    }
+    L.geoJSON(gjresults, {
+        onEachFeature: onEachFeature,
+        style: miniMapstyleComp,
+    }).addTo(inputmap);
+
     (function() {
         if ((apitoken !== "0" && projectid !== "0" && diagramid !== "0")) {
             // it is synthesis. 
             if (gjresults.features.length > 0) {
-                $("#gjTA").text(JSON.stringify(gjresults));
+                // $("#gjTA").text(JSON.stringify(gjresults));
                 submitGJ();
             }
         } else if (apitoken !== "0" && projectid !== "0" && cteamid !== "0" && synthesisid !== "0") {
 
             if (gjresults.features.length > 0) {
-                $("#gjTA").text(JSON.stringify(gjresults));
+                // $("#gjTA").text(JSON.stringify(gjresults));
                 generateSystemCB(systems);
                 $('#systemsCBCont').show();
                 submitGJ();
@@ -285,7 +409,7 @@
                     $('#systemsCB input:checked').each(function() {
                         selectedsystems.push($(this).attr('id'));
                     });
-                    
+
                     $("#loadingGIF").show();
                     var constrainWorker = new Worker('/assets/workers/constrainGeneratedFeatures.js');
                     constrainWorker.onerror = function(e) {
@@ -299,7 +423,7 @@
                     constrainWorker.postMessage({
                         'allFeaturesList': generatedData,
                         'selectedsystems': JSON.stringify(selectedsystems),
-                        
+
                     });
                     constrainWorker.addEventListener('message', function(e) {
                         if (e.data.mode === 'status') {

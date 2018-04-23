@@ -51,6 +51,7 @@ app.get('/', function(request, response) {
             var bounds = results[1];
 
             opts['systems'] = 0;
+            opts['bounds'] = JSON.stringify(bounds['bounds']);
 
             response.render('index', opts);
 
@@ -93,12 +94,13 @@ app.get('/', function(request, response) {
             var sys = JSON.stringify(results[2]);
 
             opts['result'] = gj;
+            opts['bounds'] = JSON.stringify(bounds['bounds']);
             opts['systems'] = sys;
             response.render('index', opts);
         });
 
     } else {
-        opts = { 'apitoken': '0', 'projectid': '0', 'diagramid': '0', 'result': '0', 'cteamid': '0', 'systems': '0', 'synthesisid': '0' };
+        opts = { 'bounds': '0', 'apitoken': '0', 'projectid': '0', 'diagramid': '0', 'result': '0', 'cteamid': '0', 'systems': '0', 'synthesisid': '0' };
         response.render('index', opts);
     }
 

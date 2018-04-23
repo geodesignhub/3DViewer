@@ -2,6 +2,11 @@
     /* display: none;*/
 }
 
+#inputmap {
+    height: 200px;
+    border: 1px solid #DCDCDC;
+}
+
 .square {
     width: 15px;
     height: 15px;

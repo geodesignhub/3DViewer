@@ -1,20 +1,21 @@
 {
-    "name": "minimalgdh",
+    "name": "3DViewer",
     "version": "1.0.0",
-    "description": "A Geodesign Hub API experiment to show a text based view of projects on Geodesign Hub. ",
+    "description": "A Viewer to visualize designs from Geodesignhub in 3D",
     "main": "app.js",
     "scripts": {
         "test": "echo \"Error: no test specified\" && exit 1"
     },
     "repository": {
         "type": "git",
-        "url": "https://github.com/hrishiballal/GDHDashboard/"
+        "url": "https://geodesignhub.github.io/3DViewer"
     },
     "keywords": [
         "Geodesign",
-        "Hub"
+        "Hub",
+        "OSM Buildings"
     ],
-    "author": "Hrishikesh Ballal",
+    "author": "Geodesign Hub Pvt. Ltd.",
     "license": "MIT",
     "dependencies": {
         "express": "^4.13.4",
