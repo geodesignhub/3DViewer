@@ -7,7 +7,8 @@ The plugin can be added to a project through the project administration panels.
 ### Screenshots
 ![screenshot](https://i.imgur.com/SOibKbs.png)
 
-![screenshot](https://i.imgur.com/3QhOBvR.png)
+![screenshot2](https://i.imgur.com/z4J2r0Y.jpg)
 
+![screenshot3](https://i.imgur.com/3QhOBvR.png)
 
 
