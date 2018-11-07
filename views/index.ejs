@@ -30,7 +30,9 @@
             <div class="col-sm-3 col-md-3 main">
                 <h1 class="page-header">Geodesign Hub 3D Viewer</h1>
                 <section class="information">
-                    <p class="description">This plugin uses <a href="http://osmbuildings.org/" target="_blank">OSM Buildings</a> library for visualization and design data from <a href="http://www.geodesignhub.com/">Geodesign Hub</a>. See the <a href="https://github.com/geodesignhub/3DViewer">GitHub repository</a>.</p>
+                    <p class="description">This plugin uses <a href="http://osmbuildings.org/" target="_blank">OSM
+                            Buildings</a> library for visualization and design data from <a href="http://www.geodesignhub.com/">Geodesign
+                            Hub</a>. See the <a href="https://github.com/geodesignhub/3DViewer">GitHub repository</a>.</p>
                     <br>
                     <!-- <br>
                     <div class="instruction">
@@ -59,15 +61,15 @@
                         <span class="tilt">
                             <button class="dec">&#8601;</button>
                             <button class="inc">&#8599;</button>
-                            </span>
+                        </span>
                         <span class="rotation">
                             <button class="inc">&#8630;</button>
                             <button class="dec">&#8631;</button>
-                            </span>
+                        </span>
                         <span class="zoom">
                             <button class="dec">-</button>
                             <button class="inc">+</button>
-                            </span>
+                        </span>
                     </div><br>
                     <div id='downloadLink' style='display:none'>
                         <h4>Download</h4>
@@ -102,21 +104,11 @@
                 longitude: 0.2217864990234375
             },
             zoom: 16,
-            minZoom: 12,
+            minZoom: 12,            
             maxZoom: 20,
             state: false, // stores map position/rotation in url
             attribution: '© 3D <a href="http://osmbuildings.org/copyright/">OSM Buildings</a>'
         });
-
-        // osmb.addGeoJSONTiles('https://{s}.data.osmbuildings.org/0.2/anonymous/tile/{z}/{x}/{y}.json', {
-        //     "color": "#ffe9ec",
-        //     "fadeIn": true
-        // });
-        // featureIdsToHide = [];
-        // osmb.hide(feature => {
-        //     console.log(feature.id);
-        // return (featureIdsToHide.indexOf(feature.id) > -1); // hides if true
-        // });
 
         osmb.addMapTiles(
             'https://{s}.tiles.mapbox.com/v3/cygnus2936.curedn3y/{z}/{x}/{y}.png', {
@@ -128,7 +120,7 @@
         var controlButtons = document.querySelectorAll('.glcontrol button');
 
         for (var i = 0, il = controlButtons.length; i < il; i++) {
-            controlButtons[i].addEventListener('click', function(e) {
+            controlButtons[i].addEventListener('click', function (e) {
                 var button = this;
                 var parentClassList = button.parentNode.classList;
                 var direction = button.classList.contains('inc') ? 1 : -1;
@@ -159,7 +151,9 @@
 
         function generateSystemCB(systems) {
             for (var x = 0; x < systems.length; x++) {
-                $('#systemsCB').append('<input name="sysCB" id=' + "'" + systems[x].sysname + "'" + 'type="checkbox" checked /> <span class="square c-' + systems[x].syscolor.substring(1) + '"></span>&nbsp;&nbsp;' + systems[x].sysname + '</input>&nbsp;&nbsp;');
+                $('#systemsCB').append('<input name="sysCB" id=' + "'" + systems[x].sysname + "'" +
+                    'type="checkbox" checked /> <span class="square c-' + systems[x].syscolor.substring(1) +
+                    '"></span>&nbsp;&nbsp;' + systems[x].sysname + '</input>&nbsp;&nbsp;');
             }
         }
 
@@ -169,7 +163,7 @@
 
         function submitGJ() {
             var selectedsystems = [];
-            $('#systemsCB input:checked').each(function() {
+            $('#systemsCB input:checked').each(function () {
                 selectedsystems.push($(this).attr('id'));
             });
 
@@ -192,7 +186,7 @@
                 addnCls: 'humane-flatty-info'
             });
             var threeDWorker = new Worker('/assets/workers/3dlib.js');
-            threeDWorker.onerror = function(e) {
+            threeDWorker.onerror = function (e) {
                 console.log('Error: Line ' + e.lineno + ' in ' + e.filename + ': ' + e.message);
                 $("#loadingGIF").hide();
                 humane.log("There was a error in processing, please try again with a new geometry.. ", {
@@ -203,7 +197,7 @@
                 'allFeaturesList': JSON.stringify(allFeaturesList),
                 'selectedsystems': JSON.stringify(selectedsystems)
             });
-            threeDWorker.addEventListener('message', function(e) {
+            threeDWorker.addEventListener('message', function (e) {
 
                 if (e.data.mode === 'status') {
                     // update status. 
@@ -291,8 +285,8 @@
         scrollWheelZoom: false,
         dragging: false,
         zoomControl: false,
-        doubleClickZoom: false, 
-        attributionControl:false
+        doubleClickZoom: false,
+        attributionControl: false
     });
     // FeatureGroup is to store editable layers
     var designLayer = new L.FeatureGroup();
@@ -306,6 +300,26 @@
     var northEast = L.latLng(latLngs[3], latLngs[2]);
     var mb = L.latLngBounds(southWest, northEast);
     inputmap.fitBounds(mb);
+
+
+    osmb.addGeoJSONTiles('https://{s}.data.osmbuildings.org/0.2/anonymous/tile/{z}/{x}/{y}.json', {
+        "color": "#ffe9ec",
+
+        // "fadeIn": true
+    });
+
+    osmb.hide(feature => {
+        const bounds = L.latLngBounds([feature.properties.bounds['min'][1], feature.properties.bounds['min'][0]],
+            feature.properties.bounds['max'][1], feature.properties.bounds['max'][0]);
+
+        if (mb.intersects(bounds) && Number.isInteger(parseInt(feature.id))) {
+            return 1;
+
+        } else {
+            return 0;
+        }
+    });
+
 
     var svgDrawing = SVG('drawing').size(10, 10);
 
@@ -348,7 +362,7 @@
     }
 
     function setSVGStyle(reqColor) {
-        var pattern = svgDrawing.pattern(6, 6, function(add) {
+        var pattern = svgDrawing.pattern(6, 6, function (add) {
             // add.rect(5, 5).fill(reqColor)
             add.line(0, 0, 6, 6).stroke({
                 width: 1,
@@ -396,7 +410,7 @@
         style: miniMapstyleComp,
     }).addTo(inputmap);
 
-    (function() {
+    (function () {
         if ((apitoken !== "0" && projectid !== "0" && diagramid !== "0")) {
             // it is synthesis. 
             if (gjresults.features.length > 0) {
@@ -410,15 +424,16 @@
                 generateSystemCB(systems);
                 $('#systemsCBCont').show();
                 submitGJ();
-                $('#systemsCB').click(function() {
+                $('#systemsCB').click(function () {
                     var selectedsystems = [];
-                    $('#systemsCB input:checked').each(function() {
+                    $('#systemsCB input:checked').each(function () {
                         selectedsystems.push($(this).attr('id'));
                     });
 
                     $("#loadingGIF").show();
-                    var constrainWorker = new Worker('/assets/workers/constrainGeneratedFeatures.js');
-                    constrainWorker.onerror = function(e) {
+                    var constrainWorker = new Worker(
+                        '/assets/workers/constrainGeneratedFeatures.js');
+                    constrainWorker.onerror = function (e) {
                         console.log('Error: Line ' + e.lineno + ' in ' + e.filename + ': ' + e.message);
                         $("#loadingGIF").hide();
                         humane.log("There was a error in processing, please try again.. ", {
@@ -431,7 +446,7 @@
                         'selectedsystems': JSON.stringify(selectedsystems),
 
                     });
-                    constrainWorker.addEventListener('message', function(e) {
+                    constrainWorker.addEventListener('message', function (e) {
                         if (e.data.mode === 'status') {
 
                             updateWorkerStatus(e.data.percentcomplete);
@@ -444,8 +459,8 @@
             }
         }
     })();
-    (function(console) {
-        console.save = function(data, filename) {
+    (function (console) {
+        console.save = function (data, filename) {
             if (!data) {
                 console.error('Console.save: No data')
                 return;
@@ -462,7 +477,8 @@
             a.download = filename
             a.href = window.URL.createObjectURL(blob)
             a.dataset.downloadurl = ['text/json', a.download, a.href].join(':')
-            e.initMouseEvent('click', true, false, window, 0, 0, 0, 0, 0, false, false, false, false, 0, null)
+            e.initMouseEvent('click', true, false, window, 0, 0, 0, 0, 0, false, false, false, false, 0,
+                null)
             a.dispatchEvent(e)
         }
     })(console)
