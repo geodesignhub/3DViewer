@@ -82,6 +82,7 @@ function generateFinal3DGeoms(constraintedModelDesigns, genstreets, existingroad
     var fullproc = flen;
     var counter = 0;
     for (var h = 0; h < flen; h++) {
+        
         // for every feature , create a point grid.
         var curFeat = curFeats[h];
         // console.log(JSON.stringify(curFeat));
