@@ -10,21 +10,6 @@ function makeid() {
 }
 
 
-function bufferExistingRoads(inputroads) {
-    var streets = [];
-    for (var x = 0; x < inputroads.features.length; x++) {
-        var linestring = inputroads.features[x];
-        var street = turf.buffer(linestring, 0.0075, 'kilometers');
-        if (street['type'] === "Feature") {
-            streets.push(street);
-        }
-    }
-    return {
-        "type": "FeatureCollection",
-        "features": streets
-    }
-}
-
 function generatePolicyFeatures(curFeat) {
     var curFeatprops = curFeat.properties;
     const elevationoffset = 10;
@@ -70,7 +55,7 @@ function generatePolicyFeatures(curFeat) {
 function generateFinal3DGeoms(constraintedModelDesigns, genstreets, existingroads) {
 
     const elevationoffset = 0.5;
-    var whiteListedSysName = ['HDH', 'LDH', 'IND', 'COM', 'COMIND', 'HSG', 'MXD'];
+    var whiteListedSysName = ['HDH', 'LDH', 'IND', 'COM', 'COMIND', 'HSG', 'MXD', 'MIX'];
     var finalGJFeats = [];
     // get the center of the design so that the map once returned can be recentered.
     var centerPt = turf.center(constraintedModelDesigns);
@@ -152,11 +137,11 @@ function generateFinal3DGeoms(constraintedModelDesigns, genstreets, existingroad
                         }
                         // console.log("Polygon: ", min_height, max_height);
                         var props = {
-
                             "height": max_height,
                             "minHeight": min_height,
-                            "color": "#d0d0d0",
+                            "type":"apartments",                            
                             "roofColor": featProps.color,
+                            "color": featProps.color,
                             "sysname": featProps.sysname,
                             "isStreet": 0
                         };
@@ -164,20 +149,27 @@ function generateFinal3DGeoms(constraintedModelDesigns, genstreets, existingroad
                         cFeat.properties = props;
                         finalGJFeats.push(cFeat);
 
-                    } else if (featProps.sysname === 'MXD') {
+                    } else if ((featProps.sysname === 'MXD')|| (featProps.sysname === 'MIX')) {
+                       
                         if (max_height == 0) {
                             const mxdheights = [9, 12, 8, 11]; // in meters 
                             max_height = elevationoffset + mxdheights[Math.floor(Math.random() * mxdheights.length)];
+                     
                         }
+                        
+                        levels = Math.round(max_height /4.5);
+                       
 
                         if (min_height == 0) {
                             min_height = elevationoffset + 0.5;
+
                         }
                         var props = {
-
-                            "color": "#d0d0d0",
+                            "color": featProps.color,
+                            "levels":levels,
                             "roofColor": featProps.color,
                             "sysname": featProps.sysname,
+                            "type":"retail",
                             "isStreet": 0,
                             "height": max_height,
                             "minHeight": min_height
@@ -187,20 +179,26 @@ function generateFinal3DGeoms(constraintedModelDesigns, genstreets, existingroad
                         finalGJFeats.push(cFeat);
 
                     } else if (featProps.sysname === 'LDH') {
+                        levels = 1;
                         if (max_height == 0) {
                             const ldhheights = [1, 2, 3]; // in meters 
+                            levels =1;                        
                             max_height = elevationoffset + ldhheights[Math.floor(Math.random() * ldhheights.length)];
                         }
                         if (min_height == 0) {
                             min_height = elevationoffset + 0.5;
                         }
+                        
                         // console.log("Polygon LDH: ", min_height, max_height);
                         var props = {
 
-                            "color": "#d0d0d0",
+                            "color": featProps.color,
                             "roofColor": featProps.color,
                             "sysname": featProps.sysname,
+                            "level": 1, 
                             "isStreet": 0,
+                            "levels":levels,
+                            "type":"residential",
                             "height": max_height,
                             "minHeight": min_height
                         };
@@ -217,12 +215,17 @@ function generateFinal3DGeoms(constraintedModelDesigns, genstreets, existingroad
                         if (min_height == 0) {
                             min_height = elevationoffset + 0.5;
                         }
+                        
+                        
+                        levels = Math.round(max_height /4.5);
                         var props = {
 
-                            "color": "#d0d0d0",
+                            "color": featProps.color,
                             "roofColor": featProps.color,
                             "sysname": featProps.sysname,
                             "isStreet": 0,
+                            "type":"retail",
+                            "levels":levels,
                             "height": max_height,
                             "minHeight": min_height
                         };
@@ -238,12 +241,17 @@ function generateFinal3DGeoms(constraintedModelDesigns, genstreets, existingroad
                         if (min_height == 0) {
                             min_height = elevationoffset + 0.5;
                         }
+                        
+                        
+                        levels = Math.round(max_height /4.5);
                         var props = {
 
-                            "color": "#d0d0d0",
+                            "color": featProps.color,
                             "roofColor": featProps.color,
                             "sysname": featProps.sysname,
+                            "levels":levels,
                             "isStreet": 0,
+                            "type":"retail",
                             "height": max_height,
                             "minHeight": min_height
                         };
@@ -269,12 +277,17 @@ function generateFinal3DGeoms(constraintedModelDesigns, genstreets, existingroad
                 if (min_height == 0) {
                     min_height = elevationoffset + 0.5;
                 }
+                
+                        
+                levels = Math.round(max_height /4.5);
                 // console.log("LAB", min_height, max_height);
                 var props = {
 
-                    "color": "#d0d0d0",
+                    "color": featProps.color,
                     "roofColor": featProps.color,
                     "sysname": featProps.sysname,
+                    "type":"industry",
+                    "levels":levels,
                     "isStreet": 0,
                     "height": max_height,
                     "minHeight": min_height
@@ -293,13 +306,18 @@ function generateFinal3DGeoms(constraintedModelDesigns, genstreets, existingroad
                 if (min_height == 0) {
                     min_height = elevationoffset + 0.5;
                 }
+                
+                        
+                levels = Math.round(max_height /4.5);
                 // console.log("SMB", min_height, max_height);
                 var props = {
-                    "color": "#d0d0d0",
+                    "color": featProps.color,
                     "roofColor": featProps.color,
                     "sysname": featProps.sysname,
                     "isStreet": 0,
                     "height": max_height,
+                    "levels":levels,
+                    "type":"retail",
                     "minHeight": min_height
                 };
                 var cFeat = curFeat;
@@ -318,13 +336,18 @@ function generateFinal3DGeoms(constraintedModelDesigns, genstreets, existingroad
                     if (min_height == 0) {
                         min_height = elevationoffset + 0.5;
                     }
+                    
+                        
+                    levels = Math.round(max_height /4.5);
                     // console.log("Pther", min_height, max_height)
                     // var height = elevationoffset + 0.01;
                     var prop = {
+                        "color": curFeat.properties.color,
                         "roofColor": curFeat.properties.color,
                         "isStreet": 0,
                         "height": max_height,
-                        "minHeight":min_height,
+                        "levels":levels,
+                        "minHeight":min_height,                        
                         "sysname": curFeat.properties.sysname
                     }
                     curFeat.properties = prop;
