@@ -328,8 +328,6 @@ function generateFinal3DGeoms(constraintedModelDesigns, genstreets, existingroad
             } else { // all systems that not buildings
                
                 if (curFeat.properties.areatype === 'project') {
-                    
-                        
                     // console.log("Pther", min_height, max_height)
                     // var height = elevationoffset + 0.01;
                     var prop = {
