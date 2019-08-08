@@ -328,17 +328,8 @@ function generateFinal3DGeoms(constraintedModelDesigns, genstreets, existingroad
             } else { // all systems that not buildings
                
                 if (curFeat.properties.areatype === 'project') {
-                    if (max_height == 0) {
-                        const heights = [36, 60, 90]; // in meters 
-                        max_height = elevationoffset + heights[Math.floor(Math.random() * heights.length)];
-
-                    }
-                    if (min_height == 0) {
-                        min_height = elevationoffset + 0.5;
-                    }
                     
                         
-                    levels = Math.round(max_height /4.5);
                     // console.log("Pther", min_height, max_height)
                     // var height = elevationoffset + 0.01;
                     var prop = {
@@ -346,7 +337,6 @@ function generateFinal3DGeoms(constraintedModelDesigns, genstreets, existingroad
                         "roofColor": curFeat.properties.color,
                         "isStreet": 0,
                         "height": max_height,
-                        "levels":levels,
                         "minHeight":min_height,                        
                         "sysname": curFeat.properties.sysname
                     }
