@@ -353,6 +353,32 @@
     color: #FFFFFF;
 }
 
+.c-ff8cc8 {
+    background-color: #ff8cc8;
+    color: #FFFFFF;
+}
+
+.c-5a5a5a {
+    background-color: #5a5a5a;
+    color: #FFFFFF;
+}
+
+.c-373737 {
+    background-color: #373737;
+    color: #FFFFFF;
+}
+
+.c-eb827d {
+    background-color: #eb827d;
+    color: #FFFFFF;
+}
+
+.c-ffb671 {
+    background-color: #ffb671;
+    color: #FFFFFF;
+}
+
+
 @media (min-width: 768px) {
     .sidebar {
         position: fixed;
