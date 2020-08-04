@@ -517,6 +517,16 @@
                 $('#systemsCBCont').show();
                 submitGJ();
                 $('#systemsCB').click(function () {
+                    runConstrainWorker();
+                });
+                $('#show_policies').change(function () {
+                    runConstrainWorker();
+                });
+            }
+        }
+    })();
+    function runConstrainWorker() {
+
                     var selectedsystems = [];
                     $('#systemsCB input:checked').each(function () {
                         selectedsystems.push($(this).attr('id'));
@@ -548,10 +558,7 @@
                         }
                     }, false);
 
-                });
-            }
-        }
-    })();
+    }
     (function (console) {
         console.save = function (data, filename) {
             if (!data) {

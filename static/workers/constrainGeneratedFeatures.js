@@ -14,11 +14,10 @@ function constrainFeatures(allFeaturesList, selectedsystems, showpolicies) {
         
         var isPolicy = curfeatprop.isPolicy;
         
-        if (isPolicy && parseInt(showpolicies)) {
-            constraintedFeatures.features.push(af[d]);
-
-        } else {
-            if (selectedsystems.indexOf(curFeatSys) > -1) {
+        if (selectedsystems.indexOf(curFeatSys) > -1) {
+            if (isPolicy== 1 && parseInt(showpolicies) == 1) {
+                constraintedFeatures.features.push(af[d]);
+            } else if (isPolicy == 0) {
                 constraintedFeatures.features.push(af[d]);
             }
         }

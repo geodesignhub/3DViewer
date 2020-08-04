@@ -1,5 +1,5 @@
 function update_properties(allFeaturesList, updated_properties) {
-
+    
     // constrain output ot only features in the list. 
     var updated_features = { "type": "FeatureCollection", "features": [] };
     var allFeatures = JSON.parse(allFeaturesList);
