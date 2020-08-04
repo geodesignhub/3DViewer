@@ -536,7 +536,7 @@
                     constrainWorker.postMessage({
                         'allFeaturesList': generatedData,
                         'selectedsystems': JSON.stringify(selectedsystems),
-                        'showpolicies':show_policies
+                        'showpolicies':JSON.stringify(show_policies)
 
                     });
                     constrainWorker.addEventListener('message', function (e) {
