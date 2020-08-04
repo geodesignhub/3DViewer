@@ -521,7 +521,7 @@
                     $('#systemsCB input:checked').each(function () {
                         selectedsystems.push($(this).attr('id'));
                     });
-                    let show_policies = document.getElementById("show_policies").value; 
+                    let show_policies = (document.getElementById("show_policies").checked)?1:0; 
                     $("#loadingGIF").show();
                     var constrainWorker = new Worker(
                         '/assets/workers/constrainGeneratedFeatures.js');
