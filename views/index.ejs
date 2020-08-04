@@ -13,13 +13,14 @@
     <link rel='shortcut icon' href='/assets/objs/favicon.ico' type='image/x-icon' />
     <link rel="stylesheet" href="/assets/OSMBuildings/OSMBuildings.css">
     <link rel="stylesheet" href="/assets/js/humane/flatty.css">
+
     <link href='https://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css'>
     <link href='https://fonts.googleapis.com/css?family=Raleway' rel='stylesheet' type='text/css'>
     <script type="text/javascript" src="/assets/js/jquery/jquery.min.js"></script>
     <script type="text/javascript" src="/assets/js/leaflet/leaflet.js"></script>
     <script type="text/javascript" src="/assets/js/svg/svg.min.js"></script>
     <script type="text/javascript" src="/assets/OSMBuildings/OSMBuildings.js"></script>
-    <script type="text/javascript" src="/assets/js/geojsonlint/geojsonlint.js"></script>
+    <script type="text/javascript" src="/assets/js/geojsonlint/geojsonlint.js"></script>    
     <script type="text/javascript" src="/assets/js/humane/humane.min.js"></script>
 </head>
 
@@ -54,7 +55,7 @@
                         <h4>Systems</h4>
                         <div id="systemsCB"></div>
                     </div>
-                    <br>
+                    <br><br>
                     <div class="glcontrol">
                         <h4>Map Controls</h4>
                         <span class="tilt">
@@ -70,12 +71,15 @@
                             <button class="inc">+</button>
                         </span>
                     </div><br>
-                    <div id='downloadLink' style='display:none'>
+                    <hr>
+                    <div id="search-results"></div>
+                    
+                    <!-- <div id='downloadLink' style='display:none'>
                         <h4>Download</h4>
                         <div>
                             <p><button class="button buttongreen" onclick="downloadGJ()">Download Data</button></p>
                         </div>
-                    </div>
+                    </div> -->
                     <br>
                     <br>
 
@@ -200,7 +204,7 @@
                 } else {
                     generatedData = e.data.polygons;
                     var latlng = e.data.center;
-                    // console.log(JSON.stringify(gjsonData));
+
                     setMapCenter(latlng);
                     updateGLData(generatedData);
                 }
@@ -296,7 +300,6 @@
     var mb = L.latLngBounds(southWest, northEast);
     inputmap.fitBounds(mb);
 
-
     osmb.addGeoJSONTiles('https://{s}.data.osmbuildings.org/0.2/anonymous/tile/{z}/{x}/{y}.json', {
         "color": "#ffe9ec",
         // "fadeIn": true
@@ -311,8 +314,103 @@
         }
     });
 
+    osmb.on('pointerup', e => {
+    if (!e.features) {
+        
+        osmb.highlight(feature => {});      
+      return;
+    }
+
+    const featureIdList = e.features.map(feature => feature.id);
+    
+    osmb.highlight(feature => {
+      if (featureIdList.indexOf(feature.id) > -1) {
+        return '#ffcc00';
+      }
+    });
+
+    showInfoPopup(e.features || []);
+  });
+  const $resultList = $('#search-results');
+
+  function showInfoPopup(features) {
+    $resultList.empty();
+    features.forEach(feature => {
+      $resultList.append(renderFeatureInfo(feature));
+    });
+
+
+  }
+
+  function renderFeatureInfo (feature) {
+
+    const featprops = feature.properties;
+    let html = '';
+
+    // html += '<div class="search-result-type" style="display:inline">ID</div> ';
+    // html += feature.id + '<br/>';
+    html +='<div>';
+    
+    if (featprops.isPolicy === 0 && featprops.isStreet === 0) {
+    
+    for (let key in feature.properties) {
+      if (typeof feature.properties[key] === 'object') continue;
+        
+      if (key=='height') {
+        html +='<h4>Set Floors</h4>'
+        html += '<input id="'+ feature.id +'-floors-id" type="number" value="'+ Math.ceil(feature.properties[key]/4.5)  +'" ">';        
+        // html += feature.properties[key] + '<br/>'
+      }
+
+   }
+
+    html +='&nbsp;&nbsp;&nbsp;&nbsp;<button onclick="update_id_floors('+"'"+feature.id +"'" +')">Update</button></div>';
+
+
+    }
+    else {
+        html += 'Not a building';
+    }
+    return $('<div>' + html + '</div>');
+  }
+
+
 
     var svgDrawing = SVG('drawing').size(10, 10);
+
+    function update_id_floors(feature_id) {
+        var updated_properties = {};
+        var building_floors = document.getElementById(feature_id + '-floors-id');
+        var floors_to_meters = Math.ceil((building_floors.value) * 4.5);
+        updated_properties['id'] = feature_id;
+        updated_properties['height'] = floors_to_meters;
+
+        var constrainWorker = new Worker('/assets/workers/updateFeatureProperties.js');
+                    constrainWorker.onerror = function (e) {
+                        console.log('Error: Line ' + e.lineno + ' in ' + e.filename + ': ' + e.message);
+                        $("#loadingGIF").hide();
+                        humane.log("There was a error in processing, please try again.. ", {
+                            addnCls: 'humane-flatty-error'
+                        });
+                    };
+                    // console.log(selectedsystems);
+                    constrainWorker.postMessage({
+                        'allFeaturesList': generatedData,
+                        'updated_properties': JSON.stringify([updated_properties])
+
+                    });
+                    constrainWorker.addEventListener('message', function (e) {
+                        if (e.data.mode === 'status') {
+                            updateWorkerStatus(e.data.percentcomplete);
+                        } else {
+                            generatedData = e.data.polygons;                        
+                            updateGLData(e.data.polygons);
+                        }
+                    }, false);
+
+                
+
+    }
 
     function miniMapstyleComp(feature) {
         // console.log(feature.properties)

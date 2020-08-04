@@ -41,6 +41,7 @@ function generatePolicyFeatures(curFeat) {
         "roofColor": curFeatprops.color,
         "height": height,
         "isStreet": 0,
+        "isPolicy": 1,
         "sysname": curFeatprops.sysname
     }
     for (var l1 = 0; l1 < pwLen; l1++) {
@@ -52,7 +53,7 @@ function generatePolicyFeatures(curFeat) {
     return policyFeats;
 }
 
-function generateFinal3DGeoms(constraintedModelDesigns, genstreets, existingroads) {
+function generateFinal3DGeoms(constraintedModelDesigns) {
 
     const elevationoffset = 0.5;
     var whiteListedSysName = ['HDH', 'LDH', 'IND', 'COM', 'COMIND', 'HSG', 'MXD', 'MIX'];
@@ -106,11 +107,13 @@ function generateFinal3DGeoms(constraintedModelDesigns, genstreets, existingroad
                 if (min_height == 0) {
                     min_height = elevationoffset;
                 }
+                curlineFeat.id = makeid();
                 // console.log("Line: ", min_height, max_height);
                 curlineFeat.properties = {
                     "color": curFeat.properties.color,
                     "roofColor": curFeat.properties.color,
-                    "isStreet": 0,
+                    "isStreet": 1,
+                    "isPolicy": 0,
                     "sysname": curFeat.properties.sysname,
                     "height": max_height,
                     "minHeight": min_height
@@ -143,9 +146,12 @@ function generateFinal3DGeoms(constraintedModelDesigns, genstreets, existingroad
                             "roofColor": featProps.color,
                             "color": featProps.color,
                             "sysname": featProps.sysname,
-                            "isStreet": 0
+                            "isStreet": 0,
+                            "isPolicy": 0,
                         };
                         var cFeat = curFeat;
+                        
+                        cFeat.id = makeid();
                         cFeat.properties = props;
                         finalGJFeats.push(cFeat);
 
@@ -170,12 +176,14 @@ function generateFinal3DGeoms(constraintedModelDesigns, genstreets, existingroad
                             "roofColor": featProps.color,
                             "sysname": featProps.sysname,
                             "type":"retail",
+                            "isPolicy": 0,
                             "isStreet": 0,
                             "height": max_height,
                             "minHeight": min_height
                         };
                         var cFeat = curFeat;
                         cFeat.properties = props;
+                        cFeat.id = makeid();
                         finalGJFeats.push(cFeat);
 
                     } else if (featProps.sysname === 'LDH') {
@@ -197,6 +205,7 @@ function generateFinal3DGeoms(constraintedModelDesigns, genstreets, existingroad
                             "sysname": featProps.sysname,
                             "level": 1, 
                             "isStreet": 0,
+                            "isPolicy": 0,
                             "levels":levels,
                             "type":"residential",
                             "height": max_height,
@@ -204,6 +213,7 @@ function generateFinal3DGeoms(constraintedModelDesigns, genstreets, existingroad
                         };
                         var cFeat = curFeat;
                         cFeat.properties = props;
+                        cFeat.id = makeid();
                         finalGJFeats.push(cFeat);
 
                     } else if ((featProps.sysname === 'COM')) {
@@ -224,12 +234,14 @@ function generateFinal3DGeoms(constraintedModelDesigns, genstreets, existingroad
                             "roofColor": featProps.color,
                             "sysname": featProps.sysname,
                             "isStreet": 0,
+                            "isPolicy": 0,
                             "type":"retail",
                             "levels":levels,
                             "height": max_height,
                             "minHeight": min_height
                         };
                         var cFeat = curFeat;
+                        cFeat.id = makeid();
                         cFeat.properties = props;
                         finalGJFeats.push(cFeat);
 
@@ -251,12 +263,14 @@ function generateFinal3DGeoms(constraintedModelDesigns, genstreets, existingroad
                             "sysname": featProps.sysname,
                             "levels":levels,
                             "isStreet": 0,
+                            "isPolicy": 0,
                             "type":"retail",
                             "height": max_height,
                             "minHeight": min_height
                         };
                         var cFeat = curFeat;
                         cFeat.properties = props;
+                        cFeat.id = makeid();
                         finalGJFeats.push(cFeat);
 
                     }
@@ -289,11 +303,13 @@ function generateFinal3DGeoms(constraintedModelDesigns, genstreets, existingroad
                     "type":"industry",
                     "levels":levels,
                     "isStreet": 0,
+                    "isPolicy": 0,
                     "height": max_height,
                     "minHeight": min_height
                 };
                 var cFeat = curFeat;
                 cFeat.properties = props;
+                cFeat.id = makeid();
                 finalGJFeats.push(cFeat);
 
 
@@ -315,6 +331,7 @@ function generateFinal3DGeoms(constraintedModelDesigns, genstreets, existingroad
                     "roofColor": featProps.color,
                     "sysname": featProps.sysname,
                     "isStreet": 0,
+                    "isPolicy": 0,
                     "height": max_height,
                     "levels":levels,
                     "type":"retail",
@@ -322,6 +339,7 @@ function generateFinal3DGeoms(constraintedModelDesigns, genstreets, existingroad
                 };
                 var cFeat = curFeat;
                 cFeat.properties = props;
+                cFeat.id = makeid();
                 finalGJFeats.push(cFeat);
 
 
@@ -335,10 +353,12 @@ function generateFinal3DGeoms(constraintedModelDesigns, genstreets, existingroad
                         "roofColor": curFeat.properties.color,
                         "isStreet": 0,
                         "height": max_height,
+                        "isPolicy": 0,
                         "minHeight":min_height,                        
                         "sysname": curFeat.properties.sysname
                     }
                     curFeat.properties = prop;
+                    curFeat.id = makeid();
                     finalGJFeats.push.apply(finalGJFeats, [curFeat]);
                 } else if (curFeat.properties.areatype === 'policy') {
                     var policyF = generatePolicyFeatures(curFeat);
