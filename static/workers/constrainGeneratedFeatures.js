@@ -14,7 +14,9 @@ function constrainFeatures(allFeaturesList, selectedsystems, showpolicies) {
         
         var isPolicy = curfeatprop.isPolicy;
         if (isPolicy && parseInt(showpolicies)) {
+            if (selectedsystems.indexOf(curFeatSys) > -1) {
             constraintedFeatures.features.push(af[d]);
+            }
         } else {
             if (selectedsystems.indexOf(curFeatSys) > -1) {
                 constraintedFeatures.features.push(af[d]);
