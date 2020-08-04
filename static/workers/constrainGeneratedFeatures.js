@@ -13,7 +13,7 @@ function constrainFeatures(allFeaturesList, selectedsystems, showpolicies) {
         var curFeatSys = curfeatprop.sysname;
         
         var isPolicy = curfeatprop.isPolicy;
-        console.log(curfeatprop, isPolicy)
+        console.log(curfeatprop, isPolicy, showpolicies)
         if (isPolicy && parseInt(showpolicies)) {
             constraintedFeatures.features.push(af[d]);
 
