@@ -54,6 +54,8 @@
                     <div id="systemsCBCont" style="display:none">
                         <h4>Systems</h4>
                         <div id="systemsCB"></div>
+                        <br>
+                        <div><input name="show_policies" id='show_policies 'type="checkbox" checked />Show Policies</input></div>
                     </div>
                     <br><br>
                     <div class="glcontrol">
@@ -518,7 +520,7 @@
                     $('#systemsCB input:checked').each(function () {
                         selectedsystems.push($(this).attr('id'));
                     });
-
+                    let show_policies = document.getElementById("show_policies").value; 
                     $("#loadingGIF").show();
                     var constrainWorker = new Worker(
                         '/assets/workers/constrainGeneratedFeatures.js');
@@ -533,6 +535,7 @@
                     constrainWorker.postMessage({
                         'allFeaturesList': generatedData,
                         'selectedsystems': JSON.stringify(selectedsystems),
+                        'showpolicies':show_policies
 
                     });
                     constrainWorker.addEventListener('message', function (e) {
