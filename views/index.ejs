@@ -361,7 +361,7 @@
         
       if (key=='height') {
         html +='<h4>Set Floors</h4>'
-        html += '<input id="'+ feature.id +'-floors-id" type="number" value="'+ Math.ceil(feature.properties[key]/4.5)  +'" ">';        
+        html += '<input id="'+ feature.id +'-floors-id" type="number" value="'+ Math.ceil(feature.properties[key]/3.5)  +'" ">';        
         // html += feature.properties[key] + '<br/>'
       }
 
@@ -384,7 +384,7 @@
     function update_id_floors(feature_id) {
         var updated_properties = {};
         var building_floors = document.getElementById(feature_id + '-floors-id');
-        var floors_to_meters = Math.ceil((building_floors.value) * 4.5);
+        var floors_to_meters = Math.ceil((building_floors.value) * 3.5);
         updated_properties['id'] = feature_id;
         updated_properties['height'] = floors_to_meters;
 
