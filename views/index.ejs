@@ -116,11 +116,11 @@
             attribution: '© 3D <a href="http://osmbuildings.org/copyright/">OSM Buildings</a>'
         });
 
-        // osmb.addMapTiles(
-        //     'https://{s}.tiles.mapbox.com/v3/cygnus2936.curedn3y/{z}/{x}/{y}.png', {
-        //         attribution: '© Data <a href="http://openstreetmap.org/copyright/">OpenStreetMap</a> · © Map <a href="http://mapbox.com">MapBox</a>'
-        //     }
-        // );
+        osmb.addMapTiles(
+            'https://{s}.tiles.mapbox.com/v3/cygnus2936.curedn3y/{z}/{x}/{y}.png', {
+                attribution: '© Data <a href="http://openstreetmap.org/copyright/">OpenStreetMap</a> · © Map <a href="http://mapbox.com">MapBox</a>'
+            }
+        );
 
         osmb.setTilt(25);
         var controlButtons = document.querySelectorAll('.glcontrol button');
