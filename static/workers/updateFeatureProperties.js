@@ -10,7 +10,7 @@ function update_properties(allFeaturesList, updated_properties) {
     var counter = 0;
     var fullproc = featlen;
 
-
+    
     for (var d = 0; d < featlen; d++) {
         
         var curfeatprop = af[d].properties;
@@ -21,9 +21,10 @@ function update_properties(allFeaturesList, updated_properties) {
             for (let index = 0; index < update_prop.length; index++) {
                 const cur_element = update_prop[index];
                 let max_height = cur_element['height'];
+                
                 if (cur_element['id'] === feature_id){
                     curfeatprop.height = max_height;
-                    var levels = Math.round(max_height / 4.5);
+                    var levels = Math.round(max_height / 3.2);
                     curfeatprop.levels = levels;
                     break;
                 }                

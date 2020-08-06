@@ -33,7 +33,7 @@
                 <section class="information">
                     <p class="description">This plugin uses <a href="http://osmbuildings.org/" target="_blank">OSM
                             Buildings</a> library for visualization and design data from <a href="http://www.geodesignhub.com/">Geodesignhub</a>. See the <a href="https://github.com/geodesignhub/3DViewer">GitHub repository</a>.</p>
-                    <br>
+                    
                     <!-- <br>
                     <div class="instruction">
                         <ol>
@@ -49,8 +49,8 @@
                     <div>
                         <div id="inputmap"></div>
                     </div>
+                    
                     <br>
-                    <hr style=" margin-top:20px !important; margin-bottom:20px !important; " />
                     <div id="systemsCBCont" style="display:none">
                         <h4>Systems</h4>
                         <div id="systemsCB"></div>
@@ -116,11 +116,11 @@
             attribution: '© 3D <a href="http://osmbuildings.org/copyright/">OSM Buildings</a>'
         });
 
-        osmb.addMapTiles(
-            'https://{s}.tiles.mapbox.com/v3/cygnus2936.curedn3y/{z}/{x}/{y}.png', {
-                attribution: '© Data <a href="http://openstreetmap.org/copyright/">OpenStreetMap</a> · © Map <a href="http://mapbox.com">MapBox</a>'
-            }
-        );
+        // osmb.addMapTiles(
+        //     'https://{s}.tiles.mapbox.com/v3/cygnus2936.curedn3y/{z}/{x}/{y}.png', {
+        //         attribution: '© Data <a href="http://openstreetmap.org/copyright/">OpenStreetMap</a> · © Map <a href="http://mapbox.com">MapBox</a>'
+        //     }
+        // );
 
         osmb.setTilt(25);
         var controlButtons = document.querySelectorAll('.glcontrol button');
@@ -187,6 +187,7 @@
             humane.log("Processing..", {
                 addnCls: 'humane-flatty-info'
             });
+
             var threeDWorker = new Worker('/assets/workers/3dlib.js');
             threeDWorker.onerror = function (e) {
                 console.log('Error: Line ' + e.lineno + ' in ' + e.filename + ': ' + e.message);
@@ -360,14 +361,16 @@
       if (typeof feature.properties[key] === 'object') continue;
         
       if (key=='height') {
-        html +='<h4>Set Floors</h4>'
+        html +='<h4>Set Floors</h4>';
         html += '<input id="'+ feature.id +'-floors-id" type="number" value="'+ Math.ceil(feature.properties[key]/3.5)  +'" ">';        
-        // html += feature.properties[key] + '<br/>'
+        html +='<br>';
+        // html +='<br><br><h4>Set Rooftype</h4>';
+        // html += '<select id="'+ feature.id +'-roof-type"><option value="flat">flat</option><option value="skillion">skillion</option><option value="gabled">gabled</option><option value="pyramidal">pyramidal</option></select>';        
       }
 
    }
 
-    html +='&nbsp;&nbsp;&nbsp;&nbsp;<button onclick="update_id_floors('+"'"+feature.id +"'" +')">Update</button></div>';
+    html +='<br><br><button onclick="update_id_floors('+"'"+feature.id +"'" +')">Update</button></div>';
 
 
     }
