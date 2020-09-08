@@ -345,7 +345,7 @@ function generateFinal3DGeoms(constraintedModelDesigns) {
                 };
                 var cFeat = curFeat;
                 cFeat.properties = props;
-                cFeat.id = "bldg-" + eature_id;
+                cFeat.id = "bldg-" + feature_id;
                 finalGJFeats.push(cFeat);
 
 
