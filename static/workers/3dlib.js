@@ -27,13 +27,13 @@ function generatePolicyFeatures(curFeat) {
     var fe = turf.bbox(curFeat);
     var area = Math.round(turf.area(curFeat));
     var cw = getCW(area);
-    var unit = 'kilometers';
+    var options = {'units':'kilometers'};
     var dJSON = {
         "type": "FeatureCollection",
         "features": [curFeat]
     };
     // make the grid of 50 meter points
-    var grd = turf.pointGrid(fe, cw, unit);
+    var grd = turf.pointGrid(fe, cw, options);
     var pW = turf.within(grd, dJSON);
     var pwLen = pW.features.length;
     var height = elevationoffset + 0.01;
@@ -46,7 +46,7 @@ function generatePolicyFeatures(curFeat) {
     }
     for (var l1 = 0; l1 < pwLen; l1++) {
         var curptwithin = pW.features[l1];
-        var bufFeat = turf.buffer(curptwithin, 0.0075, 'kilometers');
+        var bufFeat = turf.buffer(curptwithin, 0.0075, options);
         bufFeat.properties = prop;
         policyFeats.push(bufFeat);
     }
