@@ -73,7 +73,7 @@ function generateFinal3DGeoms(constraintedModelDesigns) {
         var curFeat = curFeats[h];
         // console.log(JSON.stringify(curFeat));
         var curFeatSys = curFeat.properties.sysname;
-        const units = 'kilometers';
+        const options = {'units': 'kilometers'};
 
         var featProps = curFeat.properties;
         const feature_id = curFeat.properties.diagramid.toString();
@@ -94,7 +94,7 @@ function generateFinal3DGeoms(constraintedModelDesigns) {
 
         // if it is a line then simply buffer it and paint it black with a small height
         if (curFeat.geometry.type === "LineString") {
-            f = turf.buffer(curFeat, 0.005, units);
+            f = turf.buffer(curFeat, 0.005, options);
             if (f['type'] === "Feature") {
                 f = {
                     "type": "FeatureCollection",

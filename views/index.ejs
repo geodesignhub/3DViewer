@@ -20,7 +20,7 @@
     <script type="text/javascript" src="/assets/js/leaflet/leaflet.js"></script>
     <script type="text/javascript" src="/assets/js/svg/svg.min.js"></script>
     <script type="text/javascript" src="/assets/OSMBuildings/OSMBuildings.js"></script>
-    <script type="text/javascript" src="/assets/js/geojsonlint/geojsonlint.js"></script>    
+    <script type="text/javascript" src="/assets/js/geojsonlint/geojsonlint.js"></script>
     <script type="text/javascript" src="/assets/js/humane/humane.min.js"></script>
 </head>
 
@@ -32,8 +32,10 @@
                 <h1 class="page-header">Geodesignhub 3D Viewer</h1>
                 <section class="information">
                     <p class="description">This plugin uses <a href="http://osmbuildings.org/" target="_blank">OSM
-                            Buildings</a> library for visualization and design data from <a href="http://www.geodesignhub.com/">Geodesignhub</a>. See the <a href="https://github.com/geodesignhub/3DViewer">GitHub repository</a>.</p>
-                    
+                            Buildings</a> library for visualization and design data from <a
+                            href="http://www.geodesignhub.com/">Geodesignhub</a>. See the <a
+                            href="https://github.com/geodesignhub/3DViewer">GitHub repository</a>.</p>
+
                     <!-- <br>
                     <div class="instruction">
                         <ol>
@@ -49,14 +51,15 @@
                     <div>
                         <div id="inputmap"></div>
                     </div>
-                    
+
                     <br>
                     <div id="systemsCBCont" style="display:none">
                         <h4>Systems</h4>
                         <div id="systemsCB"></div>
                         <br>
-                        
-                        <div><input name="show_policies" id='show_policies' type="checkbox" checked /> Show Policies</input></div>
+
+                        <div><input name="show_policies" id='show_policies' type="checkbox" checked /> Show
+                            Policies</input></div>
                     </div>
                     <br><br>
                     <div class="glcontrol">
@@ -76,17 +79,10 @@
                     </div><br>
                     <hr>
                     <div id="search-results"></div>
-                    
-                    <!-- <div id='downloadLink' style='display:none'>
-                        <h4>Download</h4>
-                        <div>
-                            <p><button class="button buttongreen" onclick="downloadGJ()">Download Data</button></p>
-                        </div>
-                    </div> -->
-                    <br>
-                    <br>
+                    <small id="procstatus"></small>
 
-                    <div id="drawing"></div>
+                    <br>
+                    <br>
                 </section>
 
             </div>
@@ -110,7 +106,7 @@
                 longitude: 0.2217864990234375
             },
             zoom: 16,
-            minZoom: 12,            
+            minZoom: 12,
             maxZoom: 20,
             state: false, // stores map position/rotation in url
             attribution: '© 3D <a href="http://osmbuildings.org/copyright/">OSM Buildings</a>'
@@ -179,7 +175,8 @@
             } else {
                 gj = JSON.parse(gj);
                 start3dWorker(gj, selectedsystems);
-                $("#loadingGIF").show();
+                // $("#loadingGIF").show();
+                $("#procstatus").show();
             }
         }
 
@@ -191,7 +188,8 @@
             var threeDWorker = new Worker('/assets/workers/3dlib.js');
             threeDWorker.onerror = function (e) {
                 console.log('Error: Line ' + e.lineno + ' in ' + e.filename + ': ' + e.message);
-                $("#loadingGIF").hide();
+                // $("#loadingGIF").hide();
+                $("#procstatus").hide();
                 humane.log("There was a error in processing, please try again with a new geometry.. ", {
                     addnCls: 'humane-flatty-error'
                 });
@@ -242,7 +240,8 @@
         }
 
         function updateGLData(gjsonData) {
-            $("#loadingGIF").hide();
+            // $("#loadingGIF").hide();
+            $("#procstatus").hide();
             $("#downloadLink").show();
             $("#procstatus").html("Processing..");
             humane.log("Rendering Scene..", {
@@ -270,7 +269,8 @@
     </script>
 </body>
 <script>
-    $("#loadingGIF").hide();
+    // $("#loadingGIF").hide();
+    $("#procstatus").hide();
     var generatedData;
     var apitoken = "<%= apitoken  %>"; //var test is now assigned to getTest which will only work on browsers
     var projectid = "<%= projectid %>"; //var test is now assigned to getTest which will only work on browsers 
@@ -306,11 +306,12 @@
 
     osmb.addGeoJSONTiles('https://{s}.data.osmbuildings.org/0.2/anonymous/tile/{z}/{x}/{y}.json', {
         "color": "#ffe9ec",
-        // "fadeIn": true
+
     });
 
     osmb.hide(feature => {
-        const bounds = L.latLngBounds([feature.properties.bounds['min'][1], feature.properties.bounds['min'][0]], feature.properties.bounds['max'][1], feature.properties.bounds['max'][0]);
+        const bounds = L.latLngBounds([feature.properties.bounds['min'][1], feature.properties.bounds['min'][
+            0]], feature.properties.bounds['max'][1], feature.properties.bounds['max'][0]);
         if (mb.intersects(bounds) && Number.isInteger(parseInt(feature.id))) {
             return 1;
         } else {
@@ -319,102 +320,136 @@
     });
 
     osmb.on('pointerup', e => {
-    if (!e.features) {
-        
-        osmb.highlight(feature => {});      
-      return;
-    }
+        if (!e.features) {
 
-    const featureIdList = e.features.map(feature => feature.id);
-    
-    osmb.highlight(feature => {
-      if (featureIdList.indexOf(feature.id) > -1) {
-        return '#ffcc00';
-      }
+            osmb.highlight(feature => {});
+            return;
+        }
+
+        const featureIdList = e.features.map(feature => feature.id);
+
+        osmb.highlight(feature => {
+            if (featureIdList.indexOf(feature.id) > -1) {
+                return '#ffcc00';
+            }
+        });
+
+        showInfoPopup(e.features || []);
     });
+    const $resultList = $('#search-results');
 
-    showInfoPopup(e.features || []);
-  });
-  const $resultList = $('#search-results');
-
-  function showInfoPopup(features) {
-    $resultList.empty();
-    features.forEach(feature => {
-      $resultList.append(renderFeatureInfo(feature));
-    });
-
-
-  }
-
-  function renderFeatureInfo (feature) {
-
-    const featprops = feature.properties;
-    let html = '';
-
-    // html += '<div class="search-result-type" style="display:inline">ID</div> ';
-    // html += feature.id + '<br/>';
-    html +='<div>';
-    
-    if (featprops.isPolicy === 0 && featprops.isStreet === 0) {
-    
-    for (let key in feature.properties) {
-      if (typeof feature.properties[key] === 'object') continue;
-        
-      if (key=='height') {
-        html +='<h4>Set Floors</h4>';
-        html += '<input id="'+ feature.id +'-floors-id" type="number" value="'+ Math.ceil(feature.properties[key]/3.5)  +'" ">';        
-        html +='<br>';
-        // html +='<br><br><h4>Set Rooftype</h4>';
-        // html += '<select id="'+ feature.id +'-roof-type"><option value="flat">flat</option><option value="skillion">skillion</option><option value="gabled">gabled</option><option value="pyramidal">pyramidal</option></select>';        
-      }
-
-   }
-
-    html +='<br><br><button onclick="update_id_floors('+"'"+feature.id +"'" +')">Update</button></div>';
+    function showInfoPopup(features) {
+        $resultList.empty();
+        features.forEach(feature => {
+            $resultList.append(renderFeatureInfo(feature));
+        });
 
 
     }
-    else {
-        html += 'Not a building';
+
+    function renderFeatureInfo(feature) {
+
+        const featprops = feature.properties;
+        let html = '';
+
+        // html += '<div class="search-result-type" style="display:inline">ID</div> ';
+        // html += feature.id + '<br/>';
+        html += '<div>';
+
+        if (featprops.isPolicy === 0 && featprops.isStreet === 0) {
+
+            for (let key in feature.properties) {
+                if (typeof feature.properties[key] === 'object') continue;
+
+                if (key == 'height') {
+                    html += '<h4>Set Floors</h4>';
+                    html += '<input id="' + feature.id + '-floors-id" type="number" value="' + Math.ceil(feature
+                            .properties[key] / 3.5) + '" "><button onclick="update_id_floors(' + "'" + feature.id +
+                        "'" + ')"> ↻ Update</button><br>';
+                    // html +='<br><br><h4>Set Rooftype</h4>';
+                    // html += '<select id="'+ feature.id +'-roof-type"><option value="flat">flat</option><option value="skillion">skillion</option><option value="gabled">gabled</option><option value="pyramidal">pyramidal</option></select>';        
+                    break;
+                }
+            }
+            html += '<br><h4>Scale Feature</h4>';
+            html += '<input id="' + feature.id + '-size-id" type="number" step="0.1" value="' + 0 +
+                '" "><button onclick="scale_feature(' + "'" + feature.id + "'" + ')"> ↻ Update</button><br>';
+            html += '<br></div>';
+
+
+        } else {
+            html += 'Not a building';
+        }
+        return $('<div>' + html + '</div>');
     }
-    return $('<div>' + html + '</div>');
-  }
 
 
-
-    var svgDrawing = SVG('drawing').size(10, 10);
+    var svgDrawing = SVG().addTo('body').size(10, 10);
 
     function update_id_floors(feature_id) {
         var updated_properties = {};
-        var building_floors = document.getElementById(feature_id + '-floors-id');
+        let building_floors = document.getElementById(feature_id + '-floors-id');
         var floors_to_meters = Math.ceil((building_floors.value) * 3.5);
         updated_properties['id'] = feature_id;
         updated_properties['height'] = floors_to_meters;
 
-        var constrainWorker = new Worker('/assets/workers/updateFeatureProperties.js');
-                    constrainWorker.onerror = function (e) {
-                        console.log('Error: Line ' + e.lineno + ' in ' + e.filename + ': ' + e.message);
-                        $("#loadingGIF").hide();
-                        humane.log("There was a error in processing, please try again.. ", {
-                            addnCls: 'humane-flatty-error'
-                        });
-                    };
-                    // console.log(selectedsystems);
-                    constrainWorker.postMessage({
-                        'allFeaturesList': generatedData,
-                        'updated_properties': JSON.stringify([updated_properties])
+        var updateFeatureWorker = new Worker('/assets/workers/updateFeatureProperties.js');
+        updateFeatureWorker.onerror = function (e) {
+            console.log('Error: Line ' + e.lineno + ' in ' + e.filename + ': ' + e.message);
+            // $("#loadingGIF").hide();
+            $("#procstatus").hide();
+            humane.log("There was a error in processing, please try again.. ", {
+                addnCls: 'humane-flatty-error'
+            });
+        };
+        // console.log(selectedsystems);
+        updateFeatureWorker.postMessage({
+            'allFeaturesList': generatedData,
+            'updated_properties': JSON.stringify([updated_properties])
 
-                    });
-                    constrainWorker.addEventListener('message', function (e) {
-                        if (e.data.mode === 'status') {
-                            updateWorkerStatus(e.data.percentcomplete);
-                        } else {
-                            generatedData = e.data.polygons;                        
-                            updateGLData(e.data.polygons);
-                        }
-                    }, false);
+        });
+        updateFeatureWorker.addEventListener('message', function (e) {
+            if (e.data.mode === 'status') {
+                updateWorkerStatus(e.data.percentcomplete);
+            } else {
+                generatedData = e.data.polygons;
+                updateGLData(e.data.polygons);
+            }
+        }, false);
 
-                
+    }
+
+    
+    function scale_feature(feature_id) {
+        var updated_properties = {};
+        let new_size = document.getElementById(feature_id + '-size-id').value;
+
+        updated_properties['id'] = feature_id;
+        updated_properties['scale'] = new_size;
+        console.log(updated_properties);
+        var updateFeatureWorker = new Worker('/assets/workers/resize_polygon.js');
+        updateFeatureWorker.onerror = function (e) {
+            console.log('Error: Line ' + e.lineno + ' in ' + e.filename + ': ' + e.message);
+            // $("#loadingGIF").hide();
+            $("#procstatus").hide();
+            humane.log("There was a error in processing, please try again.. ", {
+                addnCls: 'humane-flatty-error'
+            });
+        };
+        // console.log(selectedsystems);
+        updateFeatureWorker.postMessage({
+            'allFeaturesList': generatedData,
+            'updated_properties': JSON.stringify([updated_properties])
+
+        });
+        updateFeatureWorker.addEventListener('message', function (e) {
+            if (e.data.mode === 'status') {
+                updateWorkerStatus(e.data.percentcomplete);
+            } else {
+                generatedData = e.data.polygons;
+                updateGLData(e.data.polygons);
+            }
+        }, false);
 
     }
 
@@ -528,38 +563,41 @@
             }
         }
     })();
+
     function runConstrainWorker() {
 
-                    var selectedsystems = [];
-                    $('#systemsCB input:checked').each(function () {
-                        selectedsystems.push($(this).attr('id'));
-                    });
-                    let show_policies = (document.getElementById("show_policies").checked)?1:0; 
-                    $("#loadingGIF").show();
-                    var constrainWorker = new Worker(
-                        '/assets/workers/constrainGeneratedFeatures.js');
-                    constrainWorker.onerror = function (e) {
-                        console.log('Error: Line ' + e.lineno + ' in ' + e.filename + ': ' + e.message);
-                        $("#loadingGIF").hide();
-                        humane.log("There was a error in processing, please try again.. ", {
-                            addnCls: 'humane-flatty-error'
-                        });
-                    };
-                    // console.log(selectedsystems);
-                    constrainWorker.postMessage({
-                        'allFeaturesList': generatedData,
-                        'selectedsystems': JSON.stringify(selectedsystems),
-                        'showpolicies':JSON.stringify(show_policies)
+        var selectedsystems = [];
+        $('#systemsCB input:checked').each(function () {
+            selectedsystems.push($(this).attr('id'));
+        });
+        let show_policies = (document.getElementById("show_policies").checked) ? 1 : 0;
+        // $("#loadingGIF").show();
+        $("#procstatus").show();
+        var constrainWorker = new Worker(
+            '/assets/workers/constrainGeneratedFeatures.js');
+        constrainWorker.onerror = function (e) {
+            console.log('Error: Line ' + e.lineno + ' in ' + e.filename + ': ' + e.message);
+            // $("#loadingGIF").hide();
+            $("#procstatus").hide();
+            humane.log("There was a error in processing, please try again.. ", {
+                addnCls: 'humane-flatty-error'
+            });
+        };
+        // console.log(selectedsystems);
+        constrainWorker.postMessage({
+            'allFeaturesList': generatedData,
+            'selectedsystems': JSON.stringify(selectedsystems),
+            'showpolicies': JSON.stringify(show_policies)
 
-                    });
-                    constrainWorker.addEventListener('message', function (e) {
-                        if (e.data.mode === 'status') {
+        });
+        constrainWorker.addEventListener('message', function (e) {
+            if (e.data.mode === 'status') {
 
-                            updateWorkerStatus(e.data.percentcomplete);
-                        } else {
-                            updateGLData(e.data.polygons);
-                        }
-                    }, false);
+                updateWorkerStatus(e.data.percentcomplete);
+            } else {
+                updateGLData(e.data.polygons);
+            }
+        }, false);
 
     }
     (function (console) {
