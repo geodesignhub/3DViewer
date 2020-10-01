@@ -33,7 +33,7 @@ function scale_feature(allFeaturesList, updated_properties) {
 
         }
         if (found) {
-            console.log(JSON.stringify(scaledPoly));
+            // console.log(JSON.stringify(scaledPoly));
             updated_features.features.push(scaledPoly);
 
         } else {

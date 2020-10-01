@@ -456,3 +456,35 @@ section {
 .page-header {
     margin-bottom: 0px;
 }
+
+
+.range-wrap {
+    position: relative;
+    margin: 0 auto 3rem;
+  }
+  .range {
+    width: 100%;
+  }
+  .bubble {
+    background: gray;
+    color: white;
+    padding: 4px 12px;
+    position: absolute;
+    border-radius: 4px;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+  .bubble::after {
+    content: "";
+    position: absolute;
+    width: 2px;
+    height: 2px;
+    background: gray;
+    top: -1px;
+    left: 50%;
+  }
+  
+  body {
+    margin: 2rem;
+  }
+  

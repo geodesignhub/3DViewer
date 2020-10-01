@@ -308,7 +308,6 @@
 
     osmb.addGeoJSONTiles('https://{s}.data.osmbuildings.org/0.2/anonymous/tile/{z}/{x}/{y}.json', {
         "color": "#ffe9ec",
-
     });
 
     osmb.hide(feature => {
@@ -349,7 +348,26 @@
             $resultList.append(renderFeatureInfo(feature));
         });
 
+    const allRanges = document.querySelectorAll(".range-wrap");
+        allRanges.forEach(wrap => {
+        const range = wrap.querySelector(".range");
+        const bubble = wrap.querySelector(".bubble");
 
+        range.addEventListener("input", () => {
+            setBubble(range, bubble);
+        });
+        setBubble(range, bubble);
+        });
+
+        function setBubble(range, bubble) {
+        const val = range.value;
+        const min = range.min ? range.min : 0;
+        const max = range.max ? range.max : 100;
+        const newVal = Number(((val - min) * 100) / (max - min));
+        bubble.innerHTML = val;
+        // Sorta magic numbers based on size of the native UI thumb
+        bubble.style.left = `calc(${newVal}% + (${8 - newVal * 0.15}px))`;
+        }
     }
 
     function renderFeatureInfo(feature) {
@@ -360,7 +378,7 @@
         // html += '<div class="search-result-type" style="display:inline">ID</div> ';
         // html += feature.id + '<br/>';
         html += '<div>';
-
+        
         if (featprops.isPolicy === 0 && featprops.isStreet === 0) {
 
             for (let key in feature.properties) {
@@ -368,18 +386,15 @@
 
                 if (key == 'height') {
                     html += '<h4>Set Floors</h4>';
-                    html += '<input id="' + feature.id + '-floors-id" type="number" value="' + Math.ceil(feature
-                            .properties[key] / 3.5) + '" "><button onclick="update_id_floors(' + "'" + feature.id +
-                        "'" + ')"> ↻ Update</button><br>';
+                    html += '<div class="range-wrap"><input onchange="update_id_floors('+"'" + feature.id +"'" +  ')" id="' + feature.id + '-floors-id" class="range" type="range" value="' + Math.ceil(feature.properties[key] / 3.5) + '" "><output class="bubble"></output></div><br>';
                     // html +='<br><br><h4>Set Rooftype</h4>';
                     // html += '<select id="'+ feature.id +'-roof-type"><option value="flat">flat</option><option value="skillion">skillion</option><option value="gabled">gabled</option><option value="pyramidal">pyramidal</option></select>';        
                     break;
                 }
             }
             html += '<br><h4>Scale Feature</h4>';
-            html += '<input id="' + feature.id + '-size-id" type="number" step="0.1" value="' + 0 +
-                '" "><button onclick="scale_feature(' + "'" + feature.id + "'" + ')"> ↻ Update</button><br>';
-            html += '<br></div>';
+            html += '<div class="range-wrap"><input onchange="scale_feature('+"'" + feature.id +"'" +  ')" id="' + feature.id + '-size-id" class="range" type="range" min="-1" max="2" step="0.1" value="' + 0 + '" "><br>';
+            html += '<output class="bubble"></output></div><br></div>';
 
 
         } else {
@@ -430,8 +445,7 @@
         let new_size = document.getElementById(feature_id + '-size-id').value;
 
         updated_properties['id'] = feature_id;
-        updated_properties['scale'] = new_size;
-        console.log(updated_properties);
+        updated_properties['scale'] = Math.abs(new_size);
         var updateFeatureWorker = new Worker('/assets/workers/resize_polygon.js');
         updateFeatureWorker.onerror = function (e) {
             console.log('Error: Line ' + e.lineno + ' in ' + e.filename + ': ' + e.message);
