@@ -78,7 +78,9 @@
                         </span>
                     </div><br>
                     <hr>
+                   
                     <div id="search-results"></div>
+                   
                     <small id="procstatus"></small>
 
                     <br>
@@ -320,9 +322,12 @@
     });
 
     osmb.on('pointerup', e => {
+        
         if (!e.features) {
 
             osmb.highlight(feature => {});
+            const $resultList = $('#search-results');
+            $resultList.empty();
             return;
         }
 
