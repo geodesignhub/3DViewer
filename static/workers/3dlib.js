@@ -27,7 +27,7 @@ function generatePolicyFeatures(curFeat) {
     var fe = turf.bbox(curFeat);
     var area = Math.round(turf.area(curFeat));
     var cw = getCW(area);
-    var options = {'units':'kilometers'};
+    var options = { 'units': 'kilometers' };
     var dJSON = {
         "type": "FeatureCollection",
         "features": [curFeat]
@@ -73,7 +73,7 @@ function generateFinal3DGeoms(constraintedModelDesigns) {
         var curFeat = curFeats[h];
         // console.log(JSON.stringify(curFeat));
         var curFeatSys = curFeat.properties.sysname;
-        const options = {'units': 'kilometers'};
+        const options = { 'units': 'kilometers' };
 
         var featProps = curFeat.properties;
         const feature_id = curFeat.properties.diagramid.toString();
@@ -112,7 +112,7 @@ function generateFinal3DGeoms(constraintedModelDesigns) {
                     min_height = elevationoffset;
                 }
 
-                curlineFeat.id = "road-" + feature_id;
+                curlineFeat.id = "road-" + makeid() + '-' + feature_id;
                 // console.log("Line: ", min_height, max_height);
                 curlineFeat.properties = {
                     "color": curFeat.properties.color,
@@ -157,7 +157,7 @@ function generateFinal3DGeoms(constraintedModelDesigns) {
                         };
                         var cFeat = curFeat;
 
-                        cFeat.id = "bldg-" + feature_id;
+                        cFeat.id = "bldg-" + makeid() + '-' + feature_id;
                         cFeat.properties = props;
                         finalGJFeats.push(cFeat);
 
@@ -189,7 +189,7 @@ function generateFinal3DGeoms(constraintedModelDesigns) {
                         };
                         var cFeat = curFeat;
                         cFeat.properties = props;
-                        cFeat.id = "bldg-" + feature_id;
+                        cFeat.id = "bldg-" + makeid() + '-' + feature_id;
                         finalGJFeats.push(cFeat);
 
                     } else if (featProps.sysname === 'LDH') {
@@ -219,7 +219,7 @@ function generateFinal3DGeoms(constraintedModelDesigns) {
                         };
                         var cFeat = curFeat;
                         cFeat.properties = props;
-                        cFeat.id = "bldg-" + feature_id;
+                        cFeat.id = "bldg-" + makeid() + '-' + feature_id;
                         finalGJFeats.push(cFeat);
 
                     } else if ((featProps.sysname === 'COM')) {
@@ -247,7 +247,7 @@ function generateFinal3DGeoms(constraintedModelDesigns) {
                             "minHeight": min_height
                         };
                         var cFeat = curFeat;
-                        cFeat.id = "bldg-" + feature_id;
+                        cFeat.id = "bldg-" + makeid() + '-' + feature_id;
                         cFeat.properties = props;
                         finalGJFeats.push(cFeat);
 
@@ -276,7 +276,7 @@ function generateFinal3DGeoms(constraintedModelDesigns) {
                         };
                         var cFeat = curFeat;
                         cFeat.properties = props;
-                        cFeat.id = "bldg-" + feature_id;
+                        cFeat.id = "bldg-" + makeid() + '-' + feature_id;
                         finalGJFeats.push(cFeat);
 
                     }
@@ -356,7 +356,7 @@ function generateFinal3DGeoms(constraintedModelDesigns) {
                     // var height = elevationoffset + 0.01;
                     var prop = {
                         "color": curFeat.properties.color,
-                        "roofColor": curFeat.properties.color,
+                        "roofColor": curFeat.properties.color,                        
                         "isStreet": 0,
                         "height": max_height,
                         "isPolicy": 0,
@@ -415,9 +415,9 @@ function constrainFeatures(allFeaturesList, selectedsystems) {
 function generate3DGeoms(allFeaturesList, selectedsystems) {
     var allFeaturesList = JSON.parse(allFeaturesList);
     var selectedsystems = JSON.parse(selectedsystems);
-    // console.log(JSON.stringify(existingroads));
 
-    var threeDOutput;
+
+
     if (selectedsystems.length > 0) {
         var constraintedFeatures = constrainFeatures(allFeaturesList, selectedsystems);
         threeDOutput = generateFinal3DGeoms(constraintedFeatures);

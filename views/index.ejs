@@ -115,8 +115,8 @@
         });
 
         osmb.addMapTiles(
-            'https://{s}.tiles.mapbox.com/v3/cygnus2936.curedn3y/{z}/{x}/{y}.png', {
-                attribution: '© Data <a href="http://openstreetmap.org/copyright/">OpenStreetMap</a> · © Map <a href="http://mapbox.com">MapBox</a>'
+            'https://{s}.basemaps.cartocdn.com/rastertiles/light_all/{z}/{x}/{y}.png', {
+                attribution: '© Data <a href="http://openstreetmap.org/copyright/">OpenStreetMap</a> · © Map <a href="http://mapbox.com">Carto</a>'
             }
         );
 
@@ -392,10 +392,6 @@
                     break;
                 }
             }
-            html += '<br><h4>Scale Feature</h4>';
-            html += '<div class="range-wrap"><input onchange="scale_feature('+"'" + feature.id +"'" +  ')" id="' + feature.id + '-size-id" class="range" type="range" min="-1" max="2" step="0.1" value="' + 0 + '" "><br>';
-            html += '<output class="bubble"></output></div><br></div>';
-
 
         } else {
             html += 'Not a building';
@@ -414,39 +410,6 @@
         updated_properties['height'] = floors_to_meters;
 
         var updateFeatureWorker = new Worker('/assets/workers/updateFeatureProperties.js');
-        updateFeatureWorker.onerror = function (e) {
-            console.log('Error: Line ' + e.lineno + ' in ' + e.filename + ': ' + e.message);
-            // $("#loadingGIF").hide();
-            $("#procstatus").hide();
-            humane.log("There was a error in processing, please try again.. ", {
-                addnCls: 'humane-flatty-error'
-            });
-        };
-        // console.log(selectedsystems);
-        updateFeatureWorker.postMessage({
-            'allFeaturesList': generatedData,
-            'updated_properties': JSON.stringify([updated_properties])
-
-        });
-        updateFeatureWorker.addEventListener('message', function (e) {
-            if (e.data.mode === 'status') {
-                updateWorkerStatus(e.data.percentcomplete);
-            } else {
-                generatedData = e.data.polygons;
-                updateGLData(e.data.polygons);
-            }
-        }, false);
-
-    }
-
-    
-    function scale_feature(feature_id) {
-        var updated_properties = {};
-        let new_size = document.getElementById(feature_id + '-size-id').value;
-
-        updated_properties['id'] = feature_id;
-        updated_properties['scale'] = Math.abs(new_size);
-        var updateFeatureWorker = new Worker('/assets/workers/resize_polygon.js');
         updateFeatureWorker.onerror = function (e) {
             console.log('Error: Line ' + e.lineno + ' in ' + e.filename + ': ' + e.message);
             // $("#loadingGIF").hide();
