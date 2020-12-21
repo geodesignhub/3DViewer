@@ -58,7 +58,6 @@ app.get('/', function(request, response) {
             opts['result'] = gj;
             opts['bounds'] = JSON.stringify(bounds['bounds']);
             opts['systems'] = sys;
-            console.log(process.env.TILES_URL)
             opts['basemap_tiles'] = process.env.TILES_URL;
             response.render('index', opts);
         });
