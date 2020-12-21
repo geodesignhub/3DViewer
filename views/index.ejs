@@ -113,12 +113,14 @@
             state: false, // stores map position/rotation in url
             attribution: '© 3D <a href="http://osmbuildings.org/copyright/">OSM Buildings</a>'
         });
-
-        osmb.addMapTiles(
-            'https://{s}.basemaps.cartocdn.com/rastertiles/light_all/{z}/{x}/{y}.png', {
-                attribution: '© Data <a href="http://openstreetmap.org/copyright/">OpenStreetMap</a> · © Map <a href="http://mapbox.com">Carto</a>'
-            }
-        );
+ 
+        const basemap_tiles = "<%= basemap_tiles %>"; 
+        if (basemap_tiles !=""){
+        osmb.addMapTiles(basemap_tiles, {
+        attribution: '<a href="https://www.maptiler.com/copyright/" target="_blank">&copy; MapTiler</a> <a href="https://www.openstreetmap.org/copyright" target="_blank">&copy; OpenStreetMap contributors</a>',
+        maxZoom: 18,
+        });
+        }
 
         osmb.setTilt(25);
         var controlButtons = document.querySelectorAll('.glcontrol button');
@@ -295,7 +297,6 @@
     });
     // FeatureGroup is to store editable layers
     var designLayer = new L.FeatureGroup();
-
     var inputbaseLayer = L.tileLayer('https://cartodb-basemaps-{s}.global.ssl.fastly.net/light_all/{z}/{x}/{y}.png', {
         attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, &copy; <a href="https://cartodb.com/attributions">CartoDB</a>',
         maxZoom: 18,
@@ -454,10 +455,11 @@
                 var fillColor = feature.properties.color;
             } else { // it is policy
                 var fillPattern = setSVGStyle(feature.properties.color);
+                
                 var fillColor = fillPattern;
             }
 
-            return {
+        return {
                 // fillColor: feature.properties.color,
                 // fillColor:'#333333',
                 weight: 1,
@@ -485,7 +487,7 @@
                 color: reqColor
             })
         });
-        return pattern.fill();
+        return pattern;
     }
 
     function getColor(type) {

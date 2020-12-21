@@ -8,6 +8,7 @@ var ejs = require('ejs');
 app.set('view engine', 'ejs');
 
 
+require("dotenv").config();
 app.use(express.static(__dirname + '/views'));
 app.use('/assets', express.static('static'));
 app.use(bodyParser.urlencoded({
@@ -52,10 +53,13 @@ app.get('/', function(request, response) {
             var gj = JSON.stringify(results[0]);
             var bounds = results[1];
             var sys = JSON.stringify(results[2]);
+            
 
             opts['result'] = gj;
             opts['bounds'] = JSON.stringify(bounds['bounds']);
             opts['systems'] = sys;
+            console.log(process.env.TILES_URL)
+            opts['basemap_tiles'] = process.env.TILES_URL;
             response.render('index', opts);
         });
 
