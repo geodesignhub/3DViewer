@@ -311,15 +311,15 @@
         "color": "#ffe9ec",
     });
 
-    osmb.hide(feature => {
-        const bounds = L.latLngBounds([feature.properties.bounds['min'][1], feature.properties.bounds['min'][
-            0]], feature.properties.bounds['max'][1], feature.properties.bounds['max'][0]);
-        if (mb.intersects(bounds) && Number.isInteger(parseInt(feature.id))) {
-            return 1;
-        } else {
-            return 0;
-        }
-    });
+    // osmb.hide(feature => {
+    //     const bounds = L.latLngBounds([feature.properties.bounds['min'][1], feature.properties.bounds['min'][
+    //         0]], feature.properties.bounds['max'][1], feature.properties.bounds['max'][0]);
+    //     if (mb.intersects(bounds) && Number.isInteger(parseInt(feature.id))) {
+    //         return 1;
+    //     } else {
+    //         return 0;
+    //     }
+    // });
 
     osmb.on('pointerup', e => {
         
