@@ -430,7 +430,8 @@
                 updateWorkerStatus(e.data.percentcomplete);
             } else {
                 generatedData = e.data.polygons;
-                updateGLData(e.data.polygons);
+                runConstrainWorker();
+                // updateGLData(e.data.polygons);
             }
         }, false);
 
