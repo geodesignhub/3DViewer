@@ -53,12 +53,13 @@
                     </div>
 
                     <br>
-                    <div id="systemsCBCont" style="display:none">
+                    <div id="systemsCBCont">
                         <h4>Systems</h4>
                         <div id="systemsCB"></div>
                         <br>
 
-                        <div><input name="show_policies" id='show_policies' type="checkbox" checked /> Show
+                        <div><input class="policies_cb" name="show_policies" id='show_policies' type="checkbox"
+                                checked /> Show
                             Policies</input></div>
                     </div>
                     <br><br>
@@ -78,9 +79,9 @@
                         </span>
                     </div><br>
                     <hr>
-                   
+
                     <div id="search-results"></div>
-                   
+
                     <small id="procstatus"></small>
 
                     <br>
@@ -113,13 +114,13 @@
             state: false, // stores map position/rotation in url
             attribution: '© 3D <a href="http://osmbuildings.org/copyright/">OSM Buildings</a>'
         });
- 
-        const basemap_tiles = "<%= basemap_tiles %>"; 
-        if (basemap_tiles !=""){
-        osmb.addMapTiles(basemap_tiles, {
-        attribution: '<a href="https://www.maptiler.com/copyright/" target="_blank">&copy; MapTiler</a> <a href="https://www.openstreetmap.org/copyright" target="_blank">&copy; OpenStreetMap contributors</a>',
-        maxZoom: 18,
-        });
+
+        const basemap_tiles = "<%= basemap_tiles %>";
+        if (basemap_tiles != "") {
+            osmb.addMapTiles(basemap_tiles, {
+                attribution: '<a href="https://www.maptiler.com/copyright/" target="_blank">&copy; MapTiler</a> <a href="https://www.openstreetmap.org/copyright" target="_blank">&copy; OpenStreetMap contributors</a>',
+                maxZoom: 18,
+            });
         }
 
         osmb.setTilt(25);
@@ -153,7 +154,7 @@
 
         function generateSystemCB(systems) {
             for (var x = 0; x < systems.length; x++) {
-                $('#systemsCB').append('<input name="sysCB" id=' + "'" + systems[x].sysname + "'" +
+                $('#systemsCB').append('<input class="chekbox" name="sysCB" id=' + "'" + systems[x].sysname + "'" +
                     'type="checkbox" checked /> <span class="square c-' + systems[x].syscolor.substring(1) +
                     '"></span>&nbsp;&nbsp;' + systems[x].sysname + '</input>&nbsp;&nbsp;');
             }
@@ -161,27 +162,6 @@
 
         function setbg(color) {
             document.getElementById("styled").style.background = color;
-        }
-
-        function submitGJ() {
-            var selectedsystems = [];
-            $('#systemsCB input:checked').each(function () {
-                selectedsystems.push($(this).attr('id'));
-            });
-
-            var gj = JSON.stringify(gjresults);
-            // document.getElementById("gjTA").value;
-            var gjerrors = geojsonhint.hint(gj);
-            if (gjerrors.length > 0) {
-                humane.log("The GeoJSON you have entered is invalid.. ", {
-                    addnCls: 'humane-flatty-error'
-                });
-            } else {
-                gj = JSON.parse(gj);
-                start3dWorker(gj, selectedsystems);
-                // $("#loadingGIF").show();
-                $("#procstatus").show();
-            }
         }
 
         function start3dWorker(allFeaturesList, selectedsystems) {
@@ -278,7 +258,6 @@
     var generatedData;
     var apitoken = "<%= apitoken  %>"; //var test is now assigned to getTest which will only work on browsers
     var projectid = "<%= projectid %>"; //var test is now assigned to getTest which will only work on browsers 
-    var diagramid = "<%= diagramid %>"; //var test is now assigned to getTest which will only work on browsers 
     var synthesisid = "<%= synthesisid %>"; //var test is now assigned to getTest which will only work on browsers  
     var cteamid = "<%= cteamid %>"; //var test is now assigned to getTest which will only work on browsers   
     var systems = <%- systems %>; //var test is now assigned to getTest which will only work on browsers  
@@ -322,7 +301,7 @@
     // });
 
     osmb.on('pointerup', e => {
-        
+
         if (!e.features) {
 
             osmb.highlight(feature => {});
@@ -349,25 +328,25 @@
             $resultList.append(renderFeatureInfo(feature));
         });
 
-    const allRanges = document.querySelectorAll(".range-wrap");
+        const allRanges = document.querySelectorAll(".range-wrap");
         allRanges.forEach(wrap => {
-        const range = wrap.querySelector(".range");
-        const bubble = wrap.querySelector(".bubble");
+            const range = wrap.querySelector(".range");
+            const bubble = wrap.querySelector(".bubble");
 
-        range.addEventListener("input", () => {
+            range.addEventListener("input", () => {
+                setBubble(range, bubble);
+            });
             setBubble(range, bubble);
-        });
-        setBubble(range, bubble);
         });
 
         function setBubble(range, bubble) {
-        const val = range.value;
-        const min = range.min ? range.min : 0;
-        const max = range.max ? range.max : 100;
-        const newVal = Number(((val - min) * 100) / (max - min));
-        bubble.innerHTML = val;
-        // Sorta magic numbers based on size of the native UI thumb
-        bubble.style.left = `calc(${newVal}% + (${8 - newVal * 0.15}px))`;
+            const val = range.value;
+            const min = range.min ? range.min : 0;
+            const max = range.max ? range.max : 100;
+            const newVal = Number(((val - min) * 100) / (max - min));
+            bubble.innerHTML = val;
+            // Sorta magic numbers based on size of the native UI thumb
+            bubble.style.left = `calc(${newVal}% + (${8 - newVal * 0.15}px))`;
         }
     }
 
@@ -379,7 +358,7 @@
         // html += '<div class="search-result-type" style="display:inline">ID</div> ';
         // html += feature.id + '<br/>';
         html += '<div>';
-        
+
         if (featprops.isPolicy === 0 && featprops.isStreet === 0) {
 
             for (let key in feature.properties) {
@@ -387,7 +366,9 @@
 
                 if (key == 'height') {
                     html += '<h4>Set Floors</h4>';
-                    html += '<div class="range-wrap"><input onchange="update_id_floors('+"'" + feature.id +"'" +  ')" id="' + feature.id + '-floors-id" class="range" type="range" value="' + Math.ceil(feature.properties[key] / 3.5) + '" "><output class="bubble"></output></div><br>';
+                    html += '<div class="range-wrap"><input onchange="update_id_floors(' + "'" + feature.id + "'" +
+                        ')" id="' + feature.id + '-floors-id" class="range" type="range" value="' + Math.ceil(feature
+                            .properties[key] / 3.5) + '" "><output class="bubble"></output></div><br>';
                     // html +='<br><br><h4>Set Rooftype</h4>';
                     // html += '<select id="'+ feature.id +'-roof-type"><option value="flat">flat</option><option value="skillion">skillion</option><option value="gabled">gabled</option><option value="pyramidal">pyramidal</option></select>';        
                     break;
@@ -456,11 +437,11 @@
                 var fillColor = feature.properties.color;
             } else { // it is policy
                 var fillPattern = setSVGStyle(feature.properties.color);
-                
+
                 var fillColor = fillPattern;
             }
 
-        return {
+            return {
                 // fillColor: feature.properties.color,
                 // fillColor:'#333333',
                 weight: 1,
@@ -525,29 +506,6 @@
         style: miniMapstyleComp,
     }).addTo(inputmap);
 
-    (function () {
-        if ((apitoken !== "0" && projectid !== "0" && diagramid !== "0")) {
-            // it is synthesis. 
-            if (gjresults.features.length > 0) {
-                // $("#gjTA").text(JSON.stringify(gjresults));
-                submitGJ();
-            }
-        } else if (apitoken !== "0" && projectid !== "0" && cteamid !== "0" && synthesisid !== "0") {
-
-            if (gjresults.features.length > 0) {
-                // $("#gjTA").text(JSON.stringify(gjresults));
-                generateSystemCB(systems);
-                $('#systemsCBCont').show();
-                submitGJ();
-                $('#systemsCB').click(function () {
-                    runConstrainWorker();
-                });
-                $('#show_policies').change(function () {
-                    runConstrainWorker();
-                });
-            }
-        }
-    })();
 
     function runConstrainWorker() {
 
@@ -627,6 +585,31 @@
         console.save(filteredGJ);
 
     }
+
+    generateSystemCB(systems);
+    var selectedsystems = [];
+    $('#systemsCB input:checked').each(function () {
+        selectedsystems.push($(this).attr('id'));
+    });
+    var gj = JSON.stringify(gjresults);
+    // document.getElementById("gjTA").value;
+    var gjerrors = geojsonhint.hint(gj);
+    if (gjerrors.length > 0) {
+        humane.log("The GeoJSON you have entered is invalid.. ", {
+            addnCls: 'humane-flatty-error'
+        });
+    } else {
+        gj = JSON.parse(gj);
+        start3dWorker(gj, selectedsystems);
+        // $("#loadingGIF").show();
+        $("#procstatus").show();
+    }
+    $(".chekbox").change(function () {
+        runConstrainWorker()
+    });
+    $(".policies_cb").change(function () {
+        runConstrainWorker()
+    });
 </script>
 
 </html>
