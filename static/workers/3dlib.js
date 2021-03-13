@@ -105,12 +105,12 @@ function generateFinal3DGeoms(constraintedModelDesigns) {
             var linefeatlen = linefeats.length;
             for (var x1 = 0; x1 < linefeatlen; x1++) {
                 curlineFeat = linefeats[x1];
-                if (max_height == 0) {
+                // if (max_height == 0) {
                     max_height = elevationoffset + 0.5;
-                }
-                if (min_height == 0) {
+                // }
+                // if (min_height == 0) {
                     min_height = elevationoffset;
-                }
+                // }
 
                 curlineFeat.id = "road-" + makeid() + '-' + feature_id;
                 // console.log("Line: ", min_height, max_height);
