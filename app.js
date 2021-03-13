@@ -115,12 +115,7 @@ app.get('/', function (request, response) {
     } 
     else {
         response.status(400).send('Not all parameters supplied.')
-
     }
-
 });
-
-
-
 
 app.listen(process.env.PORT || 5001);
