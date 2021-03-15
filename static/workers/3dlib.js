@@ -17,17 +17,19 @@ function generatePolicyFeatures(curFeat) {
     function getCW(d) {
         return d > 10000000 ? 1 :
             d > 6000000 ? 0.75 :
-                d > 5000000 ? 0.5 :
-                    d > 3000000 ? 0.3 :
-                        d > 2000000 ? 0.15 :
-                            d > 1000000 ? 0.08 :
-                                0.04;
+            d > 5000000 ? 0.5 :
+            d > 3000000 ? 0.3 :
+            d > 2000000 ? 0.15 :
+            d > 1000000 ? 0.08 :
+            0.04;
     }
     var policyFeats = [];
     var fe = turf.bbox(curFeat);
     var area = Math.round(turf.area(curFeat));
     var cw = getCW(area);
-    var options = { 'units': 'kilometers' };
+    var options = {
+        'units': 'kilometers'
+    };
     var dJSON = {
         "type": "FeatureCollection",
         "features": [curFeat]
@@ -73,7 +75,9 @@ function generateFinal3DGeoms(constraintedModelDesigns) {
         var curFeat = curFeats[h];
         // console.log(JSON.stringify(curFeat));
         var curFeatSys = curFeat.properties.sysname;
-        const options = { 'units': 'kilometers' };
+        const options = {
+            'units': 'kilometers'
+        };
 
         var featProps = curFeat.properties;
         const feature_id = curFeat.properties.diagramid.toString();
@@ -106,10 +110,10 @@ function generateFinal3DGeoms(constraintedModelDesigns) {
             for (var x1 = 0; x1 < linefeatlen; x1++) {
                 curlineFeat = linefeats[x1];
                 // if (max_height == 0) {
-                    max_height = elevationoffset + 0.5;
+                max_height = elevationoffset + 0.5;
                 // }
                 // if (min_height == 0) {
-                    min_height = elevationoffset;
+                min_height = elevationoffset;
                 // }
 
                 curlineFeat.id = "road-" + makeid() + '-' + feature_id;
@@ -356,7 +360,7 @@ function generateFinal3DGeoms(constraintedModelDesigns) {
                     // var height = elevationoffset + 0.01;
                     var prop = {
                         "color": curFeat.properties.color,
-                        "roofColor": curFeat.properties.color,                        
+                        "roofColor": curFeat.properties.color,
                         "isStreet": 0,
                         "height": max_height,
                         "isPolicy": 0,
