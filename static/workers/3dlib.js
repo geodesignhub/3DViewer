@@ -12,7 +12,7 @@ function makeid() {
 
 function generatePolicyFeatures(curFeat) {
     var curFeatprops = curFeat.properties;
-    const elevationoffset = 10;
+    const elevationoffset = 2;
 
     function getCW(d) {
         return d > 10000000 ? 1 :
@@ -35,6 +35,7 @@ function generatePolicyFeatures(curFeat) {
         "features": [curFeat]
     };
     // make the grid of 50 meter points
+    var policy_id = "plcy-" + makeid();
     var grd = turf.pointGrid(fe, cw, options);
     var pW = turf.within(grd, dJSON);
     var pwLen = pW.features.length;
@@ -52,6 +53,7 @@ function generatePolicyFeatures(curFeat) {
         bufFeat.properties = prop;
         policyFeats.push(bufFeat);
     }
+    
     return policyFeats;
 }
 

@@ -67,8 +67,8 @@
                             <button class="inc">+</button>
                         </span>
                     </div><br>
-                    
-                    
+
+
                     <hr>
 
                     <div id="search-results"></div>
@@ -81,7 +81,7 @@
 
             </div>
 
-            <div id="glMap" class="col-sm-9 col-md-9 sidebar">                    
+            <div id="glMap" class="col-sm-9 col-md-9 sidebar">
                 <div class="time-control">Shadows
                     <input id="date" type="range" min="1" max="365" step="1"><label for="date"></label>
                     <input id="time" type="range" min="0" max="23" step="1"><label for="time"></label>
@@ -109,10 +109,7 @@
 
         const basemap_tiles = "<%= basemap_tiles %>";
         if (basemap_tiles != "") {
-            osmb.addMapTiles(basemap_tiles, {
-                attribution: '<a href="https://www.maptiler.com/copyright/" target="_blank">&copy; MapTiler</a> <a href="https://www.openstreetmap.org/copyright" target="_blank">&copy; OpenStreetMap contributors</a>',
-                maxZoom: 18,
-            });
+            osmb.addMapTiles(basemap_tiles);
         }
 
         osmb.setTilt(25);
@@ -252,7 +249,7 @@
     var synthesisid = "<%= synthesisid %>"; //var test is now assigned to getTest which will only work on browsers  
     var cteamid = "<%= cteamid %>"; //var test is now assigned to getTest which will only work on browsers   
     var systems = <%- systems %>; //var test is now assigned to getTest which will only work on browsers  
-    var gjresults = <%- result %>;
+    var gjresults = <%-result %>;
     var bounds = <%- bounds %>;
 
     var inputmap = L.map('inputmap', {
@@ -278,18 +275,31 @@
     inputmap.fitBounds(mb);
 
     osmb.addGeoJSONTiles('https://{s}.data.osmbuildings.org/0.2/anonymous/tile/{z}/{x}/{y}.json', {
-        "color": "#ffe9ec",
+        "color": "#FF1493",
     });
 
+    const to_check_prefix = ["road-", "bldg-", "plcy-"];
     osmb.hide(feature => {
-        const bounds = L.latLngBounds([feature.properties.bounds['min'][1], feature.properties.bounds['min'][
-            0
-        ]], feature.properties.bounds['max'][1], feature.properties.bounds['max'][0]);
-        if (mb.intersects(bounds) && Number.isInteger(parseInt(feature.id))) {
-            return 1;
+        const bounds = L.latLngBounds([feature.properties.bounds['min'][1], feature.properties.bounds['min'][0]], feature.properties.bounds['max'][1], feature.properties.bounds['max'][0]);
+
+        if (mb.intersects(bounds)) {
+            if (feature.properties.isPolicy) {
+                return 0;
+            } else {
+                const feature_id = feature.id;
+                const feature_prefix = (feature_id).substring(0, 5);
+                const to_include = to_check_prefix.includes(feature_prefix);
+                if (to_include) {
+                    return 0;
+                } else {
+                    return 1;
+                }
+            }
         } else {
+
             return 0;
         }
+
     });
 
     osmb.on('pointerup', e => {
