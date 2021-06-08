@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html>
+
 <head>
     <title>Geodesignhub OSM Buildings Viewer</title>
     <meta charset="utf-8">
@@ -30,21 +31,10 @@
             <div class="col-sm-3 col-md-3 main">
                 <h1 class="page-header">Geodesignhub 3D Viewer</h1>
                 <section class="information">
-                    <p class="description">This plugin uses <a href="http://osmbuildings.org/" target="_blank">OSM
-                            Buildings</a> library for visualization and design data from <a
-                            href="http://www.geodesignhub.com/">Geodesignhub</a>. See the <a
-                            href="https://github.com/geodesignhub/3DViewer">GitHub repository</a>.</p>
+                    <p class="description">This plugin uses buildings data from openstreetmap for visualization and
+                        design data from Geodesignhub. See the <a href="https://github.com/geodesignhub/3DViewer">GitHub
+                            repository</a> for more information.</p>
 
-                    <!-- <br>
-                    <div class="instruction">
-                        <ol>
-                            <li>Wait till the processing is complete</li>
-                            <li>Turn on or off streets and systems</li>
-                            <li>Click "Regenerate Scene" button to rebuild</li>
-
-                        </ol>
-                    </div> -->
-                    <!-- <textarea id="gjTA" style="display:none" name="styled-textarea">Paste GeoJSON from Geodesign Hub here...</textarea> -->
                     <br>
                     <h4>Design</h4>
                     <div>
@@ -77,6 +67,8 @@
                             <button class="inc">+</button>
                         </span>
                     </div><br>
+                    
+                    
                     <hr>
 
                     <div id="search-results"></div>
@@ -89,14 +81,15 @@
 
             </div>
 
-            <div id="glMap" class="col-sm-9 col-md-9 sidebar">
-
+            <div id="glMap" class="col-sm-9 col-md-9 sidebar">                    
+                <div class="time-control">Shadows
+                    <input id="date" type="range" min="1" max="365" step="1"><label for="date"></label>
+                    <input id="time" type="range" min="0" max="23" step="1"><label for="time"></label>
+                </div>
             </div>
 
         </div>
     </div>
-
-
 
     <script>
         var glb = {};
@@ -274,7 +267,7 @@
     });
     // FeatureGroup is to store editable layers
     var designLayer = new L.FeatureGroup();
-    var inputbaseLayer = L.tileLayer('https://cartodb-basemaps-{s}.global.ssl.fastly.net/light_all/{z}/{x}/{y}.png', {
+    var inputbaseLayer = L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/light_all/{z}/{x}/{y}.png', {
         attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, &copy; <a href="https://cartodb.com/attributions">CartoDB</a>',
         maxZoom: 18,
     }).addTo(inputmap);
@@ -290,7 +283,8 @@
 
     osmb.hide(feature => {
         const bounds = L.latLngBounds([feature.properties.bounds['min'][1], feature.properties.bounds['min'][
-            0]], feature.properties.bounds['max'][1], feature.properties.bounds['max'][0]);
+            0
+        ]], feature.properties.bounds['max'][1], feature.properties.bounds['max'][0]);
         if (mb.intersects(bounds) && Number.isInteger(parseInt(feature.id))) {
             return 1;
         } else {
@@ -608,6 +602,60 @@
     $(".policies_cb").change(function () {
         runConstrainWorker()
     });
+
+
+    var now,
+        date, time,
+        timeRange, dateRange,
+        timeRangeLabel, dateRangeLabel;
+
+    function changeDate() {
+        var Y = now.getFullYear(),
+            M = now.getMonth(),
+            D = now.getDate(),
+            h = now.getHours(),
+            m = 0;
+
+        timeRangeLabel.innerText = pad(h) + ':' + pad(m);
+        dateRangeLabel.innerText = Y + '-' + pad(M + 1) + '-' + pad(D);
+
+        osmb.setDate(new Date(Y, M, D, h, m));
+    }
+
+    function onTimeChange() {
+        now.setHours(this.value);
+        now.setMinutes(0);
+        changeDate();
+    }
+
+    function onDateChange() {
+        now.setMonth(0);
+        now.setDate(this.value);
+        changeDate();
+    }
+
+    function pad(v) {
+        return (v < 10 ? '0' : '') + v;
+    }
+
+    timeRange = document.getElementById('time');
+    dateRange = document.getElementById('date');
+    timeRangeLabel = document.querySelector('*[for=time]');
+    dateRangeLabel = document.querySelector('*[for=date]');
+
+    now = new Date;
+    changeDate();
+
+    // init with day of year
+    var Jan1 = new Date(now.getFullYear(), 0, 1);
+    dateRange.value = Math.ceil((now - Jan1) / 86400000);
+
+    timeRange.value = now.getHours();
+
+    timeRange.addEventListener('change', onTimeChange);
+    dateRange.addEventListener('change', onDateChange);
+    timeRange.addEventListener('input', onTimeChange);
+    dateRange.addEventListener('input', onDateChange);
 </script>
 
 </html>
