@@ -1,12 +1,25 @@
-# 3DViewer
-A one-click 3D viewer for designs on Geodesignhub, using [OSM Buildings](https://osmbuildings.org/) library. This plugin takes design data from the [Geodesignhub API](https://www.geodesignhub.com/api) and transforms the polygons drawn to random buildings and road generation. In addition, the generated footprint data can be downloaded as GeoJSON and the map can be zoomed and panned. In addition, features can be filtered per system. 
+# Geodesignhub 3DViewer
 
-### Adding the plugin
+A fully integrated 3D viewer for ideas negotiated on Geodesignhub. This 1-click plugin helps you visualize the outcomes of negotiations and focuses on buildings / urban form.
+
+## Screenshots
+
+See the standard view for a design here, with buildings, policies and roads and the ability to turn on / off individual themes. 
+
+![alt text](readme-images/standard-view.png)
+
+Click on a building to set it's height, if you set the height in Geodesignhub , it  but here you can change the height for any scenarios / changes you
+
+![alt text](readme-images/set-floors.png)
+
+Once set the new building can be seen taller to the number of floors set eariler.
+
+![alt text](readme-images/floors-set.png)
+
+Shadows based on date / time of the year can also be set.
+
+![alt text](readme-images/shadows.png)
+
+## Adding the plugin
+
 The plugin can be added to a project through the project administration panels.
-
-### Screenshots
-![screenshot2](https://i.imgur.com/z4J2r0Y.jpg)
-
-![screenshot3](https://i.imgur.com/3QhOBvR.png)
-
-
