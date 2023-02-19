@@ -41,6 +41,7 @@ function generatePolicyFeatures(curFeat) {
     var pwLen = pW.features.length;
     var height = elevationoffset + 0.01;
     var prop = {
+        "color": curFeatprops.color,        
         "roofColor": curFeatprops.color,
         "height": height,
         "isStreet": 0,

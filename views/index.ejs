@@ -11,7 +11,7 @@
     <link rel="stylesheet" type="text/css" href="assets/css/base.css">
     <link rel="stylesheet" type="text/css" href="assets/css/leaflet.css">
     <link rel='shortcut icon' href='/assets/objs/favicon.ico' type='image/x-icon' />
-    <link rel="stylesheet" href="/assets/OSMBuildings/OSMBuildings.css">
+    <link rel="stylesheet" href="/assets/css/maplibre-gl/maplibre-gl.css">
     <link rel="stylesheet" href="/assets/js/humane/flatty.css">
 
     <link href='https://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css'>
@@ -19,7 +19,7 @@
     <script type="text/javascript" src="/assets/js/jquery/jquery.min.js"></script>
     <script type="text/javascript" src="/assets/js/leaflet/leaflet.js"></script>
     <script type="text/javascript" src="/assets/js/svg/svg.min.js"></script>
-    <script type="text/javascript" src="/assets/OSMBuildings/OSMBuildings.js"></script>
+    <script type="text/javascript" src="/assets/maplibre-gl-js/maplibre-gl.js"></script>
     <script type="text/javascript" src="/assets/js/geojsonlint/geojsonlint.js"></script>
     <script type="text/javascript" src="/assets/js/humane/humane.min.js"></script>
 </head>
@@ -52,21 +52,7 @@
                             Policies</input></div>
                     </div>
                     <br><br>
-                    <div class="glcontrol">
-                        <h4>Map Controls</h4>
-                        <span class="tilt">
-                            <button class="dec">&#8601;</button>
-                            <button class="inc">&#8599;</button>
-                        </span>
-                        <span class="rotation">
-                            <button class="inc">&#8630;</button>
-                            <button class="dec">&#8631;</button>
-                        </span>
-                        <span class="zoom">
-                            <button class="dec">-</button>
-                            <button class="inc">+</button>
-                        </span>
-                    </div><br>
+
 
 
                     <hr>
@@ -82,64 +68,120 @@
             </div>
 
             <div id="glMap" class="col-sm-9 col-md-9 sidebar">
-                <div class="time-control">Shadows
-                    <input id="date" type="range" min="1" max="365" step="1"><label for="date"></label>
-                    <input id="time" type="range" min="0" max="23" step="1"><label for="time"></label>
-                </div>
+                <div id="map"></div>
+
             </div>
 
         </div>
     </div>
 
     <script>
-        var glb = {};
-        var osmb = new OSMBuildings({
-            // baseURL: 'assets/OSMBuildings/',
-            container: 'glMap',
-            position: {
-                latitude: 51.478496359866696,
-                longitude: 0.2217864990234375
-            },
-            zoom: 16,
-            minZoom: 12,
-            maxZoom: 20,
-            state: false, // stores map position/rotation in url
-            attribution: '© 3D <a href="http://osmbuildings.org/copyright/">OSM Buildings</a>'
+
+        var map = new maplibregl.Map({
+            style:
+                'https://api.maptiler.com/maps/streets/style.json?key=get_your_own_OpIi9ZULNHzrESv6T2vL',
+            center: [-74.0066, 40.7135],
+            zoom: 15.5,
+            pitch: 45,
+            bearing: -17.6,
+            container: 'map',
+            antialias: true
         });
 
-        const basemap_tiles = "<%= basemap_tiles %>";
-        if (basemap_tiles != "") {
-            osmb.addMapTiles(basemap_tiles);
-        }
-
-        osmb.setTilt(25);
-        var controlButtons = document.querySelectorAll('.glcontrol button');
-
-        for (var i = 0, il = controlButtons.length; i < il; i++) {
-            controlButtons[i].addEventListener('click', function (e) {
-                var button = this;
-                var parentClassList = button.parentNode.classList;
-                var direction = button.classList.contains('inc') ? 1 : -1;
-                var increment;
-                var property;
-
-                if (parentClassList.contains('tilt')) {
-                    property = 'Tilt';
-                    increment = direction * 10;
-                }
-                if (parentClassList.contains('rotation')) {
-                    property = 'Rotation';
-                    increment = direction * 10;
-                }
-                if (parentClassList.contains('zoom')) {
-                    property = 'Zoom';
-                    increment = direction * 1;
-                }
-                if (property) {
-                    osmb['set' + property](osmb['get' + property]() + increment);
+        // The 'building' layer in the streets vector source contains building-height
+        // data from OpenStreetMap.
+        map.on('load', function () {
+            
+            map.addSource('gdh-buildings', {
+                type: 'geojson',
+                data: {
+                    "type": "FeatureCollection",
+                    "features": []
                 }
             });
-        }
+            map.addSource('currentBuildings', {
+                type: 'geojson',
+                data: {
+                    "type": "FeatureCollection",
+                    "features": []
+                }
+            });
+            map.addLayer({
+                "id": "highlight",
+                "source": "currentBuildings",
+                'type': 'line',
+                'minzoom': 15,
+                'paint': {
+                    'line-color': '#f00',
+                    'line-width': 3
+                }
+            });
+
+            map.addLayer({
+                'id': 'gdh-building-extrusion',
+                'type': 'fill-extrusion',
+                'source': 'gdh-buildings',
+                'paint': {
+                    // See the MapLibre Style Specification for details on data expressions.
+                    // https://maplibre.org/maplibre-gl-js-docs/style-spec/expressions/
+
+                    // Get the fill-extrusion-color from the source 'color' property.
+                    'fill-extrusion-color': ['get', 'color'],
+
+                    // Get fill-extrusion-height from the source 'height' property.
+                    'fill-extrusion-height': ['get', 'height'],
+
+                    // Get fill-extrusion-base from the source 'base_height' property.
+                    'fill-extrusion-base': ['get', 'base_height'],
+
+                    // Make extrusions slightly opaque for see through indoor walls.
+                    'fill-extrusion-opacity': 0.5
+                }
+            });
+
+            map.on('click', 'gdh-buildings', function (e) {
+                var coordinates = e.features[0].geometry.coordinates.slice();
+                var description = e.features[0].properties.description;
+                
+                // Ensure that if the map is zoomed out such that multiple
+                // copies of the feature are visible, the popup appears
+                // over the copy being pointed to.
+                while (Math.abs(e.lngLat.lng - coordinates[0]) > 180) {
+                coordinates[0] += e.lngLat.lng > coordinates[0] ? 360 : -360;
+                }
+                
+                new maplibregl.Popup()
+                .setLngLat(coordinates)
+                .setHTML(description)
+                .addTo(map);
+                });
+                
+                // Change the cursor to a pointer when the mouse is over the places layer.
+                map.on('mouseenter', 'gdh-buildings', function () {
+                map.getCanvas().style.cursor = 'pointer';
+                });
+                
+                // Change it back to a pointer when it leaves.
+                map.on('mouseleave', 'gdh-buildings', function () {
+                map.getCanvas().style.cursor = '';
+                });
+
+
+            const gj = JSON.stringify(gjresults);
+            var gjerrors = geojsonhint.hint(gj);
+            if (gjerrors.length > 0) {
+                humane.log("The GeoJSON you have entered is invalid.. ", {
+                    addnCls: 'humane-flatty-error'
+                });
+            } else {
+
+
+                start3dWorker(gjresults, selectedsystems);
+                // $("#loadingGIF").show();
+                $("#procstatus").show();
+            }
+        });
+
 
         function generateSystemCB(systems) {
             for (var x = 0; x < systems.length; x++) {
@@ -194,9 +236,10 @@
 
         function setMapCenter(latlng) {
             ll = JSON.parse(latlng);
-            osmb.setPosition({
-                latitude: ll[0],
-                longitude: ll[1]
+
+            map.setCenter({
+                lat: ll[0],
+                lon: ll[1]
             });
 
         }
@@ -219,25 +262,13 @@
             humane.log("Rendering Scene..", {
                 addnCls: 'humane-flatty-success'
             });
-            if (glb.gjLayer) {
-                var k = glb.gjLayer;
-                k.destroy();
-                glb.gjLayer = "";
-            }
-            // var d = JSON.parse(gjsonData);
-            // for (var k1 = 0; k1<d.features.length;k1++){
-            //     var uuid = guid();
-            //     var curfeat = d['features'][k1];
-            //     if (curfeat.geometry.type==="Point"){
-            //     osmb.addOBJ('assets/objs/ldhhouse.obj', { latitude: curfeat.geometry.coordinates[1], longitude: curfeat.geometry.coordinates[0]}, { id: uuid, color: 'red',scale:0.001});
-            //     }
-            // }
+            const gjData = JSON.parse(gjsonData);           
 
-            var x = osmb.addGeoJSON(JSON.parse(gjsonData), {
-                altitude: 0
-            });
-            glb.gjLayer = x;
+            map.getSource('gdh-buildings').setData(gjData);
+
         }
+
+
     </script>
 </body>
 <script>
@@ -249,7 +280,7 @@
     var synthesisid = "<%= synthesisid %>"; //var test is now assigned to getTest which will only work on browsers  
     var cteamid = "<%= cteamid %>"; //var test is now assigned to getTest which will only work on browsers   
     var systems = <%- systems %>; //var test is now assigned to getTest which will only work on browsers  
-    var gjresults = <%-result %>;
+    var gjresults = <%- result %>;
     var bounds = <%- bounds %>;
 
     var inputmap = L.map('inputmap', {
@@ -274,54 +305,54 @@
     var mb = L.latLngBounds(southWest, northEast);
     inputmap.fitBounds(mb);
 
-    osmb.addGeoJSONTiles('https://{s}.data.osmbuildings.org/0.2/anonymous/tile/{z}/{x}/{y}.json', {
-        "color": "#FF1493",
-    });
+    // osmb.addGeoJSONTiles('https://{s}.data.osmbuildings.org/0.2/anonymous/tile/{z}/{x}/{y}.json', {
+    //     "color": "#FF1493",
+    // });
 
     const to_check_prefix = ["road-", "bldg-", "plcy-"];
-    osmb.hide(feature => {
-        const bounds = L.latLngBounds([feature.properties.bounds['min'][1], feature.properties.bounds['min'][0]], feature.properties.bounds['max'][1], feature.properties.bounds['max'][0]);
+    // osmb.hide(feature => {
+    //     const bounds = L.latLngBounds([feature.properties.bounds['min'][1], feature.properties.bounds['min'][0]], feature.properties.bounds['max'][1], feature.properties.bounds['max'][0]);
 
-        if (mb.intersects(bounds)) {
-            if (feature.properties.isPolicy) {
-                return 0;
-            } else {
-                const feature_id = feature.id;
-                const feature_prefix = (feature_id).substring(0, 5);
-                const to_include = to_check_prefix.includes(feature_prefix);
-                if (to_include) {
-                    return 0;
-                } else {
-                    return 1;
-                }
-            }
-        } else {
+    //     if (mb.intersects(bounds)) {
+    //         if (feature.properties.isPolicy) {
+    //             return 0;
+    //         } else {
+    //             const feature_id = feature.id;
+    //             const feature_prefix = (feature_id).substring(0, 5);
+    //             const to_include = to_check_prefix.includes(feature_prefix);
+    //             if (to_include) {
+    //                 return 0;
+    //             } else {
+    //                 return 1;
+    //             }
+    //         }
+    //     } else {
 
-            return 0;
-        }
+    //         return 0;
+    //     }
 
-    });
+    // });
 
-    osmb.on('pointerup', e => {
+    // osmb.on('pointerup', e => {
 
-        if (!e.features) {
+    //     if (!e.features) {
 
-            osmb.highlight(feature => {});
-            const $resultList = $('#search-results');
-            $resultList.empty();
-            return;
-        }
+    //         osmb.highlight(feature => { });
+    //         const $resultList = $('#search-results');
+    //         $resultList.empty();
+    //         return;
+    //     }
 
-        const featureIdList = e.features.map(feature => feature.id);
+    //     const featureIdList = e.features.map(feature => feature.id);
 
-        osmb.highlight(feature => {
-            if (featureIdList.indexOf(feature.id) > -1) {
-                return '#ffcc00';
-            }
-        });
+    //     osmb.highlight(feature => {
+    //         if (featureIdList.indexOf(feature.id) > -1) {
+    //             return '#ffcc00';
+    //         }
+    //     });
 
-        showInfoPopup(e.features || []);
-    });
+    //     showInfoPopup(e.features || []);
+    // });
     const $resultList = $('#search-results');
 
     function showInfoPopup(features) {
@@ -478,22 +509,22 @@
 
         return type === 'policy' ? '#707070 ' :
             type === 'project' ? '#a69695 ' :
-            type === 'red2' ? '#bd0026' :
-            type === 'red' ? '#f03b20' :
-            type === 'yellow' ? '#FFFF00' :
-            type === 'green' ? '#74c476' :
-            type === 'green2' ? '#31a354' :
-            type === 'green3' ? '#006d2c' :
-            type === 'purple' ? '#CFACF7' :
-            type === 'purple2' ? '#8D6CBF' :
-            type === 'purple3' ? '#601286' :
-            type === 'orange' ? '#FFA927' :
-            type === 'orange2' ? '#F8872E' :
-            type === 'orange3' ? '#FC6B0A' :
-            type === 'constraints' ? '#343434' :
-            type === 'boundaries' ? '#a6cee3' :
-            type === 'boundaries2' ? '#b2df8a' :
-            '#808080';
+                type === 'red2' ? '#bd0026' :
+                    type === 'red' ? '#f03b20' :
+                        type === 'yellow' ? '#FFFF00' :
+                            type === 'green' ? '#74c476' :
+                                type === 'green2' ? '#31a354' :
+                                    type === 'green3' ? '#006d2c' :
+                                        type === 'purple' ? '#CFACF7' :
+                                            type === 'purple2' ? '#8D6CBF' :
+                                                type === 'purple3' ? '#601286' :
+                                                    type === 'orange' ? '#FFA927' :
+                                                        type === 'orange2' ? '#F8872E' :
+                                                            type === 'orange3' ? '#FC6B0A' :
+                                                                type === 'constraints' ? '#343434' :
+                                                                    type === 'boundaries' ? '#a6cee3' :
+                                                                        type === 'boundaries2' ? '#b2df8a' :
+                                                                            '#808080';
     }
 
 
@@ -556,8 +587,8 @@
                 data = JSON.stringify(data, undefined, 4)
             }
             var blob = new Blob([data], {
-                    type: 'text/json'
-                }),
+                type: 'text/json'
+            }),
                 e = document.createEvent('MouseEvents'),
                 a = document.createElement('a')
             a.download = filename
@@ -580,7 +611,7 @@
         for (var k = 0; k < gendataFeatlen; k++) {
             var curFeat = gd.features[k];
             var prop = curFeat.properties;
-            if (prop.isStreet) {} else {
+            if (prop.isStreet) { } else {
                 filteredGJ.features.push(curFeat);
             }
         }
@@ -593,19 +624,9 @@
     $('#systemsCB input:checked').each(function () {
         selectedsystems.push($(this).attr('id'));
     });
-    var gj = JSON.stringify(gjresults);
+
     // document.getElementById("gjTA").value;
-    var gjerrors = geojsonhint.hint(gj);
-    if (gjerrors.length > 0) {
-        humane.log("The GeoJSON you have entered is invalid.. ", {
-            addnCls: 'humane-flatty-error'
-        });
-    } else {
-        gj = JSON.parse(gj);
-        start3dWorker(gj, selectedsystems);
-        // $("#loadingGIF").show();
-        $("#procstatus").show();
-    }
+
     $(".chekbox").change(function () {
         runConstrainWorker()
     });
@@ -614,58 +635,11 @@
     });
 
 
-    var now,
-        date, time,
-        timeRange, dateRange,
-        timeRangeLabel, dateRangeLabel;
-
-    function changeDate() {
-        var Y = now.getFullYear(),
-            M = now.getMonth(),
-            D = now.getDate(),
-            h = now.getHours(),
-            m = 0;
-
-        timeRangeLabel.innerText = pad(h) + ':' + pad(m);
-        dateRangeLabel.innerText = Y + '-' + pad(M + 1) + '-' + pad(D);
-
-        osmb.setDate(new Date(Y, M, D, h, m));
-    }
-
-    function onTimeChange() {
-        now.setHours(this.value);
-        now.setMinutes(0);
-        changeDate();
-    }
-
-    function onDateChange() {
-        now.setMonth(0);
-        now.setDate(this.value);
-        changeDate();
-    }
 
     function pad(v) {
         return (v < 10 ? '0' : '') + v;
     }
 
-    timeRange = document.getElementById('time');
-    dateRange = document.getElementById('date');
-    timeRangeLabel = document.querySelector('*[for=time]');
-    dateRangeLabel = document.querySelector('*[for=date]');
-
-    now = new Date;
-    changeDate();
-
-    // init with day of year
-    var Jan1 = new Date(now.getFullYear(), 0, 1);
-    dateRange.value = Math.ceil((now - Jan1) / 86400000);
-
-    timeRange.value = now.getHours();
-
-    timeRange.addEventListener('change', onTimeChange);
-    dateRange.addEventListener('change', onDateChange);
-    timeRange.addEventListener('input', onTimeChange);
-    dateRange.addEventListener('input', onDateChange);
 </script>
 
 </html>
