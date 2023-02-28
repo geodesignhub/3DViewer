@@ -151,30 +151,6 @@
                 var feature = features[0];
                 showInfoPopup([feature] || []);
 
-                // if (!e.features) {
-                //     osmb.highlight(feature => { });
-                // }
-
-                // const featureIdList = e.features.map(feature => feature.id);
-                // osmb.highlight(feature => {
-                //     if (featureIdList.indexOf(feature.id) > -1) {
-                //         return '#ffcc00';
-                //     }
-                // });
-
-                // var coordinates = e.features[0].geometry.coordinates.slice();
-                // var description = e.features[0].properties.description;
-
-                // Ensure that if the map is zoomed out such that multiple
-                // copies of the feature are visible, the popup appears
-                // over the copy being pointed to.
-                // while (Math.abs(e.lngLat.lng - coordinates[0]) > 180) {
-                // coordinates[0] += e.lngLat.lng > coordinates[0] ? 360 : -360;
-                // console.log(e);
-                // new maplibregl.Popup()
-                //     .setLngLat(coordinates)
-                //     .setHTML(description)
-                //     .addTo(map);
             });
 
             // Change the cursor to a pointer when the mouse is over the places layer.
