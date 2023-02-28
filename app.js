@@ -15,8 +15,8 @@ app.use(bodyParser.urlencoded({
 app.use(bodyParser.json())
 
 
-// var baseurl = 'https://www.geodesignhub.com/api/v1/projects/';
-var baseurl = 'http://local.test:8000/api/v1/projects/';
+var baseurl = 'https://www.geodesignhub.com/api/v1/projects/';
+// var baseurl = 'http://local.test:8000/api/v1/projects/';
 
 
 app.get('/', function (request, response) {
