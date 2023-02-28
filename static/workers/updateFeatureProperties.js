@@ -14,7 +14,7 @@ function update_properties(allFeaturesList, updated_properties) {
     for (var d = 0; d < featlen; d++) {
         
         var curfeatprop = af[d].properties;
-        var feature_id = af[d].id;
+        var feature_id = curfeatprop.id;
         
         if(updated_feature_ids.includes(feature_id)) { // this feature is interesting            
             for (let index = 0; index < update_prop.length; index++) {
