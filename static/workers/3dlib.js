@@ -41,6 +41,7 @@ function generatePolicyFeatures(curFeat) {
     var pwLen = pW.features.length;
     var height = elevationoffset + 0.01;
     var prop = {
+        "color": curFeatprops.color,        
         "roofColor": curFeatprops.color,
         "height": height,
         "isStreet": 0,
@@ -118,7 +119,7 @@ function generateFinal3DGeoms(constraintedModelDesigns) {
                 min_height = elevationoffset;
                 // }
 
-                curlineFeat.id = "road-" + makeid() + '-' + feature_id;
+                const feat_id = "road-" + makeid() + '-' + feature_id;
                 // console.log("Line: ", min_height, max_height);
                 curlineFeat.properties = {
                     "color": curFeat.properties.color,
@@ -127,7 +128,8 @@ function generateFinal3DGeoms(constraintedModelDesigns) {
                     "isPolicy": 0,
                     "sysname": curFeat.properties.sysname,
                     "height": max_height,
-                    "minHeight": min_height
+                    "minHeight": min_height,
+                    "id": feat_id
 
                 };
 
@@ -149,6 +151,8 @@ function generateFinal3DGeoms(constraintedModelDesigns) {
                             min_height = elevationoffset + 0.5;
                         }
                         let levels = Math.round(max_height / 3.5);
+                        
+                        const feat_id = "bldg-" + makeid() + '-' + feature_id;
                         // console.log("Polygon: ", min_height, max_height);
                         var props = {
                             "height": max_height,
@@ -160,10 +164,10 @@ function generateFinal3DGeoms(constraintedModelDesigns) {
                             "sysname": featProps.sysname,
                             "isStreet": 0,
                             "isPolicy": 0,
+                            "id":feat_id
                         };
                         var cFeat = curFeat;
 
-                        cFeat.id = "bldg-" + makeid() + '-' + feature_id;
                         cFeat.properties = props;
                         finalGJFeats.push(cFeat);
 
@@ -175,7 +179,8 @@ function generateFinal3DGeoms(constraintedModelDesigns) {
 
                         }
 
-
+                        
+                        const feat_id = "bldg-" + makeid() + '-' + feature_id;
 
                         if (min_height == 0) {
                             min_height = elevationoffset + 0.5;
@@ -191,11 +196,12 @@ function generateFinal3DGeoms(constraintedModelDesigns) {
                             "isPolicy": 0,
                             "isStreet": 0,
                             "height": max_height,
-                            "minHeight": min_height
+                            "minHeight": min_height,
+                            "id":feat_id
                         };
                         var cFeat = curFeat;
                         cFeat.properties = props;
-                        cFeat.id = "bldg-" + makeid() + '-' + feature_id;
+                        
                         finalGJFeats.push(cFeat);
 
                     } else if (featProps.sysname === 'LDH') {
@@ -209,6 +215,7 @@ function generateFinal3DGeoms(constraintedModelDesigns) {
                             min_height = elevationoffset + 0.5;
                         }
 
+                        const feat_id = "bldg-" + makeid() + '-' + feature_id;
                         // console.log("Polygon LDH: ", min_height, max_height);
                         var props = {
 
@@ -221,11 +228,11 @@ function generateFinal3DGeoms(constraintedModelDesigns) {
                             "levels": levels,
                             "type": "residential",
                             "height": max_height,
-                            "minHeight": min_height
+                            "minHeight": min_height,
+                            "id":feat_id
                         };
                         var cFeat = curFeat;
                         cFeat.properties = props;
-                        cFeat.id = "bldg-" + makeid() + '-' + feature_id;
                         finalGJFeats.push(cFeat);
 
                     } else if ((featProps.sysname === 'COM')) {
@@ -238,6 +245,7 @@ function generateFinal3DGeoms(constraintedModelDesigns) {
                             min_height = elevationoffset + 0.5;
                         }
 
+                        const feat_id = "bldg-" + makeid() + '-' + feature_id;
 
                         let levels = Math.round(max_height / 3.5);
                         var props = {
@@ -250,10 +258,10 @@ function generateFinal3DGeoms(constraintedModelDesigns) {
                             "type": "retail",
                             "levels": levels,
                             "height": max_height,
-                            "minHeight": min_height
+                            "minHeight": min_height,
+                            'id':feat_id
                         };
                         var cFeat = curFeat;
-                        cFeat.id = "bldg-" + makeid() + '-' + feature_id;
                         cFeat.properties = props;
                         finalGJFeats.push(cFeat);
 
@@ -267,6 +275,7 @@ function generateFinal3DGeoms(constraintedModelDesigns) {
                         }
 
 
+                        const feat_id = "bldg-" + makeid() + '-' + feature_id;
                         let levels = Math.round(max_height / 3.5);
                         var props = {
 
@@ -278,11 +287,12 @@ function generateFinal3DGeoms(constraintedModelDesigns) {
                             "isPolicy": 0,
                             "type": "retail",
                             "height": max_height,
-                            "minHeight": min_height
+                            "minHeight": min_height,
+                            "id":feat_id
                         };
                         var cFeat = curFeat;
                         cFeat.properties = props;
-                        cFeat.id = "bldg-" + makeid() + '-' + feature_id;
+                        
                         finalGJFeats.push(cFeat);
 
                     }
@@ -307,6 +317,7 @@ function generateFinal3DGeoms(constraintedModelDesigns) {
 
                 let levels = Math.round(max_height / 4.5);
                 // console.log("LAB", min_height, max_height);
+                const feat_id = "bldg-" + makeid() + '-' + feature_id;
                 var props = {
 
                     "color": featProps.color,
@@ -317,11 +328,12 @@ function generateFinal3DGeoms(constraintedModelDesigns) {
                     "isStreet": 0,
                     "isPolicy": 0,
                     "height": max_height,
-                    "minHeight": min_height
+                    "minHeight": min_height,
+                    "id":feat_id
                 };
                 var cFeat = curFeat;
                 cFeat.properties = props;
-                cFeat.id = "bldg-" + feature_id;
+                cFeat.id = 
                 finalGJFeats.push(cFeat);
 
 
@@ -335,7 +347,7 @@ function generateFinal3DGeoms(constraintedModelDesigns) {
                     min_height = elevationoffset + 0.5;
                 }
 
-
+                const feat_id = "bldg-" + makeid() + '-' + feature_id;
                 let levels = Math.round(max_height / 3.5);
                 // console.log("SMB", min_height, max_height);
                 var props = {
@@ -347,11 +359,12 @@ function generateFinal3DGeoms(constraintedModelDesigns) {
                     "height": max_height,
                     "levels": levels,
                     "type": "retail",
-                    "minHeight": min_height
+                    "minHeight": min_height,
+                    "id":feat_id
                 };
                 var cFeat = curFeat;
                 cFeat.properties = props;
-                cFeat.id = "bldg-" + feature_id;
+                
                 finalGJFeats.push(cFeat);
 
 
@@ -360,6 +373,7 @@ function generateFinal3DGeoms(constraintedModelDesigns) {
                 if (curFeat.properties.areatype === 'project') {
                     // console.log("Pther", min_height, max_height)
                     // var height = elevationoffset + 0.01;
+                    const feat_id = "bldg-" + makeid() + '-' + feature_id;
                     var prop = {
                         "color": curFeat.properties.color,
                         "roofColor": curFeat.properties.color,
@@ -367,10 +381,11 @@ function generateFinal3DGeoms(constraintedModelDesigns) {
                         "height": max_height,
                         "isPolicy": 0,
                         "minHeight": min_height,
-                        "sysname": curFeat.properties.sysname
+                        "sysname": curFeat.properties.sysname, 
+                        "id":feat_id
+
                     }
                     curFeat.properties = prop;
-                    curFeat.id = "bldg-" + feature_id;
 
                     finalGJFeats.push.apply(finalGJFeats, [curFeat]);
                 } else if (curFeat.properties.areatype === 'policy') {

@@ -7,6 +7,8 @@
     border: 1px solid #DCDCDC;
 }
 
+
+
 .time-control {
     position: absolute;
     left: 20px;
@@ -28,6 +30,42 @@
     display: inline-block;
 }
 
+
+.c-ab507e {
+    background-color: #ab507e;
+    color: #FFFFFF;
+}
+.c-d9cd91
+{
+    background-color: #d9cd91;
+    color: #FFFFFF;
+}
+.c-80bd75
+{
+    background-color: #80bd75;
+    color: #FFFFFF;
+}
+.c-8ccdd1{
+    background-color: #8ccdd1;
+    color: #FFFFFF;
+}
+.c-e6564e
+{
+    background-color: #e6564e;
+    color: #FFFFFF;
+}
+.c-916da3{
+    background-color: #916da3;
+    color: #FFFFFF;
+}
+.c-706666{
+    background-color: #706666;
+    color: #FFFFFF;
+}
+.c-6b9cb0{
+    background-color: #6b9cb0;
+    color: #FFFFFF;
+}
 .c-e54c00 {
     background-color: #e54c00;
     color: #FFFFFF;
