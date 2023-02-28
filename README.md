@@ -1,6 +1,6 @@
 # Geodesignhub 3DViewer
 
-A fully integrated 3D viewer for ideas negotiated on Geodesignhub. This 1-click plugin helps you visualize the outcomes of negotiations and focuses on buildings / urban form.
+A fully integrated 3D viewer for ideas negotiated on Geodesignhub. This 1-click plugin helps you visualize the outcomes of negotiations and focuses on buildings / urban form. You can 
 
 ## Screenshots
 
@@ -16,9 +16,6 @@ Once set the new building can be seen taller to the number of floors set eariler
 
 ![alt text](readme-images/floors-set.png)
 
-Shadows based on date / time of the year can also be set.
-
-![alt text](readme-images/shadows.png)
 
 ## Adding the plugin
 
