@@ -62,7 +62,8 @@ app.get('/', function (request, response) {
             opts['result'] = gj;
             opts['bounds'] = JSON.stringify(bounds['bounds']);
             opts['systems'] = sys;
-            opts['basemap_tiles'] = process.env.TILES_URL;
+            opts['basemap_tiles'] = process.env.TILES_URL;      
+            opts['maptiler_key'] = process.env.MAPTILER_KEY;
             response.render('index', opts);
         });
 
@@ -108,7 +109,8 @@ app.get('/', function (request, response) {
             opts['result'] = gj;
             opts['bounds'] = JSON.stringify(bounds['bounds']);
             opts['systems'] = sys;
-            opts['basemap_tiles'] = process.env.TILES_URL;
+            opts['basemap_tiles'] = process.env.TILES_URL;            
+            opts['maptiler_key'] = process.env.MAPTILER_KEY;
             response.render('index', opts);
         });
 
