@@ -88,12 +88,12 @@ function generateFinal3DGeoms(constraintedModelDesigns) {
         var max_height = 0;
         var min_height = 0;
         try {
-            max_height = curFeat.properties.max_height;
+            max_height = curFeat.properties.volume_information.max_height;
         } catch (err) {
             max_height = 0;
         }
         try {
-            min_height = curFeat.properties.min_height;
+            min_height = curFeat.properties.volume_information.min_height;
         } catch (err) {
             min_height = 0;
         }
