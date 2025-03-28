@@ -1,35 +1,27 @@
-function constrainFeatures(allFeaturesList, selectedsystems, showpolicies) {
-    // constrain output ot only features in the list. 
-    var constraintedFeatures = { "type": "FeatureCollection", "features": [] };
-    var allFeatures = JSON.parse(allFeaturesList);
-    var selectedsystems = JSON.parse(selectedsystems);
-    var af = allFeatures.features;
-    var featlen = af.length;
-    var counter = 0;
-    var fullproc = featlen;
-    for (var d = 0; d < featlen; d++) {
+function constrainFeatures(allFeaturesList, selectedSystems, showPolicies) {
+    const constrainedFeatures = { "type": "FeatureCollection", "features": [] };
+    const allFeatures = JSON.parse(allFeaturesList);
+    const selectedSystemsArray = JSON.parse(selectedSystems);
+    const features = allFeatures.features;
+    const totalFeatures = features.length;
 
-        var curfeatprop = af[d].properties;
-        var curFeatSys = curfeatprop.sysname;
-        
-        var isPolicy = curfeatprop.isPolicy;
-        
-        if (selectedsystems.indexOf(curFeatSys) > -1) {
-            if (isPolicy== 1 && parseInt(showpolicies) == 1) {
-                constraintedFeatures.features.push(af[d]);
-            } else if (isPolicy == 0) {
-                constraintedFeatures.features.push(af[d]);
+    features.forEach((feature, index) => {
+        const { sysname: currentSystem, isPolicy } = feature.properties;
+
+        if (selectedSystemsArray.includes(currentSystem)) {
+            if ((isPolicy === 1 && parseInt(showPolicies) === 1) || isPolicy === 0) {
+                constrainedFeatures.features.push(feature);
             }
         }
-        counter += 1;
+
         self.postMessage({
-            'percentcomplete': parseInt((100 * counter) / fullproc),
+            'percentcomplete': Math.floor((100 * (index + 1)) / totalFeatures),
             'mode': 'status',
         });
-    }
+    });
 
     self.postMessage({
-        'polygons': JSON.stringify(constraintedFeatures)
+        'polygons': JSON.stringify(constrainedFeatures)
     });
 }
 

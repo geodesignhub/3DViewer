@@ -1,42 +1,37 @@
 function update_properties(allFeaturesList, updated_properties) {
-    
-    // constrain output ot only features in the list. 
-    var updated_features = { "type": "FeatureCollection", "features": [] };
-    var allFeatures = JSON.parse(allFeaturesList);
-    var update_prop = JSON.parse(updated_properties);
-    var updated_feature_ids = update_prop.map(value => value.id);
-    var af = allFeatures.features;
-    var featlen = af.length;
-    var counter = 0;
-    var fullproc = featlen;
+    const updated_features = { "type": "FeatureCollection", "features": [] };
+    const allFeatures = JSON.parse(allFeaturesList);
+    const update_prop = JSON.parse(updated_properties);
+    const updated_feature_ids = new Set(update_prop.map(value => value.id));
+    const af = allFeatures.features;
+    const featlen = af.length;
 
-    
-    for (var d = 0; d < featlen; d++) {
-        
-        var curfeatprop = af[d].properties;
-        var feature_id = curfeatprop.id;
-        
-        if(updated_feature_ids.includes(feature_id)) { // this feature is interesting            
-            for (let index = 0; index < update_prop.length; index++) {
-                const cur_element = update_prop[index];
-                let max_height = cur_element['height'];                
-                if (cur_element['id'] === feature_id){
-                    curfeatprop.height = max_height;
-                    var levels = Math.round(max_height / 3.2);
-                    curfeatprop.levels = levels;
-                    break;
-                }                
-            } 
-            af[d].properties = curfeatprop;
+    let counter = 0;
+
+    const updateFeatureProperties = (feature, updateData) => {
+        const max_height = updateData.height;
+        feature.properties.height = max_height;
+        feature.properties.levels = Math.round(max_height / 3.2);
+    };
+
+    af.forEach(feature => {
+        const feature_id = feature.properties.id;
+
+        if (updated_feature_ids.has(feature_id)) {
+            const updateData = update_prop.find(item => item.id === feature_id);
+            if (updateData) {
+                updateFeatureProperties(feature, updateData);
+            }
         }
-        updated_features.features.push(af[d]);
-        counter +=1;      
+
+        updated_features.features.push(feature);
+        counter++;
 
         self.postMessage({
-            'percentcomplete': parseInt((100 * counter) / fullproc),
+            'percentcomplete': Math.floor((100 * counter) / featlen),
             'mode': 'status',
         });
-    }
+    });
 
     self.postMessage({
         'polygons': JSON.stringify(updated_features)

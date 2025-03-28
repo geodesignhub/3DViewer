@@ -173,8 +173,6 @@
                     addnCls: 'humane-flatty-error'
                 });
             } else {
-
-
                 start3dWorker(gjresults, selectedsystems);
                 // $("#loadingGIF").show();
                 $("#procstatus").show();
@@ -338,114 +336,105 @@
             bubble.style.left = `calc(${newVal}% + (${8 - newVal * 0.15}px))`;
         }
     }
-
     function renderFeatureInfo(feature) {
-        
         const featprops = feature.properties;
-        let html = '';
-
-        // html += '<div class="search-result-type" style="display:inline">ID</div> ';
-        // html += feature.id + '<br/>';
-        html += '<div>';
+        const container = document.createElement('div');
 
         if (featprops.isPolicy === 0 && featprops.isStreet === 0) {
-
             for (let key in feature.properties) {
                 if (typeof feature.properties[key] === 'object') continue;
 
-                if (key == 'height') {
-                    html += '<h4>Set Floors</h4>';
-                    html += '<div class="range-wrap"><input onchange="update_id_floors(' + "'" + feature.properties.id + "'" +
-                        ')" id="' + feature.properties.id  + '-floors-id" class="range" type="range" value="' + Math.ceil(feature
-                            .properties[key] / 3.5) + '" "><output class="bubble"></output></div><br>';
-                    // html +='<br><br><h4>Set Rooftype</h4>';
-                    // html += '<select id="'+ feature.id +'-roof-type"><option value="flat">flat</option><option value="skillion">skillion</option><option value="gabled">gabled</option><option value="pyramidal">pyramidal</option></select>';        
+                if (key === 'height') {
+                    const heading = document.createElement('h4');
+                    heading.textContent = 'Set Floors';
+                    container.appendChild(heading);
+
+                    const rangeWrap = document.createElement('div');
+                    rangeWrap.className = 'range-wrap';
+
+                    const rangeInput = document.createElement('input');
+                    rangeInput.type = 'range';
+                    rangeInput.className = 'range';
+                    rangeInput.id = `${feature.properties.id}-floors-id`;
+                    rangeInput.value = Math.ceil(feature.properties[key] / 3.5);
+                    rangeInput.setAttribute('onchange', `updateBuildingFloors('${feature.properties.id}')`);
+
+                    const outputBubble = document.createElement('output');
+                    outputBubble.className = 'bubble';
+
+                    rangeWrap.appendChild(rangeInput);
+                    rangeWrap.appendChild(outputBubble);
+                    container.appendChild(rangeWrap);
+
                     break;
                 }
             }
-
         } else {
-            html += 'Not a building';
+            container.textContent = 'Not a building';
         }
-        return $('<div>' + html + '</div>');
+
+        return container;
     }
 
 
     var svgDrawing = SVG().addTo('body').size(10, 10);
 
-    function update_id_floors(feature_id) {
-        var updated_properties = {};
-        let building_floors = document.getElementById(feature_id + '-floors-id');
-        var floors_to_meters = Math.ceil((building_floors.value) * 3.5);
-        updated_properties['id'] = feature_id;
-        updated_properties['height'] = floors_to_meters;
+    function updateBuildingFloors(featureId) {
+        const buildingFloorsElement = document.getElementById(`${featureId}-floors-id`);
+        const floorsToMeters = Math.ceil(buildingFloorsElement.value * 3.5);
+        const updatedProperties = {
+            id: featureId,
+            height: floorsToMeters
+        };
 
-        var updateFeatureWorker = new Worker('/assets/workers/updateFeatureProperties.js');
-        updateFeatureWorker.onerror = function (e) {
-            console.log('Error: Line ' + e.lineno + ' in ' + e.filename + ': ' + e.message);
-            // $("#loadingGIF").hide();
+        const updateFeatureWorker = new Worker('/assets/workers/updateFeatureProperties.js');
+
+        updateFeatureWorker.onerror = function (error) {
+            console.error(`Error: Line ${error.lineno} in ${error.filename}: ${error.message}`);
             $("#procstatus").hide();
-            humane.log("There was a error in processing, please try again.. ", {
+            humane.log("An error occurred during processing. Please try again.", {
                 addnCls: 'humane-flatty-error'
             });
         };
-        
+
         updateFeatureWorker.postMessage({
-            'allFeaturesList': generatedData,
-            'updated_properties': JSON.stringify([updated_properties])
-
+            allFeaturesList: generatedData,
+            updated_properties: JSON.stringify([updatedProperties])
         });
-        updateFeatureWorker.addEventListener('message', function (e) {
-            if (e.data.mode === 'status') {
-                updateWorkerStatus(e.data.percentcomplete);
+
+        updateFeatureWorker.addEventListener('message', function (event) {
+            if (event.data.mode === 'status') {
+                updateWorkerStatus(event.data.percentcomplete);
             } else {
-                generatedData = e.data.polygons;
-                
+                generatedData = event.data.polygons;
                 runConstrainWorker();
-                // updateGLData(e.data.polygons);
-                
             }
-        }, false);
-
+        });
     }
-
     function miniMapstyleComp(feature) {
-        // console.log(feature.properties)
-        var curFeature = feature.geometry.type;
-        if (curFeature === 'LineString') {
-            // console.log(feature)
+        const { type: geometryType } = feature.geometry;
+        const { areatype, color } = feature.properties;
+
+        if (geometryType === 'LineString') {
             return {
                 weight: 2,
-                opacity: .9,
-                color: feature.properties.color,
-                dashArray: '',
-
-            };
-        } else {
-            // var fillColor = getColor(feature.properties.areatype);
-
-            if (feature.properties.areatype == 'project') {
-                var fillColor = feature.properties.color;
-            } else { // it is policy
-                var fillPattern = setSVGStyle(feature.properties.color);
-
-                var fillColor = fillPattern;
-            }
-
-            return {
-                // fillColor: feature.properties.color,
-                // fillColor:'#333333',
-                weight: 1,
-                stroke: true,
                 opacity: 0.9,
-                fillColor: fillColor,
-                color: feature.properties.color,
+                color: color,
                 dashArray: '',
-                // opacity: 0.2,
-                fillOpacity: 0.8,
             };
         }
 
+        const fillColor = areatype === 'project' ? color : setSVGStyle(color);
+
+        return {
+            weight: 1,
+            stroke: true,
+            opacity: 0.9,
+            fillColor: fillColor,
+            color: color,
+            dashArray: '',
+            fillOpacity: 0.8,
+        };
     }
 
     function setSVGStyle(reqColor) {
@@ -464,25 +453,27 @@
     }
 
     function getColor(type) {
+        const colorMap = {
+            'policy': '#707070',
+            'project': '#a69695',
+            'red2': '#bd0026',
+            'red': '#f03b20',
+            'yellow': '#FFFF00',
+            'green': '#74c476',
+            'green2': '#31a354',
+            'green3': '#006d2c',
+            'purple': '#CFACF7',
+            'purple2': '#8D6CBF',
+            'purple3': '#601286',
+            'orange': '#FFA927',
+            'orange2': '#F8872E',
+            'orange3': '#FC6B0A',
+            'constraints': '#343434',
+            'boundaries': '#a6cee3',
+            'boundaries2': '#b2df8a'
+        };
 
-        return type === 'policy' ? '#707070 ' :
-            type === 'project' ? '#a69695 ' :
-                type === 'red2' ? '#bd0026' :
-                    type === 'red' ? '#f03b20' :
-                        type === 'yellow' ? '#FFFF00' :
-                            type === 'green' ? '#74c476' :
-                                type === 'green2' ? '#31a354' :
-                                    type === 'green3' ? '#006d2c' :
-                                        type === 'purple' ? '#CFACF7' :
-                                            type === 'purple2' ? '#8D6CBF' :
-                                                type === 'purple3' ? '#601286' :
-                                                    type === 'orange' ? '#FFA927' :
-                                                        type === 'orange2' ? '#F8872E' :
-                                                            type === 'orange3' ? '#FC6B0A' :
-                                                                type === 'constraints' ? '#343434' :
-                                                                    type === 'boundaries' ? '#a6cee3' :
-                                                                        type === 'boundaries2' ? '#b2df8a' :
-                                                                            '#808080';
+        return colorMap[type] || '#808080';
     }
 
 
@@ -500,95 +491,78 @@
     }).addTo(inputmap);
 
 
-function pointToLayerEnlarged(feature, latlng) {
+    function pointToLayerEnlarged(feature, latlng) {
 
-    return L.circle(latlng, 5, {
-        // radius: 8,
-        // fillColor: "#ff7800",
-        color: "#000",
-        weight: 1,
-        opacity: 0.1,
-        fillOpacity: 0.5
-    });
-
-};
-    function runConstrainWorker() {
-
-        var selectedsystems = [];
-        $('#systemsCB input:checked').each(function () {
-            selectedsystems.push($(this).attr('id'));
+        return L.circle(latlng, 5, {
+            // radius: 8,
+            // fillColor: "#ff7800",
+            color: "#000",
+            weight: 1,
+            opacity: 0.1,
+            fillOpacity: 0.5
         });
-        let show_policies = (document.getElementById("show_policies").checked) ? 1 : 0;
-        // $("#loadingGIF").show();
+
+    };
+    function runConstrainWorker() {
+        const selectedSystems = $('#systemsCB input:checked').map(function () {
+            return $(this).attr('id');
+        }).get();
+
+        const showPolicies = document.getElementById("show_policies").checked ? 1 : 0;
+
         $("#procstatus").show();
-        var constrainWorker = new Worker(
-            '/assets/workers/constrainGeneratedFeatures.js');
+
+        const constrainWorker = new Worker('/assets/workers/constrainGeneratedFeatures.js');
+
         constrainWorker.onerror = function (e) {
-            console.log('Error: Line ' + e.lineno + ' in ' + e.filename + ': ' + e.message);
-            // $("#loadingGIF").hide();
+            console.error(`Error: Line ${e.lineno} in ${e.filename}: ${e.message}`);
             $("#procstatus").hide();
-            humane.log("There was a error in processing, please try again.. ", {
+            humane.log("There was an error in processing, please try again.", {
                 addnCls: 'humane-flatty-error'
             });
         };
-        // console.log(selectedsystems);
-        constrainWorker.postMessage({
-            'allFeaturesList': generatedData,
-            'selectedsystems': JSON.stringify(selectedsystems),
-            'showpolicies': JSON.stringify(show_policies)
 
+        constrainWorker.postMessage({
+            allFeaturesList: generatedData,
+            selectedsystems: JSON.stringify(selectedSystems),
+            showpolicies: JSON.stringify(showPolicies)
         });
+
         constrainWorker.addEventListener('message', function (e) {
             if (e.data.mode === 'status') {
-
                 updateWorkerStatus(e.data.percentcomplete);
             } else {
                 updateGLData(e.data.polygons);
             }
-        }, false);
-
+        });
     }
     (function (console) {
-        console.save = function (data, filename) {
+        console.save = function (data, filename = 'generatedfootprints.geojson') {
             if (!data) {
-                console.error('Console.save: No data')
+                console.error('Console.save: No data');
                 return;
             }
-            if (!filename) filename = 'generatedfootprints.geojson'
-            if (typeof data === "object") {
-                data = JSON.stringify(data, undefined, 4)
-            }
-            var blob = new Blob([data], {
-                type: 'text/json'
-            }),
-                e = document.createEvent('MouseEvents'),
-                a = document.createElement('a')
-            a.download = filename
-            a.href = window.URL.createObjectURL(blob)
-            a.dataset.downloadurl = ['text/json', a.download, a.href].join(':')
-            e.initMouseEvent('click', true, false, window, 0, 0, 0, 0, 0, false, false, false, false, 0,
-                null)
-            a.dispatchEvent(e)
-        }
-    })(console)
+
+            const jsonData = typeof data === "object" ? JSON.stringify(data, undefined, 4) : data;
+            const blob = new Blob([jsonData], { type: 'application/json' });
+            const a = document.createElement('a');
+
+            a.download = filename;
+            a.href = URL.createObjectURL(blob);
+            a.dataset.downloadurl = ['application/json', a.download, a.href].join(':');
+
+            const event = new MouseEvent('click', { bubbles: true, cancelable: true, view: window });
+            a.dispatchEvent(event);
+        };
+    })(console);
 
     function downloadGJ() {
-        // filter out streets
-        var gd = JSON.parse(generatedData);
-        var filteredGJ = {
+        const gd = JSON.parse(generatedData);
+        const filteredGJ = {
             "type": "FeatureCollection",
-            "features": []
+            "features": gd.features.filter(feature => !feature.properties.isStreet)
         };
-        var gendataFeatlen = gd.features.length;
-        for (var k = 0; k < gendataFeatlen; k++) {
-            var curFeat = gd.features[k];
-            var prop = curFeat.properties;
-            if (prop.isStreet) { } else {
-                filteredGJ.features.push(curFeat);
-            }
-        }
         console.save(filteredGJ);
-
     }
 
     generateSystemCB(systems);
