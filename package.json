@@ -19,11 +19,11 @@
     "author": "Geodesign Hub Pvt. Ltd.",
     "license": "MIT",
     "dependencies": {
-        "async":"^3.2.6",
+        "async": "^3.2.6",
         "body-parser": "^2.2.0",
         "dotenv": "^16.4.7",
-        "ejs":"3.1.10",
-        "express": "^4.21.2",
+        "ejs": "3.1.10",
+        "express": "^4.19.2",
         "request": "^2.88.2"
     }
 }
